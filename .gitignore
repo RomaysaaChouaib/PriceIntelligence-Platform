@@ -1,0 +1,17 @@
+# Environnements virtuels
+venv/
+ENV/
+env/
+
+# Fichiers compilés Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Fichiers lourds et temporaires
+*.mp4
+
+# Dossiers temporaires
+backend/temp/
+frontend/node_modules/
+frontend/*.json
