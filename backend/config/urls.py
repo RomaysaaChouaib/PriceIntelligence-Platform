@@ -14,18 +14,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path
 from django.http import JsonResponse
 
-def search_view(request):
-    data = {
-        "products": [
-            {"title": "PC HP", "price": 5000},
-            {"title": "PC Dell", "price": 6500}
-        ]
-    }
-    return JsonResponse(data)
+import sys
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(BASE_DIR)
+
+from django.contrib import admin
+from django.urls import path
+from .views import search_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
