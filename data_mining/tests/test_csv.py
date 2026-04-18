@@ -32,16 +32,16 @@ def test_integration_pipeline():
 
     # 1. Chargement
     df_raw = pd.read_csv(CSV_PATH)
-    print(f"\n📥 Données brutes : {len(df_raw)} lignes, colonnes: {list(df_raw.columns)}")
+    print(f"\nDonnées brutes : {len(df_raw)} lignes, colonnes: {list(df_raw.columns)}")
 
     # 2. Nettoyage
     df = clean_dataframe(df_raw)
-    print(f"\n✅ Après nettoyage : {len(df)} produits")
+    print(f"\nAprès nettoyage : {len(df)} produits")
     assert len(df) > 0, "Le nettoyage a supprimé tous les produits!"
 
     # 3. Feature engineering
     df = add_features_dataframe(df)
-    print(f"\n🔧 Features ajoutées : {[c for c in df.columns if c not in df_raw.columns]}")
+    print(f"\nFeatures ajoutées : {[c for c in df.columns if c not in df_raw.columns]}")
     assert "brand_detected" in df.columns
     assert "price_category" in df.columns
     assert "log_price" in df.columns
@@ -52,27 +52,27 @@ def test_integration_pipeline():
 
     # 5. Stats
     percentiles = get_price_percentiles(df)
-    print(f"\n📊 Percentiles prix (MAD):")
+    print(f"\nPercentiles prix (MAD):")
     for k, v in percentiles.items():
         print(f"    {k:8s} : {v:,.0f}")
 
     # 6. Distribution marques
-    print(f"\n🏷️  Top 5 marques détectées:")
+    print(f"\nTop 5 marques détectées:")
     print(df["brand_detected"].value_counts().head(5).to_string())
 
     # 7. Catégories de gamme
-    print(f"\n💰 Répartition par gamme:")
+    print(f"\nRépartition par gamme:")
     print(df["price_category"].value_counts().to_string())
 
     # 8. Gaming
     gaming_count = df["is_gaming"].sum()
-    print(f"\n🎮 Produits gaming : {gaming_count} ({gaming_count/len(df)*100:.1f}%)")
+    print(f"\nProduits gaming : {gaming_count} ({gaming_count/len(df)*100:.1f}%)")
 
     # 9. RAM détectée
     ram_detected = df["ram_gb"].notna().sum()
-    print(f"\n🧠 RAM détectée dans le titre : {ram_detected} produits")
+    print(f"\nRAM détectée dans le titre : {ram_detected} produits")
 
-    print("\n✅ Test d'intégration RÉUSSI")
+    print("\nTest d'intégration RÉUSSI")
     return df
 
 
