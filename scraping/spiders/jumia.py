@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django import db
 import requests
 from bs4 import BeautifulSoup
 import time
@@ -7,7 +8,6 @@ import re
 import csv
 from scraping.utils.headers import HEADERS
 from scraping.utils.helpers import clean_price
-
 
 class JumiaScraper:
     def __init__(self):
@@ -338,7 +338,7 @@ class JumiaScraper:
                 time.sleep(0.5 if new_on_page == 0 else 1.0)
 
         return products
-
+    
     def export_to_csv(self, products, filename="jumia_laptops.csv"):
         if not products:
             print("Aucun produit à exporter.")
