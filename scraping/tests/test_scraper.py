@@ -1,6 +1,7 @@
 # Import de la classe JumiaScraper (adaptez le chemin d'import selon votre structure)
 from scraping.core.scraper import JumiaScraper 
-
+# pour database :
+from scraping.db.mysql_writer import MySQLWriter
 def test_full_search():
     query = "laptop"
 
@@ -29,6 +30,10 @@ def test_full_search():
         scraper.export_to_csv(results, "resultats_jumia_laptops.csv")
     else:
         print("Aucun résultat à exporter.")
-
+    # 3. SAVE TO MYSQL
+    db = MySQLWriter()
+    db.insert_products(results)
+    print("Data saved to MySQL successfully!")
+    
 if __name__ == "__main__":
     test_full_search()
