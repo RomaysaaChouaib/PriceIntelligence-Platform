@@ -1,0 +1,4 @@
+methode,anomalies,pourcentage
+IQR,69,6.38
+Z-score,0,0.0
+Isolation Forest,54,5.0
