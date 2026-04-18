@@ -1,0 +1,6 @@
+price_category,count,mean,median,min,max
+entrée_de_gamme,365,2697.91,2699.0,1050.0,3999.0
+milieu_de_gamme_bas,161,5822.93,5500.0,4000.0,7999.0
+milieu_de_gamme,203,11935.92,12261.0,8011.0,14999.0
+haut_de_gamme,196,19316.47,18900.0,15000.0,24900.0
+premium,156,44949.69,36450.0,25000.0,99900.0
