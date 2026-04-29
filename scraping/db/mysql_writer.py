@@ -1,13 +1,41 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 import mysql.connector
+
+# On définit le chemin vers le dossier backend
+env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 class MySQLWriter:
     def __init__(self):
-        self.conn = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="#salmasalma!@",
-            database="price_project"
-        )
-        self.cursor = self.conn.cursor()
+      # On récupère les valeurs depuis le .env
+        # os.getenv("NOM_VARIABLE", "VALEUR_PAR_DEFAUT")
+       
+        db_host = os.getenv("DB_HOST", "127.0.0.1")
+        db_user = os.getenv("DB_USER", "root")
+        db_pass = os.getenv("DB_PASSWORD")
+        db_name = os.getenv("DB_NAME", "price_project")
+
+        # 🔍 DEBUG
+        print("HOST:", db_host)
+        print("USER:", db_user)
+        print("PASS:", db_pass)
+
+        try:
+            self.conn = mysql.connector.connect(
+                host=db_host,
+                user=db_user,
+                password=db_pass,
+                database=db_name,
+                port=3306
+            )
+
+            self.cursor = self.conn.cursor()
+            print("✅ Connexion MySQL réussie")
+
+        except mysql.connector.Error as err:
+            print(f"❌ Erreur MySQL : {err}")
+            raise
         #Cursor = outil pour exécuter SQL
     # =========================
     # 1. INSERT FROM SCRAPING
