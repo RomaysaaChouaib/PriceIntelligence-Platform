@@ -1,12 +1,14 @@
 from datetime import datetime
-
-from django import db
 import requests
+#Librairie pour faire des requêtes HTTP
 from bs4 import BeautifulSoup
+#Sert à analyser le HTML (parser)
 import time
+#Pour faire des pauses (anti-blocage)
 import re
 import csv
 from scraping.utils.headers import HEADERS
+#Headers HTTP (simuler navigateur)
 from scraping.utils.helpers import clean_price
 
 class JumiaScraper:
@@ -187,7 +189,8 @@ class JumiaScraper:
 ]
         }
         return related.get(query.lower(), [query])
-
+    
+    # Normalisation pour éviter les doublons (ex: "HP Laptop" vs "hp laptop")
     def _normalize_title(self, title):
         return re.sub(r"[^a-z0-9]", "", title.lower())
 
@@ -273,7 +276,7 @@ class JumiaScraper:
         for q_idx, search_word in enumerate(queries, 1):
             print(f"\n[{q_idx}/{total_queries}] Recherche : '{search_word}'")
             pages_without_results = 0
-
+            # Pagination
             for page in range(1, max_pages + 1):
                 url = f"{self.base_url}?q={search_word}&page={page}"
                 response = self._get_with_retry(url)

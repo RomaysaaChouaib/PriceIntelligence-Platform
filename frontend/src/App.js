@@ -29,19 +29,22 @@ function TabProducts() {
   const [products, setProducts] = useState([]);
   const [total, setTotal]       = useState(0);
   const [loading, setLoading]   = useState(false);
-  const [mode, setMode]         = useState("csv");   // "csv" ou "scrape"
+  const [mode, setMode]         = useState("db");   // "csv", "db", ou "scrape"
   const [page, setPage]         = useState(1);
   const [pages, setPages]       = useState(1);
   const [scrapeMsg, setScrapeMsg] = useState("");
+  const [scrapeTarget, setScrapeTarget] = useState(""); 
 
-  // Chargement initial depuis CSV
-  useEffect(() => { fetchCSV(1, ""); }, []);
+  // Chargement initial sur la base de données
+  useEffect(() => { 
+      fetchDB(1, ""); 
+  }, []);
 
-  const fetchCSV = async (p = 1, q = query) => {
-    setLoading(true);
-    setScrapeMsg("");
+  // 1. Fetch depuis le CSV enrichi
+  const fetchCSV = async (p = 1) => {
+    setLoading(true); setMode("csv"); setScrapeMsg("");
     try {
-      const res  = await fetch(`${API}/products/?query=${q}&page=${p}&limit=20`);
+      const res  = await fetch(`${API}/products/?query=${query}&page=${p}&limit=20`);
       const data = await res.json();
       setProducts(data.products || []);
       setTotal(data.total || 0);
@@ -51,65 +54,115 @@ function TabProducts() {
     setLoading(false);
   };
 
-  const fetchScrape = async () => {
-    if (!query.trim()) return;
-    setLoading(true);
-    setScrapeMsg("⏳ Scraping Jumia en cours… (peut prendre 1-2 min)");
+  // 2. Fetch depuis la Base de données (MySQL)
+  const fetchDB = async (p = 1) => {
+    setLoading(true); setMode("db"); setScrapeMsg("");
     try {
-      const res  = await fetch(`${API}/search/?query=${query}`);
+      // On utilise l'endpoint de recherche classique (search) qui tape dans la DB
+      const res  = await fetch(`${API}/search/?query=${query}&page=${p}&limit=20`);
       const data = await res.json();
-      // Après scraping, recharger depuis CSV enrichi
-      setScrapeMsg(`✅ Scraping terminé — ${data.products?.length || 0} produits récupérés`);
-      await fetchCSV(1, query);
+      setProducts(data.products || []);
+      setTotal(data.total || 0);
+      setPages(data.pages || 1);
+      setPage(p);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  };
+
+  // 3. Logique de Scraping en direct
+ const runScrape = async (target) => {
+    setLoading(true);
+    setScrapeTarget(target);
+    
+    // Si query est vide, on n'envoie pas de paramètre ou on envoie une chaîne vide
+    // Ton backend Django utilisera alors : request.GET.get("query", "pc portable")
+    const searchParam = query.trim() !== "" ? `?query=${encodeURIComponent(query)}` : "";
+    
+    setScrapeMsg(`⏳ Lancement du scraping ${target} ${query.trim() !== "" ? `pour "${query}"` : "(automatique)"}...`);
+    
+    try {
+      let endpoint = "";
+      switch(target) {
+        case "jumia":      endpoint = "scrape/jumia/"; break;
+        case "amazon":     endpoint = "scrape/amazon/"; break;
+        case "aliexpress": endpoint = "scrape/aliexpress/"; break;
+        case "all":        endpoint = "scrape/All/"; break;
+        default:           endpoint = "search/";
+      }
+
+      // Appel de l'API avec ou sans query
+      const res = await fetch(`${API}/${endpoint}${searchParam}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        // Succès : Ton backend a renvoyé "success": True après insertion MySQL
+        setScrapeMsg(`✅ ${data.message}`);
+        
+        // Optionnel : Basculer sur l'onglet DB pour voir les résultats
+        setMode("db");
+        fetchDB(1); 
+      } else {
+        setScrapeMsg(`❌ Erreur: ${data.error}`);
+      }
     } catch (e) {
-      setScrapeMsg("❌ Erreur de scraping");
       console.error(e);
+      setScrapeMsg(`❌ Erreur réseau sur ${target}`);
     }
     setLoading(false);
   };
 
-  const handleSearch = () => {
-    if (mode === "scrape") fetchScrape();
-    else fetchCSV(1, query);
-  };
-
   return (
     <div>
-      {/* Barre de recherche + toggle mode */}
       <div className="search-box">
         <input
           type="text"
-          placeholder="Ex: hp, lenovo, macbook, gaming…"
+          placeholder="Rechercher un modèle..."
           value={query}
           onChange={e => setQuery(e.target.value)}
-          onKeyPress={e => e.key === "Enter" && handleSearch()}
         />
+        
         <div className="mode-toggle">
-          <button
-            className={`mode-btn ${mode === "csv" ? "active" : ""}`}
-            onClick={() => setMode("csv")}
-            title="Lire le CSV existant"
-          >📂 CSV</button>
-          <button
-            className={`mode-btn ${mode === "scrape" ? "active" : ""}`}
-            onClick={() => setMode("scrape")}
-            title="Scraper Jumia en direct"
-          >🕷️ Scraper</button>
+          <button className={`mode-btn ${mode === "csv" ? "active" : ""}`} onClick={() => fetchCSV(1)}>📂 CSV</button>
+          <button className={`mode-btn ${mode === "db" ? "active" : ""}`} onClick={() => fetchDB(1)}>🗄️ Produits (DB)</button>
+          <button className={`mode-btn ${mode === "scrape" ? "active" : ""}`} onClick={() => setMode("scrape")}>🕷️ Scraper</button>
         </div>
-        <button onClick={handleSearch} disabled={loading}>
-          {loading ? "⏳ …" : mode === "scrape" ? "Scraper Jumia" : "Rechercher"}
-        </button>
+
+        {mode !== "scrape" && (
+          <button onClick={() => mode === "csv" ? fetchCSV(1) : fetchDB(1)} disabled={loading} className="search-main-btn">
+            {loading ? "..." : "🔍 Rechercher"}
+          </button>
+        )}
       </div>
 
-      {scrapeMsg && <div className={`scrape-msg ${scrapeMsg.startsWith("✅") ? "ok" : scrapeMsg.startsWith("❌") ? "err" : ""}`}>{scrapeMsg}</div>}
+      {/* Zone des boutons de Scraping - Apparaît seulement si mode === "scrape" */}
+      {mode === "scrape" && (
+        <div className="scrape-actions">
+          <p>Lancer un nouveau scraping vers la base de données :</p>
+          <div className="scrape-buttons-group">
+            <button onClick={() => runScrape("jumia")} disabled={loading} className="btn-jumia">
+               {loading && scrapeTarget === "jumia" ? "⏳" : "Scraper Jumia"}
+            </button>
+            <button onClick={() => runScrape("amazon")} disabled={loading} className="btn-amazon">
+               {loading && scrapeTarget === "amazon" ? "⏳" : "Scraper Amazon"}
+            </button>
+            <button onClick={() => runScrape("aliexpress")} disabled={loading} className="btn-aliex">
+               {loading && scrapeTarget === "aliexpress" ? "⏳" : "Scraper AliExpress"}
+            </button>
+            <button onClick={() => runScrape("all")} disabled={loading} className="btn-all">
+               {loading && scrapeTarget === "all" ? "⏳" : "🔥 Tout Scraper"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {scrapeMsg && <div className="scrape-info-bar">{scrapeMsg}</div>}
 
       <div className="status-bar">
-        <strong>{total}</strong> produits — Page {page}/{pages}
-        {mode === "csv" && <span className="mode-tag">📂 Données CSV enrichies</span>}
-        {mode === "scrape" && <span className="mode-tag scrape">🕷️ Mode scraping live</span>}
+        <strong>{total}</strong> produits trouvés
+        <span className="mode-tag">{mode === "csv" ? "Fichier CSV" : mode === "db" ? "Base de données" : "Mode Scraping"}</span>
       </div>
 
-      {loading ? <Spinner /> : (
+      {loading && mode !== "scrape" ? <Spinner /> : (
         <>
           <div className="product-list">
             {products.map((item, i) => (
@@ -117,26 +170,12 @@ function TabProducts() {
                 {item.is_gaming && <span className="gaming-tag">🎮 Gaming</span>}
                 {item.image && <img src={item.image} alt={item.title} className="product-img" />}
                 <div className="card-content">
-                  <div className="card-top">
-                    <span className="brand-label">{item.brand_detected || item.brand}</span>
-                    {item.price_category && (
-                      <Badge
-                        label={item.price_category.replace(/_/g," ")}
-                        color={CATEGORY_COLORS[item.price_category] || "#888"}
-                      />
-                    )}
-                  </div>
+                  <span className="brand-label">{item.brand_detected || "Inconnu"}</span>
                   <h3>{item.title}</h3>
-                  <div className="specs-row">
-                    {item.ram_gb     && <span className="spec">🧠 {item.ram_gb} Go</span>}
-                    {item.storage_gb && <span className="spec">💾 {item.storage_gb} Go</span>}
-                  </div>
                   <p className="price">{item.price?.toLocaleString()} MAD</p>
                   <div className="card-footer">
                     <small>{item.source}</small>
-                    <a href={item.link} target="_blank" rel="noreferrer" className="view-btn">
-                      Voir sur Jumia →
-                    </a>
+                    <a href={item.link} target="_blank" rel="noreferrer" className="view-btn">Voir →</a>
                   </div>
                 </div>
               </div>
@@ -144,9 +183,9 @@ function TabProducts() {
           </div>
 
           <div className="pagination">
-            <button onClick={() => fetchCSV(page-1)} disabled={page<=1}>← Préc</button>
-            <span>Page {page} / {pages}</span>
-            <button onClick={() => fetchCSV(page+1)} disabled={page>=pages}>Suiv →</button>
+            <button onClick={() => mode === "csv" ? fetchCSV(page - 1) : fetchDB(page - 1)} disabled={page <= 1}>←</button>
+            <span>{page} / {pages}</span>
+            <button onClick={() => mode === "csv" ? fetchCSV(page + 1) : fetchDB(page + 1)} disabled={page >= pages}>→</button>
           </div>
         </>
       )}
@@ -239,7 +278,7 @@ function TabStats() {
         <h3>🎮 Gaming vs Non-Gaming</h3>
         <div className="gaming-compare">
           {[
-            {key:"gaming",    label:"🎮 Gaming",     cls:"gaming"},
+            {key:"gaming",    label:"🎮 Gaming",    cls:"gaming"},
             {key:"non_gaming",label:"💻 Non-Gaming", cls:"non-gaming"},
           ].map(({key,label,cls})=>(
             <div className={`gaming-box ${cls}`} key={key}>

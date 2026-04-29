@@ -15,3 +15,5 @@ __pycache__/
 backend/temp/
 frontend/node_modules/
 frontend/*.json
+# helper files
+.env
