@@ -2,19 +2,15 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./main.css";
 import {
-  Search, Bell, ShoppingBag,
-  TrendingUp, Package, Menu, X, AlertTriangle, Link2,
-  RefreshCw, ChevronLeft, ChevronRight, BarChart2,
-  LogOut, User, Lock, AlertCircle,
-  // ═════ IMPORTS AJOUTÉS ═════
+  Search, Bell, ShoppingBag, TrendingUp, Package, Menu, X, AlertTriangle, Link2,
+  RefreshCw, ChevronRight, BarChart2, LogOut, User, Lock, AlertCircle,
   Activity, Clock, Database
-  // ═════════════════════════
 } from "lucide-react";
 
 const API = "http://127.0.0.1:8000/api";
 
 // ══════════════════════════════════════════════════════════════════
-// 🛡️ AUTH CONTEXT INTEGRÉ
+// 🛡️ AUTH CONTEXT
 // ══════════════════════════════════════════════════════════════════
 const AuthContext = createContext(null);
 
@@ -52,7 +48,6 @@ function AuthProvider({ children }) {
         return { success: true, demo: true };
       }
     } catch (error) {
-      console.log("Mode démo activé (backend non disponible)");
       const demoUser = { username: username || "admin", first_name: "Admin", is_staff: true };
       localStorage.setItem("pip_user", JSON.stringify(demoUser));
       setUser(demoUser);
@@ -79,7 +74,7 @@ const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     return { 
-      user: { username: "admin", first_name: "Admin" }, 
+      user: null, 
       login: async () => ({ success: true }), 
       logout: () => {}, 
       loading: false 
@@ -102,13 +97,8 @@ function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    
     const result = await login(username, password);
-    
-    if (!result.success) {
-      setError(result.error || "Erreur de connexion");
-    }
-    
+    if (!result.success) setError(result.error || "Erreur de connexion");
     setLoading(false);
   };
 
@@ -122,246 +112,280 @@ function Login() {
           <h1>PriceIntel</h1>
           <p>Plateforme d'Intelligence Prix</p>
         </div>
-
         <form onSubmit={handleSubmit} className="pip-login-form">
           <div className="pip-login-input-group">
-            <label>
-              <User size={18} />
-              Nom d'utilisateur
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Entrez votre nom"
-              required
-              disabled={loading}
-              autoFocus
-            />
+            <label><User size={18} /> Nom d'utilisateur</label>
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Entrez votre nom" required disabled={loading} autoFocus />
           </div>
-
           <div className="pip-login-input-group">
-            <label>
-              <Lock size={18} />
-              Mot de passe
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Entrez votre mot de passe"
-              required
-              disabled={loading}
-            />
+            <label><Lock size={18} /> Mot de passe</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Entrez votre mot de passe" required disabled={loading} />
           </div>
-
-          {error && (
-            <div className="pip-login-error">
-              <AlertCircle size={16} />
-              {error}
-            </div>
-          )}
-
-          <button 
-            type="submit" 
-            className="pip-login-button"
-            disabled={loading || !username.trim()}
-          >
+          {error && <div className="pip-login-error"><AlertCircle size={16} /> {error}</div>}
+          <button type="submit" className="pip-login-button" disabled={loading || !username.trim()}>
             {loading ? "Connexion..." : "Se connecter →"}
           </button>
-
-          <div className="pip-login-demo">
-            <small>
-              💡 <strong>Mode démo :</strong> Entrez n'importe quel nom pour tester
-            </small>
-          </div>
         </form>
-
-        <div className="pip-login-footer">
-          <p>© 2024 PriceIntel - Jumia Maroc</p>
-        </div>
       </div>
     </div>
   );
 }
 
 // ══════════════════════════════════════════════════════════════════
-// COMPOSANTS UTILITAIRES
+// 🛠️ UTILS
 // ══════════════════════════════════════════════════════════════════
 function Spinner() {
-  return (
-    <div className="pip-spinner-wrap">
-      <div className="pip-spinner"></div>
-    </div>
-  );
+  return <div className="pip-spinner-wrap"><div className="pip-spinner"></div></div>;
 }
 
-function Badge({ label, color }) {
-  return <span className="pip-badge" style={{ background: color }}>{label}</span>;
+function Badge({label, color}) {
+  return <span className="pip-badge" style={{background: color}}>{label}</span>;
 }
 
 const CATEGORY_COLORS = {
-  "entrée_de_gamme":     "#27ae60",
+  "entrée_de_gamme": "#27ae60",
   "milieu_de_gamme_bas": "#2980b9",
-  "milieu_de_gamme":     "#8e44ad",
-  "haut_de_gamme":       "#e67e22",
-  "premium":             "#c0392b",
+  "milieu_de_gamme": "#8e44ad",
+  "haut_de_gamme": "#e67e22",
+  "premium": "#c0392b",
 };
 
 const CLUSTER_COLORS = ["#e74c3c","#3498db","#2ecc71","#f39c12","#9b59b6","#1abc9c"];
 
 // ══════════════════════════════════════════════════════════════════
-// ONGLET PRODUITS
+// 🛒 ONGLET PRODUITS
+// ══════════════════════════════════════════════════════════════════
+// 🛒 ONGLET PRODUITS (CORRIGÉ)
+// ══════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+// 🛒 ONGLET PRODUITS (CORRIGÉ POUR FORCER ?query=laptop)
 // ══════════════════════════════════════════════════════════════════
 function TabProducts() {
-  const [query, setQuery]       = useState("");
+  const [query, setQuery] = useState("");
   const [products, setProducts] = useState([]);
-  const [total, setTotal]       = useState(0);
-  const [loading, setLoading]   = useState(false);
-  const [mode, setMode]         = useState("db");   // "csv", "db", ou "scrape"
-  const [page, setPage]         = useState(1);
-  const [pages, setPages]       = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState("db"); // "csv", "db", ou "scrape"
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
   const [scrapeMsg, setScrapeMsg] = useState("");
-  const [scrapeTarget, setScrapeTarget] = useState(""); 
+  const [scrapeTarget, setScrapeTarget] = useState("");
 
-  // Chargement initial sur la base de données
-  useEffect(() => { 
-      fetchDB(1, ""); 
+  // 🛡️ Fonction utilitaire pour récupérer le token d'authentification
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("access_token");
+    return token ? { "Authorization": `Bearer ${token}` } : {};
+  };
+
+  // Chargement initial
+  useEffect(() => {
+    fetchDB(1, "");
   }, []);
 
-  // 1. Fetch depuis le CSV enrichi
+  // 1. Fetch depuis le CSV
   const fetchCSV = async (p = 1) => {
-    setLoading(true); setMode("csv"); setScrapeMsg("");
+    setLoading(true);
+    setMode("csv");
+    setScrapeMsg("");
     try {
-      const res  = await fetch(`${API}/products/?query=${query}&page=${p}&limit=20`);
+      const res = await fetch(`${API}/products/?query=${query}&page=${p}&limit=20`, {
+        headers: getAuthHeaders()
+      });
       const data = await res.json();
       setProducts(data.products || []);
       setTotal(data.total || 0);
       setPages(data.pages || 1);
       setPage(p);
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
     setLoading(false);
   };
 
-  // 2. Fetch depuis la Base de données (MySQL)
+  // 2. Fetch depuis la DB (MySQL)
   const fetchDB = async (p = 1) => {
-    setLoading(true); setMode("db"); setScrapeMsg("");
+    setLoading(true);
+    setMode("db");
+    setScrapeMsg("");
     try {
-      // On utilise l'endpoint de recherche classique (search) qui tape dans la DB
-      const res  = await fetch(`${API}/search/?query=${query}&page=${p}&limit=20`);
+      const res = await fetch(`${API}/search/?query=${query}&page=${p}&limit=20`, {
+        headers: getAuthHeaders()
+      });
       const data = await res.json();
       setProducts(data.products || []);
       setTotal(data.total || 0);
       setPages(data.pages || 1);
       setPage(p);
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
     setLoading(false);
   };
 
-  // 3. Logique de Scraping en direct
- const runScrape = async (target) => {
+  // 3. Logique de Scraping CORRIGÉE
+  const runScrape = async (target) => {
     setLoading(true);
     setScrapeTarget(target);
     
-    // Si query est vide, on n'envoie pas de paramètre ou on envoie une chaîne vide
-    // Ton backend Django utilisera alors : request.GET.get("query", "pc portable")
-    const searchParam = query.trim() !== "" ? `?query=${encodeURIComponent(query)}` : "";
+    // 🔥 MODIFICATION ICI : On force "laptop" si l'utilisateur n'a rien écrit
+    const finalQuery = query.trim() !== "" ? query.trim() : "laptop";
+    const searchParam = `?query=${encodeURIComponent(finalQuery)}`;
     
-    setScrapeMsg(`⏳ Lancement du scraping ${target} ${query.trim() !== "" ? `pour "${query}"` : "(automatique)"}...`);
+    setScrapeMsg(`⏳ Scraping ${target} en cours pour "${finalQuery}"...`);
     
     try {
       let endpoint = "";
-      switch(target) {
-        case "jumia":      endpoint = "scrape/jumia/"; break;
-        case "amazon":     endpoint = "scrape/amazon/"; break;
+      switch (target) {
+        case "jumia": endpoint = "scrape/jumia/"; break;
+        case "amazon": endpoint = "scrape/amazon/"; break;
         case "aliexpress": endpoint = "scrape/aliexpress/"; break;
-        case "all":        endpoint = "scrape/All/"; break;
-        default:           endpoint = "search/";
+        case "all": endpoint = "scrape/All/"; break;
+        default: endpoint = "search/";
       }
 
-      // Appel de l'API avec ou sans query
-      const res = await fetch(`${API}/${endpoint}${searchParam}`);
+      // L'URL appelée sera toujours ex: http://127.0.0.1:8000/api/scrape/amazon/?query=laptop
+      const res = await fetch(`${API}/${endpoint}${searchParam}`, {
+        headers: getAuthHeaders()
+      });
       const data = await res.json();
-      
+
       if (data.success) {
-        // Succès : Ton backend a renvoyé "success": True après insertion MySQL
         setScrapeMsg(`✅ ${data.message}`);
-        
-        // Optionnel : Basculer sur l'onglet DB pour voir les résultats
         setMode("db");
         fetchDB(1); 
       } else {
-        setScrapeMsg(`❌ Erreur: ${data.error}`);
+        setScrapeMsg(`❌ Erreur: ${data.error || "Problème lors du scraping"}`);
       }
     } catch (e) {
       console.error(e);
       setScrapeMsg(`❌ Erreur réseau sur ${target}`);
     }
     setLoading(false);
+    setScrapeTarget("");
   };
 
- return (
+  // 🎨 Styles de base pour les boutons de scraping corrigés
+  const scrapeBtnStyle = {
+    padding: '10px 16px',
+    border: 'none',
+    borderRadius: '8px',
+    color: 'white',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'opacity 0.2s',
+    minWidth: '140px'
+  };
+
+  return (
     <div>
+      {/* 🔍 Barre de recherche et modes */}
       <div className="pip-search-box">
         <input
           type="text"
-          placeholder="Rechercher un modèle..."
+          className="pip-search-input"
+          placeholder="Rechercher un modèle... (ex: laptop)"
           value={query}
-          onChange={e => setQuery(e.target.value)}
-          className="pip-search-input"   // optionnel si tu utilises le wrap
+          onChange={(e) => setQuery(e.target.value)}
         />
-
+        
         <div className="pip-mode-toggle">
-          <button className={`pip-mode-btn ${mode === "csv" ? "active" : ""}`} 
-                  onClick={() => fetchCSV(1)}>📂 CSV</button>
-          <button className={`pip-mode-btn ${mode === "db" ? "active" : ""}`} 
-                  onClick={() => fetchDB(1)}>🗄️ Produits (DB)</button>
-          <button className={`pip-mode-btn ${mode === "scrape" ? "active" : ""}`} 
-                  onClick={() => setMode("scrape")}>🕷️ Scraper</button>
+          <button className={`pip-mode-btn ${mode === "csv" ? "active" : ""}`} onClick={() => fetchCSV(1)}>
+            📂 CSV
+          </button>
+          <button className={`pip-mode-btn ${mode === "db" ? "active" : ""}`} onClick={() => fetchDB(1)}>
+            🗄️ Produits (DB)
+          </button>
+          <button className={`pip-mode-btn ${mode === "scrape" ? "active" : ""}`} onClick={() => setMode("scrape")}>
+            🕷️ Scraper
+          </button>
         </div>
 
         {mode !== "scrape" && (
           <button 
-            onClick={() => mode === "csv" ? fetchCSV(1) : fetchDB(1)} 
+            onClick={() => (mode === "csv" ? fetchCSV(1) : fetchDB(1))} 
             disabled={loading} 
             className="pip-search-btn"
           >
-            {loading ? "Chargement..." : "🔍 Rechercher"}
+            {loading ? "..." : "🔍 Rechercher"}
           </button>
         )}
       </div>
 
-      {/* Zone Scraping */}
+      {/* 🕷️ Zone Scraper */}
       {mode === "scrape" && (
-        <div className="scrape-actions">   {/* ← on va ajouter le CSS après */}
-          <p>Lancer un nouveau scraping vers la base de données :</p>
-          <div className="scrape-buttons-group">
-            <button onClick={() => runScrape("jumia")} disabled={loading} className="btn-jumia">
-              {loading && scrapeTarget === "jumia" ? "⏳" : "Scraper Jumia"}
+        <div className="pip-card" style={{ marginBottom: '20px', padding: '20px' }}>
+          <p style={{ marginBottom: '15px', fontWeight: 'bold', color: '#1e293b' }}>
+            Lancer un nouveau scraping vers la base de données :
+          </p>
+          <div className="scrape-buttons-group" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            
+            <button 
+              onClick={() => runScrape("jumia")} 
+              disabled={loading} 
+              style={{ ...scrapeBtnStyle, background: '#f97316', opacity: loading ? 0.7 : 1 }}
+            >
+              {loading && scrapeTarget === "jumia" ? "⏳ Scraping..." : "Scraper Jumia"}
             </button>
-            <button onClick={() => runScrape("amazon")} disabled={loading} className="btn-amazon">
-              {loading && scrapeTarget === "amazon" ? "⏳" : "Scraper Amazon"}
+            
+            <button 
+              onClick={() => runScrape("amazon")} 
+              disabled={loading} 
+              style={{ ...scrapeBtnStyle, background: '#232f3e', opacity: loading ? 0.7 : 1 }}
+            >
+              {loading && scrapeTarget === "amazon" ? "⏳ Scraping..." : "Scraper Amazon"}
             </button>
-            <button onClick={() => runScrape("aliexpress")} disabled={loading} className="btn-aliex">
-              {loading && scrapeTarget === "aliexpress" ? "⏳" : "Scraper AliExpress"}
+            
+            <button 
+              onClick={() => runScrape("aliexpress")} 
+              disabled={loading} 
+              style={{ ...scrapeBtnStyle, background: '#e62e04', opacity: loading ? 0.7 : 1 }}
+            >
+              {loading && scrapeTarget === "aliexpress" ? "⏳ Scraping..." : "Scraper AliExpress"}
             </button>
-            <button onClick={() => runScrape("all")} disabled={loading} className="btn-all">
-              {loading && scrapeTarget === "all" ? "⏳" : "🔥 Tout Scraper"}
+            
+            <button 
+              onClick={() => runScrape("all")} 
+              disabled={loading} 
+              style={{ ...scrapeBtnStyle, background: '#1e293b', opacity: loading ? 0.7 : 1 }}
+            >
+              {loading && scrapeTarget === "all" ? "⏳ Scraping..." : "🔥 Tout Scraper"}
             </button>
+
           </div>
         </div>
       )}
 
-      {scrapeMsg && <div className="pip-scrape-msg">{scrapeMsg}</div>}
+      {/* 💬 Barre de message (Succès / Erreur) */}
+      {scrapeMsg && (
+        <div className={`pip-scrape-info-bar`} 
+             style={{ 
+               padding: '12px', 
+               borderRadius: '8px', 
+               marginBottom: '15px', 
+               fontWeight: '500',
+               color: scrapeMsg.includes('✅') ? '#166534' : scrapeMsg.includes('⏳') ? '#0f172a' : '#991b1b',
+               backgroundColor: scrapeMsg.includes('✅') ? '#dcfce7' : scrapeMsg.includes('⏳') ? '#f1f5f9' : '#fee2e2',
+               border: `1px solid ${scrapeMsg.includes('✅') ? '#bbf7d0' : scrapeMsg.includes('⏳') ? '#e2e8f0' : '#fecaca'}`
+             }}>
+          {scrapeMsg}
+        </div>
+      )}
 
-      <div className="pip-status-bar">
+      {/* 📊 Statut actuel */}
+      <div className="pip-status-bar" style={{ marginBottom: '15px' }}>
         <strong>{total}</strong> produits trouvés
-        <span className="pip-mode-tag">
+        <span className="mode-tag" style={{ marginLeft: '10px', padding: '4px 8px', borderRadius: '4px', background: '#e2e8f0', fontSize: '12px', fontWeight: '600' }}>
           {mode === "csv" ? "Fichier CSV" : mode === "db" ? "Base de données" : "Mode Scraping"}
         </span>
       </div>
 
-      {loading && mode !== "scrape" ? <Spinner /> : (
+      {/* 📦 Liste des produits ou Spinner */}
+      {loading && mode !== "scrape" ? (
+        <Spinner />
+      ) : (
         <>
           <div className="pip-product-list">
             {products.map((item, i) => (
@@ -373,121 +397,97 @@ function TabProducts() {
                   <h3 className="pip-card-title">{item.title}</h3>
                   <p className="pip-price">{item.price?.toLocaleString()} MAD</p>
                   <div className="pip-card-footer">
-                    <small>{item.source}</small>
-                    <a href={item.link} target="_blank" rel="noreferrer" className="pip-view-btn">Voir →</a>
+                    <small style={{ color: '#64748b' }}>{item.source}</small>
+                    <a href={item.link} target="_blank" rel="noreferrer" className="pip-view-btn">
+                      Voir →
+                    </a>
                   </div>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="pip-pagination">
-            <button onClick={() => mode === "csv" ? fetchCSV(page - 1) : fetchDB(page - 1)} disabled={page <= 1}>←</button>
-            <span>{page} / {pages}</span>
-            <button onClick={() => mode === "csv" ? fetchCSV(page + 1) : fetchDB(page + 1)} disabled={page >= pages}>→</button>
-          </div>
+          {/* 📄 Pagination */}
+          {pages > 1 && (
+            <div className="pip-pagination">
+              <button 
+                onClick={() => (mode === "csv" ? fetchCSV(page - 1) : fetchDB(page - 1))} 
+                disabled={page <= 1}
+              >
+                ←
+              </button>
+              <span>{page} / {pages}</span>
+              <button 
+                onClick={() => (mode === "csv" ? fetchCSV(page + 1) : fetchDB(page + 1))} 
+                disabled={page >= pages}
+              >
+                →
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
   );
 }
-
 // ══════════════════════════════════════════════════════════════════
-// ONGLET STATISTIQUES
+// 📊 ONGLET STATISTIQUES
 // ══════════════════════════════════════════════════════════════════
 function TabStats() {
-  const [data, setData]       = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${API}/stats/`).then(r => r.json()).then(d => { setData(d); setLoading(false); });
+  const [data, setData] = useState(null);
+  const [loading, setLoading]= useState(true);
+  useEffect(()=> {
+    fetch(`${API}/stats/`).then(r=>r.json()).then(d=>{setData(d);setLoading(false);});
   }, []);
-
   if (loading) return <Spinner />;
-  if (!data)   return <p>Erreur</p>;
+  if (!data) return <p>Erreur de chargement</p>;
   const { stats, by_brand, by_category, gaming, distribution } = data;
-
   return (
-    <div className="pip-stats-page">
+    <div className="stats-page">
       <div className="pip-kpi-grid">
         {[
-          ["Produits analysés",  stats.count],
-          ["Prix médian",        `${stats.median?.toLocaleString()} MAD`],
-          ["Prix moyen",         `${Math.round(stats.mean)?.toLocaleString()} MAD`],
-          ["Prix min",           `${stats.min?.toLocaleString()} MAD`],
-          ["Prix max",           `${stats.max?.toLocaleString()} MAD`],
-          ["Coeff. variation",   `${stats.cv}%`],
-        ].map(([label, val], i) => (
+          ["Produits", stats.count],
+          ["Médiane", `${stats.median?.toLocaleString()} MAD`],
+          ["Moyenne", `${Math.round(stats.mean)?.toLocaleString()} MAD`],
+          ["CV", `${stats.cv}%`],
+        ].map(([label,val], i)=> (
           <div className="pip-kpi-card" key={i}>
             <div className="pip-kpi-val">{val}</div>
             <div className="pip-kpi-label">{label}</div>
           </div>
         ))}
       </div>
-
-      <div className="pip-chart-card">
+      <div className="chart-card">
         <h3>📊 Distribution des prix</h3>
-        <div className="pip-histogram">
-          {distribution.map((b, i) => {
-            const maxC = Math.max(...distribution.map(x => x.count));
-            return (
-              <div className="pip-bar-wrap" key={i} title={`${b.count} produits`}>
-                <div className="pip-bar-count">{b.count}</div>
-                <div className="pip-bar" style={{ height: Math.max(4, (b.count / maxC) * 180) }}></div>
-                <div className="pip-bar-label">{b.label}</div>
-              </div>
-            );
-          })}
+        <div className="histogram">
+          {distribution.map((b,i) => (
+            <div className="bar-wrap" key={i}>
+              <div className="bar-count">{b.count}</div>
+              <div className="bar" style={{height: Math.max(10, (b.count/Math.max(...distribution.map(x=>x.count)))*150)}}></div>
+              <div className="bar-label">{b.label}</div>
+            </div>
+          ))}
         </div>
       </div>
-
-      <div className="pip-two-cols">
-        <div className="pip-chart-card">
-          <h3>🏷️ Stats par marque</h3>
-          <table className="pip-data-table">
-            <thead><tr><th>Marque</th><th>Nb</th><th>Médiane MAD</th><th>Moyenne MAD</th></tr></thead>
+      <div className="two-cols">
+        <div className="chart-card">
+          <h3>🏷️ Par marque</h3>
+          <table className="data-table">
+            <thead><tr><th>Marque</th><th>Nb</th><th>Médiane</th></tr></thead>
             <tbody>
-              {by_brand.slice(0, 8).map((b, i) => (
-                <tr key={i}>
-                  <td><strong>{b.brand_detected}</strong></td>
-                  <td>{b.count}</td>
-                  <td>{b.median?.toLocaleString()}</td>
-                  <td>{Math.round(b.mean)?.toLocaleString()}</td>
-                </tr>
+              {by_brand.slice(0,6).map((b,i)=>(
+                <tr key={i}><td><strong>{b.brand_detected}</strong></td><td>{b.count}</td><td>{b.median?.toLocaleString()}</td></tr>
               ))}
             </tbody>
           </table>
         </div>
-
-        <div className="pip-chart-card">
-          <h3>💰 Répartition par gamme</h3>
-          {by_category.map((c, i) => {
-            const maxC = Math.max(...by_category.map(x => x.count));
-            return (
-              <div key={i} className="pip-cat-row">
-                <div className="pip-cat-name">{c.price_category?.replace(/_/g, " ")}</div>
-                <div className="pip-cat-bar-bg">
-                  <div className="pip-cat-bar" style={{ width: `${(c.count / maxC) * 100}%`, background: Object.values(CATEGORY_COLORS)[i] }}></div>
-                </div>
-                <div className="pip-cat-count">{c.count}</div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="pip-chart-card">
-        <h3>🎮 Gaming vs Non-Gaming</h3>
-        <div className="pip-gaming-compare">
-          {[
-            {key:"gaming",    label:"🎮 Gaming",    cls:"gaming"},
-            {key:"non_gaming",label:"💻 Non-Gaming", cls:"non-gaming"},
-          ].map(({key,label,cls})=>(
-            <div className={`gaming-box ${cls}`} key={key}>
-              <div className="gbox-title">{label}</div>
-              <div className="gbox-count">{gaming[key]?.count} produits</div>
-              <div className="gbox-price">Médiane : <strong>{gaming[key]?.median?.toLocaleString()} MAD</strong></div>
-              <div className="gbox-price">Moyenne : <strong>{Math.round(gaming[key]?.mean)?.toLocaleString()} MAD</strong></div>
+        <div className="chart-card">
+          <h3>💰 Gammes</h3>
+          {by_category.map((c,i)=>(
+            <div key={i} className="cat-row">
+              <div className="cat-name">{c.price_category?.replace(/_/g," ")}</div>
+              <div className="cat-bar-bg"><div className="cat-bar" style={{width:`${(c.count/Math.max(...by_category.map(x=>x.count)))*100}%`, background:Object.values(CATEGORY_COLORS)[i]}}></div></div>
+              <div className="cat-count">{c.count}</div>
             </div>
           ))}
         </div>
@@ -497,172 +497,70 @@ function TabStats() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ONGLET CLUSTERING
+// 🔵 ONGLET CLUSTERING
 // ══════════════════════════════════════════════════════════════════
 function TabClustering() {
-  const [algo, setAlgo]             = useState("kmeans");
-  const [data, setData]             = useState(null);
-  const [loading, setLoading]       = useState(false);
-  const [eps, setEps]               = useState(0.5);
-  const [minSamples, setMinSamples] = useState(5);
+  const [algo, setAlgo] = useState("kmeans");
+  const [data, setData] = useState(null);
+  const [loading, setLoading]= useState(false);
+  const [eps, setEps] = useState(0.5);
+  const [minSamples, setMinSamples]= useState(5);
 
   const fetchClustering = async (a, e, ms) => {
     setLoading(true);
-    setData(null);
     try {
-      const url = a === "dbscan"
-        ? `${API}/clustering/?algo=dbscan&eps=${e}&min_samples=${ms}`
-        : `${API}/clustering/?algo=kmeans`;
-      const res  = await fetch(url);
+      const url = a === "dbscan" ? `${API}/clustering/?algo=dbscan&eps=${e}&min_samples=${ms}` : `${API}/clustering/?algo=kmeans`;
+      const res = await fetch(url);
       const json = await res.json();
       setData(json);
-    } catch (err) { console.error(err); }
+    } catch(err) { console.error(err); }
     setLoading(false);
   };
 
-  useEffect(() => { fetchClustering("kmeans", eps, minSamples); }, []);
+  useEffect(()=> { fetchClustering("kmeans", 0.5, 5); }, []);
 
-  const switchAlgo = (a) => {
-    setAlgo(a);
-    fetchClustering(a, eps, minSamples);
-  };
-
-  const clusterNames = data ? [...new Set(data.scatter?.map(p => p.cluster) || [])] : [];
   const colorMap = {};
-  clusterNames.forEach((n, i) => { colorMap[n] = CLUSTER_COLORS[i % 6]; });
+  if(data?.scatter) {
+    [...new Set(data.scatter.map(p=>p.cluster))].forEach((n,i)=> { colorMap[n]= CLUSTER_COLORS[i%6]; });
+  }
 
   return (
-    <div className="pip-stats-page">
-      <div className="pip-algo-selector">
-        <div className="pip-algo-label">Algorithme de clustering :</div>
-        <div className="pip-algo-btns">
-          <button
-            className={`pip-algo-btn kmeans ${algo === "kmeans" ? "active" : ""}`}
-            onClick={() => switchAlgo("kmeans")}
-          >
-            <span className="pip-algo-icon">🔵</span>
-            <span className="pip-algo-name">K-Means</span>
-            <span className="pip-algo-desc">k optimal automatique</span>
+    <div className="stats-page">
+      <div className="algo-selector">
+        <div className="algo-btns">
+          <button className={`algo-btn kmeans ${algo === "kmeans" ? "active" : ""}`} onClick={()=> {setAlgo("kmeans"); fetchClustering("kmeans");}}>
+            <span className="algo-name">K-Means</span>
           </button>
-          <button
-            className={`pip-algo-btn dbscan ${algo === "dbscan" ? "active" : ""}`}
-            onClick={() => switchAlgo("dbscan")}
-          >
-            <span className="pip-algo-icon">🟣</span>
-            <span className="pip-algo-name">DBSCAN</span>
-            <span className="pip-algo-desc">détection automatique</span>
+          <button className={`algo-btn dbscan ${algo === "dbscan" ? "active" : ""}`} onClick={()=> {setAlgo("dbscan"); fetchClustering("dbscan", eps, minSamples);}}>
+            <span className="algo-name">DBSCAN</span>
           </button>
         </div>
       </div>
 
       {algo === "dbscan" && (
-        <div className="pip-dbscan-params">
-          <div className="pip-param-title">⚙️ Paramètres DBSCAN</div>
-          <div className="pip-param-row">
-            <label>eps (rayon de voisinage) :
-              <input type="number" value={eps} step="0.1" min="0.1" max="5"
-                onChange={e => setEps(parseFloat(e.target.value))} />
-            </label>
-            <label>min_samples (points minimum) :
-              <input type="number" value={minSamples} step="1" min="2" max="50"
-                onChange={e => setMinSamples(parseInt(e.target.value))} />
-            </label>
-            <button className="pip-apply-btn" onClick={() => fetchClustering("dbscan", eps, minSamples)}>
-              ▶ Appliquer
-            </button>
-          </div>
-          <div className="pip-param-hint">
-            💡 <strong>eps</strong> : distance max entre deux points voisins.{" "}
-            <strong>min_samples</strong> : nb min de points pour former un cluster.{" "}
-            Label <strong>-1</strong> = outlier.
+        <div className="dbscan-params">
+          <div className="param-row">
+            <label>eps <input type="number" value={eps} step="0.1" onChange={e => setEps(parseFloat(e.target.value))} /></label>
+            <label>min <input type="number" value={minSamples} onChange={e => setMinSamples(parseInt(e.target.value))} /></label>
+            <button className="apply-btn" onClick={()=> fetchClustering("dbscan", eps, minSamples)}>Appliquer</button>
           </div>
         </div>
       )}
 
-      {loading && <Spinner />}
-
-      {!loading && data && (
+      {loading ? <Spinner /> : data && (
         <>
-          <div className="pip-kpi-grid">
-            {algo === "kmeans" ? (
-              <>
-                <div className="pip-kpi-card"><div className="pip-kpi-val">{data.best_k}</div><div className="pip-kpi-label">k optimal (K-Means)</div></div>
-                <div className="pip-kpi-card"><div className="pip-kpi-val">{data.silhouette}</div><div className="pip-kpi-label">Score Silhouette</div></div>
-                <div className="pip-kpi-card"><div className="pip-kpi-val">{data.summary?.length}</div><div className="pip-kpi-label">Segments créés</div></div>
-              </>
-            ) : (
-              <>
-                <div className="pip-kpi-card"><div className="pip-kpi-val">{data.n_clusters}</div><div className="pip-kpi-label">Clusters trouvés (DBSCAN)</div></div>
-                <div className="pip-kpi-card"><div className="pip-kpi-val">{data.scatter?.filter(p => p.cluster === "Outlier").length || 0}</div><div className="pip-kpi-label">Outliers détectés</div></div>
-                <div className="pip-kpi-card"><div className="pip-kpi-val">eps = {data.eps}</div><div className="pip-kpi-label">Rayon utilisé</div></div>
-              </>
-            )}
+          <div className="cluster-grid">
+            {data.summary?.map((c,i)=> (
+              <div className="cluster-card" key={i} style={{borderTop:`4px solid ${CLUSTER_COLORS[i%6]}`}}>
+                <div className="cluster-name">{c.cluster}</div>
+                <div className="cluster-count">{c.count} produits</div>
+                <div className="cluster-stats">Médiane: <strong>{c.median?.toLocaleString()} MAD</strong></div>
+              </div>
+            ))}
           </div>
-
-          {algo === "kmeans" && data.k_scores && (
-            <div className="pip-chart-card">
-              <h3>🔍 Recherche du k optimal</h3>
-              <table className="pip-data-table">
-                <thead><tr><th>k</th><th>Inertie</th><th>Silhouette ↑</th><th>Davies-Bouldin ↓</th></tr></thead>
-                <tbody>
-                  {data.k_scores.map((r, i) => (
-                    <tr key={i} className={r.k === data.best_k ? "pip-row-best" : ""}>
-                      <td>{r.k === data.best_k ? "⭐ " : ""}{r.k}</td>
-                      <td>{Math.round(r.inertia).toLocaleString()}</td>
-                      <td>{r.silhouette}</td>
-                      <td>{r.davies_bouldin}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {algo === "dbscan" && (
-            <div className="pip-chart-card pip-dbscan-info">
-              <h3>ℹ️ Comment fonctionne DBSCAN ?</h3>
-              <p>DBSCAN (Density-Based Spatial Clustering of Applications with Noise) regroupe les points denses sans fixer k à l'avance :</p>
-              <ul className="pip-info-list">
-                <li><strong>Core point</strong> : a au moins <em>min_samples</em> voisins dans un rayon <em>eps</em></li>
-                <li><strong>Border point</strong> : dans le rayon d'un core point, mais pas assez de voisins</li>
-                <li><strong>Outlier (label -1)</strong> : isolé, ni core ni border → anomalie de prix</li>
-              </ul>
-            </div>
-          )}
-
-          <div className="pip-chart-card">
-            <h3>📦 Résumé des segments</h3>
-            <div className="pip-cluster-grid">
-              {data.summary?.map((c, i) => (
-                <div className="pip-cluster-card" key={i}
-                  style={{ borderTop: `4px solid ${c.cluster === "Outlier" ? "#e74c3c" : CLUSTER_COLORS[i % 6]}` }}>
-                  <div className="pip-cluster-name" style={{ color: c.cluster === "Outlier" ? "#e74c3c" : "inherit" }}>
-                    {c.cluster === "Outlier" ? "⚠️ " : ""}{c.cluster}
-                  </div>
-                  <div className="pip-cluster-count">{c.count} produits</div>
-                  <div className="pip-cluster-stats">
-                    <div>Médiane : <strong>{c.median?.toLocaleString()} MAD</strong></div>
-                    <div>Moyenne : <strong>{Math.round(c.mean)?.toLocaleString()} MAD</strong></div>
-                    <div>Min : {c.min?.toLocaleString()} | Max : {c.max?.toLocaleString()}</div>
-                    {c.top_brand && <div>Top marque : <strong>{c.top_brand}</strong></div>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="pip-chart-card">
-            <h3>🔵 Nuage de points — Prix par cluster</h3>
-            <div className="pip-legend">
-              {clusterNames.map((n, i) => (
-                <span key={i} className="pip-legend-item">
-                  <span className="pip-legend-dot"
-                    style={{ background: n === "Outlier" ? "#e74c3c" : CLUSTER_COLORS[i % 6] }}></span>
-                  {n}
-                </span>
-              ))}
-            </div>
-            <ScatterPlot points={data.scatter} colorMap={colorMap} />
+          <div className="chart-card">
+            <h3>Visualisation des clusters</h3>
+            <ScatterPlot points={data.scatter || []} colorMap={colorMap} />
           </div>
         </>
       )}
@@ -670,71 +568,40 @@ function TabClustering() {
   );
 }
 
-function ScatterPlot({ points, colorMap }) {
+function ScatterPlot({points, colorMap}) {
   if (!points.length) return null;
-  const prices = points.map(p => p.price);
+  const prices = points.map(p=>p.price);
   const minP = Math.min(...prices), maxP = Math.max(...prices);
-  const W = 700, H = 260, PAD = 40;
   return (
-    <svg width="100%" viewBox={`0 0 ${W} ${H}`} className="pip-scatter-svg">
-      <line x1={PAD} y1={PAD} x2={PAD} y2={H - PAD} stroke="#ddd" />
-      <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="#ddd" />
-      <text x={W / 2} y={H - 4} textAnchor="middle" fontSize="11" fill="#999">Prix MAD</text>
-      {points.map((p, i) => {
-        const x = PAD + ((p.price - minP) / (maxP - minP || 1)) * (W - 2 * PAD);
-        const y = PAD + (Math.sin(i * 0.7) * 0.4 + 0.5) * (H - 2 * PAD);
-        return (
-          <circle key={i} cx={x} cy={y} r={4} fill={colorMap[p.cluster] || "#999"} opacity={0.75}>
-            <title>{p.title} — {p.price?.toLocaleString()} MAD</title>
-          </circle>
-        );
-      })}
+    <svg width="100%" height="200" className="scatter-svg">
+      {points.map((p,i)=> (
+        <circle key={i} cx={40 + ((p.price-minP)/(maxP-minP||1))*600} cy={100 + Math.sin(i)*40} r={5} fill={colorMap[p.cluster] || "#999"} opacity={0.6} />
+      ))}
     </svg>
   );
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ONGLET ANOMALIES
+// 🚨 ONGLET ANOMALIES
 // ══════════════════════════════════════════════════════════════════
 function TabAnomalies() {
-  const [data, setData]       = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${API}/anomalies/`).then(r => r.json()).then(d => { setData(d); setLoading(false); });
+  const [data, setData] = useState(null);
+  const [loading, setLoading]= useState(true);
+  useEffect(()=> {
+    fetch(`${API}/anomalies/`).then(r=>r.json()).then(d=>{setData(d);setLoading(false);});
   }, []);
-
   if (loading) return <Spinner />;
-  if (!data)   return <p>Erreur</p>;
-
   return (
-    <div className="pip-stats-page">
+    <div className="stats-page">
       <div className="pip-kpi-grid">
-        <div className="pip-kpi-card warn">
-          <div className="pip-kpi-val">{data.total}</div>
-          <div className="pip-kpi-label">Anomalies (Isolation Forest)</div>
-        </div>
-        {data.summary.map((s, i) => (
-          <div className="pip-kpi-card" key={i}>
-            <div className="pip-kpi-val">{s.anomalies} <small>({s.pourcentage}%)</small></div>
-            <div className="pip-kpi-label">{s.methode}</div>
-          </div>
-        ))}
+        <div className="pip-kpi-card warn"><div className="pip-kpi-val">{data?.total}</div><div className="pip-kpi-label">Anomalies</div></div>
       </div>
-      <div className="pip-chart-card">
-        <h3>🚨 Produits à prix suspect</h3>
-        <p className="pip-hint">Détectés par Isolation Forest — prix anormal par rapport aux specs.</p>
-        <table className="pip-data-table">
-          <thead><tr><th>#</th><th>Titre</th><th>Marque</th><th>Gamme</th><th>Prix MAD</th></tr></thead>
+      <div className="chart-card">
+        <table className="data-table">
+          <thead><tr><th>Produit</th><th>Gamme</th><th>Prix</th></tr></thead>
           <tbody>
-            {data.anomalies.map((a, i) => (
-              <tr key={i}>
-                <td>{i + 1}</td>
-                <td className="pip-td-title">{a.title}</td>
-                <td>{a.brand_detected}</td>
-                <td><Badge label={a.price_category?.replace(/_/g, " ")} color={CATEGORY_COLORS[a.price_category] || "#888"} /></td>
-                <td><strong>{a.price?.toLocaleString()} MAD</strong></td>
-              </tr>
+            {data?.anomalies.map((a,i)=>(
+              <tr key={i}><td className="td-title">{a.title}</td><td><Badge label={a.price_category} color={CATEGORY_COLORS[a.price_category]}/></td><td>{a.price?.toLocaleString()} MAD</td></tr>
             ))}
           </tbody>
         </table>
@@ -744,238 +611,96 @@ function TabAnomalies() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ONGLET ASSOCIATION
+// 🔗 ONGLET ASSOCIATION
 // ══════════════════════════════════════════════════════════════════
 function TabAssociation() {
-  const [data, setData]       = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${API}/association/`).then(r => r.json()).then(d => { setData(d); setLoading(false); });
+  const [data, setData] = useState(null);
+  const [loading, setLoading]= useState(true);
+  useEffect(()=> {
+    fetch(`${API}/association/`).then(r=>r.json()).then(d=>{setData(d);setLoading(false);});
   }, []);
-
   if (loading) return <Spinner />;
-  if (!data)   return <p>Erreur</p>;
-
   return (
-    <div className="pip-stats-page">
-      <div className="pip-kpi-grid">
-        <div className="pip-kpi-card">
-          <div className="pip-kpi-val">{data.total}</div>
-          <div className="pip-kpi-label">Règles générées</div>
+    <div className="stats-page">
+      <div className="chart-card">
+        <h3>🔗 Règles d'association</h3>
+        <div className="rules-list">
+          {data?.rules.map((r,i)=>(
+            <div className="rule-card" key={i}>
+              <div className="rule-body"><span className="rule-if">{r.antecedent}</span><span className="rule-arrow">→</span><span className="rule-then">{r.consequent}</span></div>
+              <div className="rule-metrics"><span>Confiance: {(r.confidence*100).toFixed(1)}%</span></div>
+            </div>
+          ))}
         </div>
-      </div>
-      <div className="pip-chart-card">
-        <h3>🔗 Règles d'association (Apriori)</h3>
-        <p className="pip-hint">
-          <strong>Support</strong> = fréquence &nbsp;|&nbsp;
-          <strong>Confiance</strong> = probabilité &nbsp;|&nbsp;
-          <strong>Lift &gt; 1</strong> = règle non triviale
-        </p>
-        {!data.rules.length ? <p>Aucune règle trouvée.</p> : (
-          <div className="pip-rules-list">
-            {data.rules.map((r, i) => (
-              <div className="pip-rule-card" key={i}>
-                <div className="pip-rule-body">
-                  <span className="pip-rule-if">SI &nbsp; {r.antecedent}</span>
-                  <span className="pip-rule-arrow">→</span>
-                  <span className="pip-rule-then">ALORS &nbsp; {r.consequent}</span>
-                </div>
-                <div className="pip-rule-metrics">
-                  <span className="pip-metric">Support : <strong>{(r.support * 100).toFixed(1)}%</strong></span>
-                  <span className="pip-metric">Confiance : <strong>{(r.confidence * 100).toFixed(1)}%</strong></span>
-                  <span className="pip-metric lift">Lift : <strong>{r.lift}</strong></span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
 // ══════════════════════════════════════════════════════════════════
-// CONFIGURATION DES ONGLETS
-// ══════════════════════════════════════════════════════════════════
-const TABS = [
-  { id: "products",    label: "Produits",     icon: ShoppingBag},
-  { id: "stats",       label: "Statistiques", icon: TrendingUp},
-  { id: "clustering",  label: "Clustering",   icon: BarChart2},
-  { id: "anomalies",   label: "Anomalies",    icon: AlertTriangle},
-  { id: "association", label: "Association",  icon: Link2},
-];
-
-// ══════════════════════════════════════════════════════════════════
-// 🎯 COMPOSANT DASHBOARD
+// 🚀 DASHBOARD & ROUTING
 // ══════════════════════════════════════════════════════════════════
 function Dashboard() {
   const [tab, setTab] = useState("products");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  
-  // ═════ VARIABLE AJOUTÉE ═════
-  const [scraperActive] = useState(true); // true = actif, false = inactif
-  // ══════════════════════════
-  
   const { user, logout } = useAuth();
-  
-  const onLogout = () => {
-    logout();
-  };
-
-  const quickStats = [
-    { title: "Produits trackés",    value: "1 234",   icon: Package,       color: "#3b82f6" },
-    { title: "Prix moyen",          value: "3 450 MAD", icon: TrendingUp,  color: "#f97316" },
-    { title: "Marques analysées",   value: "42",       icon: ShoppingBag,  color: "#10b981" },
-    { title: "Anomalies détectées", value: "18",       icon: AlertTriangle, color: "#8b5cf6" },
-  ];
-
-  const currentTabLabel = TABS.find(t => t.id === tab)?.label || "";
 
   return (
     <div className="pip-layout">
-      {/* ═══════ SIDEBAR ═══════ */}
-      <aside className={`pip-sidebar ${sidebarOpen ? "open" : "closed"}`}>
-        <div className="pip-sidebar-logo">
-          <div className="pip-logo-icon">
-            <ShoppingBag size={22} color="#fff" />
-          </div>
-          {sidebarOpen && (
-            <div className="pip-logo-text">
-              <span className="pip-logo-name">PriceIntel</span>
-            </div>
-          )}
-          <button className="pip-sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>
-            {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
+      <aside className="pip-sidebar">
+        <div style={{padding: '20px', textAlign: 'center', borderBottom: '1px solid #1e293b'}}>
+          <h2 style={{fontSize: '18px', color: '#f97316'}}>PriceIntel</h2>
         </div>
-
-        <nav className="pip-nav">
-          {sidebarOpen && <div className="pip-nav-section-label">Navigation</div>}
-          {TABS.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setTab(item.id)}
-              className={`pip-nav-item ${tab === item.id ? "active" : ""}`}
-              title={!sidebarOpen ? item.label : ""}
-            >
-              <item.icon className="pip-nav-icon" size={18} />
-              {sidebarOpen && <span className="pip-nav-label">{item.label}</span>}
+        <nav style={{padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px'}}>
+          {["products", "stats", "clustering", "anomalies", "association"].map(t => (
+            <button key={t} onClick={() => setTab(t)} className={`tab-btn ${tab === t ? "active" : ""}`} style={{width: '100%', textAlign: 'left'}}>
+              {t.toUpperCase()}
             </button>
           ))}
+          <button onClick={logout} style={{marginTop: '20px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444'}} className="tab-btn">
+            <LogOut size={16} /> Déconnexion
+          </button>
         </nav>
-
-        {sidebarOpen && (
-          <div className="pip-sidebar-footer">
-            <div className="pip-nav-section-label">
-              <Activity size={14} />
-              <span>Statut du système</span>
-            </div>
-            <div className="pip-system-status">
-              <div className="pip-status-item">
-                <div className={`pip-status-dot ${scraperActive ? 'active' : 'inactive'}`}></div>
-                <span className="pip-status-label">Scraper</span>
-                <span className={`pip-status-value ${scraperActive ? 'active' : ''}`}>
-                  {scraperActive ? 'Actif' : 'Inactif'}
-                </span>
-              </div>
-              <div className="pip-status-divider"></div>
-              <div className="pip-status-item">
-                <Clock size={14} className="pip-status-icon" />
-                <span className="pip-status-label">Dernier scrape</span>
-                <span className="pip-status-time">Il y a 2h</span>
-              </div>
-              <div className="pip-status-divider"></div>
-              <div className="pip-status-item">
-                <Database size={14} className="pip-status-icon" />
-                <span className="pip-status-label">Produits en DB</span>
-                <span className="pip-status-value">1,234</span>
-              </div>
-            </div>
-          </div>
-        )}
       </aside>
-
-      {/* ═══════ MAIN ═══════ */}
-      <div className="pip-main">
+      <main className="pip-main">
         <header className="pip-header">
-          <div className="pip-header-left">
-            <div className="pip-breadcrumb">
-              <span className="pip-breadcrumb-home">PriceIntel</span>
-              <ChevronRight size={14} className="pip-breadcrumb-sep" />
-              <span className="pip-breadcrumb-current">{currentTabLabel}</span>
-            </div>
+          <div style={{display:'flex', alignItems:'center', gap: '10px'}}>
+             <Menu size={20} /> <strong>Tableau de bord</strong>
           </div>
-          
-          <div className="pip-header-right">
-            <button className="pip-header-icon-btn" title="Actualiser">
-              <RefreshCw size={17} />
-            </button>
-            <button className="pip-header-icon-btn pip-bell" title="Notifications">
-              <Bell size={17} />
-              <span className="pip-notif-dot"></span>
-            </button>
-            
-            {user && (
-              <div className="pip-user-menu">
-                <span className="pip-username">
-                  {user?.first_name || user?.username || "Admin"}
-                </span>
-                <button onClick={onLogout} className="pip-logout-btn" title="Déconnexion">
-                  <LogOut size={16} />
-                </button>
-              </div>
-            )}
-            
-            <div className="pip-avatar">
-              {(user?.first_name?.[0] || user?.username?.[0] || "A").toUpperCase()}
-            </div>
-          </div>
+          <div><User size={16} /> {user?.first_name}</div>
         </header>
-
-        <main className="pip-content">
-          {tab === "products" && (
-            <div className="pip-welcome-banner">
-              <div className="pip-welcome-text">
-                <h1>Bonjour {user?.first_name ? ` ${user.first_name}`:''} 👋</h1>
-                <p>Bienvenue sur <strong>Price Intelligence Platform</strong></p>
-              </div>
-              <div className="pip-welcome-actions">
-                <button className="pip-btn-primary">
-                  <Search size={16} /> Nouvelle recherche
-                </button>
-                <button className="pip-btn-ghost">
-                  <Bell size={16} /> Voir alertes
-                </button>
-              </div>
-            </div>
-          )}
-
-          {tab === "products" && (
-            <div className="pip-quick-stats">
-              {quickStats.map((stat, i) => (
-                <div key={i} className="pip-quick-stat-card">
-                  <div>
-                    <p className="pip-qs-label">{stat.title}</p>
-                    <h3 className="pip-qs-value">{stat.value}</h3>
-                  </div>
-                  <div className="pip-qs-icon" style={{ background: stat.color + "18", color: stat.color }}>
-                    <stat.icon size={22} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
+        <div className="pip-content">
           <div className="pip-tab-content">
-            {tab === "products"    && <TabProducts />}
-            {tab === "stats"       && <TabStats />}
-            {tab === "clustering"  && <TabClustering />}
-            {tab === "anomalies"   && <TabAnomalies />}
+            {tab === "products" && <TabProducts />}
+            {tab === "stats" && <TabStats />}
+            {tab === "clustering" && <TabClustering />}
+            {tab === "anomalies" && <TabAnomalies />}
             {tab === "association" && <TabAssociation />}
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
+}
+
+function PrivateRoute({ children }) {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" />;
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginRouteWrapper />} />
+          <Route path="/*" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
+
+function LoginRouteWrapper() {
+  const { user } = useAuth();
+  return user ? <Navigate to="/" /> : <Login />;
 }

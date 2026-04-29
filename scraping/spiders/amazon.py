@@ -19,14 +19,14 @@ class AmazonScraper:
         related = {
             "laptop": [
                 "pc gamer", 
-                # "laptop", # <--- AJOUTÉ ICI pour ne pas ignorer le terme principal
-                # "ordinateur portable", 
-                # "macbook", 
-                # "macbook pro",
-                # "macbook air",
-                # "ordinateur hp",
-                # "ordinateur lenovo",
-                # "ultrabook",
+                "laptop", # <--- AJOUTÉ ICI pour ne pas ignorer le terme principal
+                "ordinateur portable", 
+                "macbook", 
+                "macbook pro",
+                "macbook air",
+                "ordinateur hp",
+                "ordinateur lenovo",
+                "ultrabook",
                 "chromebook",
                 "pc portable asus",
                 "ordinateur portable dell",
