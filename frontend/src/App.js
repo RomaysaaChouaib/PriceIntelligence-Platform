@@ -214,22 +214,26 @@ const CLUSTER_COLORS = ["#e74c3c","#3498db","#2ecc71","#f39c12","#9b59b6","#1abc
 // ONGLET PRODUITS
 // ══════════════════════════════════════════════════════════════════
 function TabProducts() {
-  const [query, setQuery]         = useState("");
-  const [products, setProducts]   = useState([]);
-  const [total, setTotal]         = useState(0);
-  const [loading, setLoading]     = useState(false);
-  const [mode, setMode]           = useState("csv");
-  const [page, setPage]           = useState(1);
-  const [pages, setPages]         = useState(1);
+  const [query, setQuery]       = useState("");
+  const [products, setProducts] = useState([]);
+  const [total, setTotal]       = useState(0);
+  const [loading, setLoading]   = useState(false);
+  const [mode, setMode]         = useState("db");   // "csv", "db", ou "scrape"
+  const [page, setPage]         = useState(1);
+  const [pages, setPages]       = useState(1);
   const [scrapeMsg, setScrapeMsg] = useState("");
+  const [scrapeTarget, setScrapeTarget] = useState(""); 
 
-  useEffect(() => { fetchCSV(1, ""); }, []);
+  // Chargement initial sur la base de données
+  useEffect(() => { 
+      fetchDB(1, ""); 
+  }, []);
 
-  const fetchCSV = async (p = 1, q = query) => {
-    setLoading(true);
-    setScrapeMsg("");
+  // 1. Fetch depuis le CSV enrichi
+  const fetchCSV = async (p = 1) => {
+    setLoading(true); setMode("csv"); setScrapeMsg("");
     try {
-      const res  = await fetch(`${API}/products/?query=${q}&page=${p}&limit=20`);
+      const res  = await fetch(`${API}/products/?query=${query}&page=${p}&limit=20`);
       const data = await res.json();
       setProducts(data.products || []);
       setTotal(data.total || 0);
@@ -239,70 +243,125 @@ function TabProducts() {
     setLoading(false);
   };
 
-  const fetchScrape = async () => {
-    if (!query.trim()) return;
-    setLoading(true);
-    setScrapeMsg("⏳ Scraping Jumia en cours… (peut prendre 1-2 min)");
+  // 2. Fetch depuis la Base de données (MySQL)
+  const fetchDB = async (p = 1) => {
+    setLoading(true); setMode("db"); setScrapeMsg("");
     try {
-      const res  = await fetch(`${API}/search/?query=${query}`);
+      // On utilise l'endpoint de recherche classique (search) qui tape dans la DB
+      const res  = await fetch(`${API}/search/?query=${query}&page=${p}&limit=20`);
       const data = await res.json();
-      setScrapeMsg(`✅ Scraping terminé — ${data.products?.length || 0} produits récupérés`);
-      await fetchCSV(1, query);
+      setProducts(data.products || []);
+      setTotal(data.total || 0);
+      setPages(data.pages || 1);
+      setPage(p);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  };
+
+  // 3. Logique de Scraping en direct
+ const runScrape = async (target) => {
+    setLoading(true);
+    setScrapeTarget(target);
+    
+    // Si query est vide, on n'envoie pas de paramètre ou on envoie une chaîne vide
+    // Ton backend Django utilisera alors : request.GET.get("query", "pc portable")
+    const searchParam = query.trim() !== "" ? `?query=${encodeURIComponent(query)}` : "";
+    
+    setScrapeMsg(`⏳ Lancement du scraping ${target} ${query.trim() !== "" ? `pour "${query}"` : "(automatique)"}...`);
+    
+    try {
+      let endpoint = "";
+      switch(target) {
+        case "jumia":      endpoint = "scrape/jumia/"; break;
+        case "amazon":     endpoint = "scrape/amazon/"; break;
+        case "aliexpress": endpoint = "scrape/aliexpress/"; break;
+        case "all":        endpoint = "scrape/All/"; break;
+        default:           endpoint = "search/";
+      }
+
+      // Appel de l'API avec ou sans query
+      const res = await fetch(`${API}/${endpoint}${searchParam}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        // Succès : Ton backend a renvoyé "success": True après insertion MySQL
+        setScrapeMsg(`✅ ${data.message}`);
+        
+        // Optionnel : Basculer sur l'onglet DB pour voir les résultats
+        setMode("db");
+        fetchDB(1); 
+      } else {
+        setScrapeMsg(`❌ Erreur: ${data.error}`);
+      }
     } catch (e) {
-      setScrapeMsg("❌ Erreur de scraping");
       console.error(e);
+      setScrapeMsg(`❌ Erreur réseau sur ${target}`);
     }
     setLoading(false);
   };
 
-  const handleSearch = () => {
-    if (mode === "scrape") fetchScrape();
-    else fetchCSV(1, query);
-  };
-
-  return (
+ return (
     <div>
       <div className="pip-search-box">
-        <div className="pip-search-input-wrap">
-          <Search className="pip-search-icon" />
-          <input
-            type="text"
-            placeholder="Ex: hp, lenovo, macbook, gaming…"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            onKeyPress={e => e.key === "Enter" && handleSearch()}
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Rechercher un modèle..."
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          className="pip-search-input"   // optionnel si tu utilises le wrap
+        />
+
         <div className="pip-mode-toggle">
-          <button
-            className={`pip-mode-btn ${mode === "csv" ? "active" : ""}`}
-            onClick={() => setMode("csv")}
-            title="Lire le CSV existant"
-          >📂 CSV</button>
-          <button
-            className={`pip-mode-btn ${mode === "scrape" ? "active" : ""}`}
-            onClick={() => setMode("scrape")}
-            title="Scraper Jumia en direct"
-          >🕷️ Scraper</button>
+          <button className={`pip-mode-btn ${mode === "csv" ? "active" : ""}`} 
+                  onClick={() => fetchCSV(1)}>📂 CSV</button>
+          <button className={`pip-mode-btn ${mode === "db" ? "active" : ""}`} 
+                  onClick={() => fetchDB(1)}>🗄️ Produits (DB)</button>
+          <button className={`pip-mode-btn ${mode === "scrape" ? "active" : ""}`} 
+                  onClick={() => setMode("scrape")}>🕷️ Scraper</button>
         </div>
-        <button className="pip-search-btn" onClick={handleSearch} disabled={loading}>
-          {loading ? "⏳ …" : mode === "scrape" ? "Scraper Jumia" : "Rechercher"}
-        </button>
+
+        {mode !== "scrape" && (
+          <button 
+            onClick={() => mode === "csv" ? fetchCSV(1) : fetchDB(1)} 
+            disabled={loading} 
+            className="pip-search-btn"
+          >
+            {loading ? "Chargement..." : "🔍 Rechercher"}
+          </button>
+        )}
       </div>
 
-      {scrapeMsg && (
-        <div className={`pip-scrape-msg ${scrapeMsg.startsWith("✅") ? "ok" : scrapeMsg.startsWith("❌") ? "err" : ""}`}>
-          {scrapeMsg}
+      {/* Zone Scraping */}
+      {mode === "scrape" && (
+        <div className="scrape-actions">   {/* ← on va ajouter le CSS après */}
+          <p>Lancer un nouveau scraping vers la base de données :</p>
+          <div className="scrape-buttons-group">
+            <button onClick={() => runScrape("jumia")} disabled={loading} className="btn-jumia">
+              {loading && scrapeTarget === "jumia" ? "⏳" : "Scraper Jumia"}
+            </button>
+            <button onClick={() => runScrape("amazon")} disabled={loading} className="btn-amazon">
+              {loading && scrapeTarget === "amazon" ? "⏳" : "Scraper Amazon"}
+            </button>
+            <button onClick={() => runScrape("aliexpress")} disabled={loading} className="btn-aliex">
+              {loading && scrapeTarget === "aliexpress" ? "⏳" : "Scraper AliExpress"}
+            </button>
+            <button onClick={() => runScrape("all")} disabled={loading} className="btn-all">
+              {loading && scrapeTarget === "all" ? "⏳" : "🔥 Tout Scraper"}
+            </button>
+          </div>
         </div>
       )}
 
+      {scrapeMsg && <div className="pip-scrape-msg">{scrapeMsg}</div>}
+
       <div className="pip-status-bar">
-        <span><strong>{total}</strong> produits — Page {page}/{pages}</span>
-        {mode === "csv"    && <span className="pip-mode-tag">📂 Données CSV enrichies</span>}
-        {mode === "scrape" && <span className="pip-mode-tag scrape">🕷️ Mode scraping live</span>}
+        <strong>{total}</strong> produits trouvés
+        <span className="pip-mode-tag">
+          {mode === "csv" ? "Fichier CSV" : mode === "db" ? "Base de données" : "Mode Scraping"}
+        </span>
       </div>
 
-      {loading ? <Spinner /> : (
+      {loading && mode !== "scrape" ? <Spinner /> : (
         <>
           <div className="pip-product-list">
             {products.map((item, i) => (
@@ -310,26 +369,12 @@ function TabProducts() {
                 {item.is_gaming && <span className="pip-gaming-tag">🎮 Gaming</span>}
                 {item.image && <img src={item.image} alt={item.title} className="pip-product-img" />}
                 <div className="pip-card-content">
-                  <div className="pip-card-top">
-                    <span className="pip-brand-label">{item.brand_detected || item.brand}</span>
-                    {item.price_category && (
-                      <Badge
-                        label={item.price_category.replace(/_/g, " ")}
-                        color={CATEGORY_COLORS[item.price_category] || "#888"}
-                      />
-                    )}
-                  </div>
+                  <span className="pip-brand-label">{item.brand_detected || "Inconnu"}</span>
                   <h3 className="pip-card-title">{item.title}</h3>
-                  <div className="pip-specs-row">
-                    {item.ram_gb     && <span className="pip-spec">🧠 {item.ram_gb} Go</span>}
-                    {item.storage_gb && <span className="pip-spec">💾 {item.storage_gb} Go</span>}
-                  </div>
                   <p className="pip-price">{item.price?.toLocaleString()} MAD</p>
                   <div className="pip-card-footer">
                     <small>{item.source}</small>
-                    <a href={item.link} target="_blank" rel="noreferrer" className="pip-view-btn">
-                      Voir sur Jumia →
-                    </a>
+                    <a href={item.link} target="_blank" rel="noreferrer" className="pip-view-btn">Voir →</a>
                   </div>
                 </div>
               </div>
@@ -337,13 +382,9 @@ function TabProducts() {
           </div>
 
           <div className="pip-pagination">
-            <button onClick={() => fetchCSV(page - 1)} disabled={page <= 1}>
-              <ChevronLeft size={16} /> Préc
-            </button>
-            <span>Page {page} / {pages}</span>
-            <button onClick={() => fetchCSV(page + 1)} disabled={page >= pages}>
-              Suiv <ChevronRight size={16} />
-            </button>
+            <button onClick={() => mode === "csv" ? fetchCSV(page - 1) : fetchDB(page - 1)} disabled={page <= 1}>←</button>
+            <span>{page} / {pages}</span>
+            <button onClick={() => mode === "csv" ? fetchCSV(page + 1) : fetchDB(page + 1)} disabled={page >= pages}>→</button>
           </div>
         </>
       )}
@@ -439,14 +480,14 @@ function TabStats() {
         <h3>🎮 Gaming vs Non-Gaming</h3>
         <div className="pip-gaming-compare">
           {[
-            { key: "gaming",     label: "🎮 Gaming",     cls: "gaming" },
-            { key: "non_gaming", label: "💻 Non-Gaming", cls: "non-gaming" },
-          ].map(({ key, label, cls }) => (
-            <div className={`pip-gaming-box ${cls}`} key={key}>
-              <div className="pip-gbox-title">{label}</div>
-              <div className="pip-gbox-count">{gaming[key]?.count} produits</div>
-              <div className="pip-gbox-price">Médiane : <strong>{gaming[key]?.median?.toLocaleString()} MAD</strong></div>
-              <div className="pip-gbox-price">Moyenne : <strong>{Math.round(gaming[key]?.mean)?.toLocaleString()} MAD</strong></div>
+            {key:"gaming",    label:"🎮 Gaming",    cls:"gaming"},
+            {key:"non_gaming",label:"💻 Non-Gaming", cls:"non-gaming"},
+          ].map(({key,label,cls})=>(
+            <div className={`gaming-box ${cls}`} key={key}>
+              <div className="gbox-title">{label}</div>
+              <div className="gbox-count">{gaming[key]?.count} produits</div>
+              <div className="gbox-price">Médiane : <strong>{gaming[key]?.median?.toLocaleString()} MAD</strong></div>
+              <div className="gbox-price">Moyenne : <strong>{Math.round(gaming[key]?.mean)?.toLocaleString()} MAD</strong></div>
             </div>
           ))}
         </div>
@@ -936,51 +977,5 @@ function Dashboard() {
         </main>
       </div>
     </div>
-  );
-}
-
-// ══════════════════════════════════════════════════════════════════
-// 🎯 APP PRINCIPALE — Avec Routing PROTÉGÉ
-// ══════════════════════════════════════════════════════════════════
-export default function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
-  );
-}
-
-// ═════ COMPOSANT DE ROUTING SÉPARÉ ═════
-function AppRoutes() {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        minHeight: '100vh',
-        background: '#f8fafc'
-      }}>
-        <div className="pip-spinner"></div>
-      </div>
-    );
-  }
-
-  return (
-    <Routes>
-      <Route 
-        path="/login" 
-        element={user ? <Navigate to="/" replace /> : <Login />} 
-      />
-      
-      <Route 
-        path="/*" 
-        element={user ? <Dashboard /> : <Navigate to="/login" replace />} 
-      />
-    </Routes>
   );
 }

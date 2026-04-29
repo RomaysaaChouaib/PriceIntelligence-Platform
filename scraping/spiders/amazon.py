@@ -11,8 +11,83 @@ class AmazonScraper:
         self.base_url = "https://www.amazon.fr/s?k="
         self.source_name = "Amazon"
 
-    def scrape(self, queries, max_pages=5):
+    def generate_queries(self, query):
+        # SÉCURITÉ : Si query est déjà une liste (venant du test_amazon.py), on la retourne directement
+        if isinstance(query, list):
+            return query
+
+        related = {
+            "laptop": [
+                "pc gamer", 
+                # "laptop", # <--- AJOUTÉ ICI pour ne pas ignorer le terme principal
+                # "ordinateur portable", 
+                # "macbook", 
+                # "macbook pro",
+                # "macbook air",
+                # "ordinateur hp",
+                # "ordinateur lenovo",
+                # "ultrabook",
+                "chromebook",
+                "pc portable asus",
+                "ordinateur portable dell",
+                "pc portable acer",
+                "pc portable msi",
+                "ordinateur portable etudiant",
+                "ordinateur portable professionnel",
+                "pc portable pas cher",
+                "notebook pc",
+                "ordinateur portable i7",
+                "ordinateur portable rtx",
+                # Marques & Gammes
+                "surface laptop",
+                "microsoft surface",
+                "huawei matebook",
+                "xiaomi redmibook",
+                "thinkpad",
+                "lenovo ideapad",
+                "lenovo yoga",
+                "dell xps",
+                "dell latitude",
+                "dell inspiron",
+                "hp pavilion",
+                "hp omen",
+                "acer predator",
+                "acer swift",
+                "acer aspire",
+                "asus rog",
+                "asus zenbook",
+                "msi stealth",
+                "apple mac",
+                # Spécifications techniques
+                "pc portable i5",
+                "pc portable i9",
+                "pc portable ryzen 5",
+                "pc portable ryzen 7",
+                "pc portable ryzen 9",
+                "pc portable 16 go ram",
+                "pc portable 32 go ram",
+                "pc portable ssd",
+                "pc portable 1 to",
+                "pc portable rtx 3060",
+                "pc portable rtx 4070",
+                "pc portable rtx 4090",
+                "pc portable gtx 1660",
+                "pc portable 144hz",
+                "pc portable 120hz",
+                "pc portable oled",
+                "pc portable 4k",
+                "pc portable full hd",
+                "pc portable intel core",
+                "pc portable amd",
+            ]
+        }
+        return related.get(query.lower().strip(), [query])
+
+    def scrape(self, base_query, max_pages=20):
         results = []
+        # On génère la liste à partir de la fonction fraîchement créée
+        queries = self.generate_queries(base_query)
+        
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=False) 
             context = browser.new_context(
@@ -31,6 +106,15 @@ class AmazonScraper:
                     
                     try:
                         page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                        
+                        # --- CORRECTION POUR NE PAS SAUTER LE PREMIER TERME ---
+                        # On force le script à attendre l'apparition des produits avant de continuer
+                        try:
+                            page.wait_for_selector('div[data-component-type="s-search-result"]', timeout=10000)
+                        except:
+                            pass # Si ça bloque (Captcha), on laisse le code continuer pour qu'il fasse son 'break' proprement
+                        # ------------------------------------------------------
+
                         page.wait_for_timeout(random.randint(2000, 4000)) 
                         
                         page.evaluate("window.scrollTo(0, document.body.scrollHeight/2)")
@@ -38,7 +122,6 @@ class AmazonScraper:
 
                         items = page.query_selector_all('div[data-component-type="s-search-result"]')
                         
-                        # Si aucun produit n'est trouvé, on passe au mot-clé suivant
                         if len(items) == 0:
                             break
 
@@ -46,48 +129,54 @@ class AmazonScraper:
                             title_el = item.query_selector('h2 a span') or item.query_selector('h2 span')
                             price_el = item.query_selector('.a-price .a-offscreen') 
                             link_el = item.query_selector('h2 a') or item.query_selector('a.a-link-normal.s-no-outline')
+                            img_el = item.query_selector('img.s-image') # Nouveau sélecteur pour l'image
 
                             if title_el:
-                                title = title_el.inner_text().strip()
-                                short_title = (title[:45] + '...') if len(title) > 45 else title
+                                title_text = title_el.inner_text().strip()
                                 
                                 # --- EXTRACTION DU PRIX ET DE LA DEVISE ---
-                                price_amount = "N/A"
+                                price_val = "N/A"
                                 currency = "N/A"
                                 
                                 if price_el:
                                     raw_price = price_el.inner_text().strip()
                                     if re.search(r'\d', raw_price):
-                                        # Extrait uniquement les chiffres, virgules et points
-                                        price_amount = re.sub(r'[^\d,.]', '', raw_price)
-                                        
-                                        # Extrait le symbole monétaire (ex: €, $)
+                                        price_val = re.sub(r'[^\d,.]', '', raw_price)
                                         currency_match = re.search(r'[^\d,.\s]+', raw_price)
                                         if currency_match:
                                             currency = currency_match.group(0)
                                 
                                 # --- EXTRACTION DU LIEN ---
-                                link = "N/A"
+                                product_link = "N/A"
                                 if link_el:
                                     href = link_el.get_attribute("href")
                                     if href:
-                                        link = href if href.startswith('http') else "https://www.amazon.fr" + href
+                                        product_link = href if href.startswith('http') else "https://www.amazon.fr" + href
 
-                                brand = title.split()[0] if title else "N/A"
+                                # --- EXTRACTION DE L'IMAGE ---
+                                image_url = "N/A"
+                                if img_el:
+                                    src = img_el.get_attribute("src")
+                                    if src:
+                                        image_url = src
 
+                                brand = title_text.split()[0] if title_text.split() else "Inconnu"
+
+                                # --- AJOUT DES CHAMPS DEMANDÉS EXACTEMENT COMME VOULU ---
                                 results.append({
-                                    "keyword": query,
-                                    "title": title,
-                                    "short_title": short_title,
-                                    "price_amount": price_amount,
+                                    "title": title_text,
+                                    "price": price_val,
                                     "currency": currency,
                                     "brand": brand,
                                     "source": self.source_name,
-                                    "link": link, 
-                                    "date_scraped": datetime.now().strftime("%H:%M:%S")
+                                    "link": product_link,
+                                    "image": image_url,
+                                    "search_query": query,
+                                    "page": p_idx,
+                                    "is_gaming": "gaming" in title_text.lower(),
+                                    "date_scraped": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 })
                     except Exception as e:
-                        # On passe silencieusement en cas d'erreur de timeout pour ne pas planter le script global
                         break
                     
             browser.close()
