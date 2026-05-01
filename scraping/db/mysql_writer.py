@@ -190,16 +190,11 @@ class MySQLWriter:
             products.append(item)
 
         return products
-    
 
     # =========================
     # 7. CLOSE CONNECTION
     # =========================
-
-    # =========================
-    # INSERT ACCESSORIES
-    # =========================
-    # =========================
+    def close(self):
     # INSERT ACCESSORIES
     # =========================
     def insert_accessories(self, accessories):
