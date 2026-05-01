@@ -1,4 +1,0 @@
-antecedent,consequent,support,confidence,lift
-"brand_detected=HP, cluster=Haut de gamme",price_category=entrée_de_gamme,0.1434,0.6652,1.9702
-"brand_detected=HP, is_gaming=False",price_category=entrée_de_gamme,0.1628,0.6048,1.7912
-brand_detected=Table,"cluster=Haut de gamme, is_gaming=False",0.1425,1.0,1.2733
