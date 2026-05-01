@@ -1,11 +1,17 @@
 import csv
-import json
 import time
 import random
 import re
 from datetime import datetime
 from playwright.sync_api import sync_playwright
-
+"""
+sync_playwright:LIBRAIRIE TRÈS IMPORTANTE
+permet de :
+ouvrir vrai navigateur
+exécuter JavaScript
+contourner protections Amazon
+ plus puissant que requests
+"""
 class AmazonScraper:
     def __init__(self):
         self.base_url = "https://www.amazon.fr/s?k="
@@ -88,23 +94,27 @@ class AmazonScraper:
         # On génère la liste à partir de la fonction fraîchement créée
         queries = self.generate_queries(base_query)
         
+        # Playwright
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=False) 
             context = browser.new_context(
+                # simuler chrome reel
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
                 viewport={"width": 1920, "height": 1080},
                 locale="fr-FR"
             )
             page = context.new_page()
+            #anti-detection
             page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
             for query in queries:
                 formatted_query = query.replace(" ", "+")
-                
+                # pagination
                 for p_idx in range(1, max_pages + 1):
                     url = f"{self.base_url}{formatted_query}&page={p_idx}"
                     
                     try:
+                        #NAVIGATION
                         page.goto(url, wait_until="domcontentloaded", timeout=60000)
                         
                         # --- CORRECTION POUR NE PAS SAUTER LE PREMIER TERME ---
@@ -116,7 +126,7 @@ class AmazonScraper:
                         # ------------------------------------------------------
 
                         page.wait_for_timeout(random.randint(2000, 4000)) 
-                        
+                        # scroll =>simule humain
                         page.evaluate("window.scrollTo(0, document.body.scrollHeight/2)")
                         page.wait_for_timeout(random.randint(1000, 2000))
 
@@ -139,7 +149,9 @@ class AmazonScraper:
                                 currency = "N/A"
                                 
                                 if price_el:
+                                    #si prix existe
                                     raw_price = price_el.inner_text().strip()
+                                    #garde chiffres
                                     if re.search(r'\d', raw_price):
                                         price_val = re.sub(r'[^\d,.]', '', raw_price)
                                         currency_match = re.search(r'[^\d,.\s]+', raw_price)
@@ -178,7 +190,7 @@ class AmazonScraper:
                                 })
                     except Exception as e:
                         break
-                    
+             # fin de navigateur       
             browser.close()
         return results
 
@@ -190,3 +202,22 @@ class AmazonScraper:
             dict_writer = csv.DictWriter(f, fieldnames=keys)
             dict_writer.writeheader()
             dict_writer.writerows(products)
+
+"""
+query → generate_queries
+      → Playwright browser
+      → Amazon search page
+      → wait selector
+      → extract products
+      → filter fields
+      → clean price
+      → save results
+"""
+
+"""
+Playwright = vrai navigateur
+ anti-bot script
+random delay
+scroll simulation
+ retry selectors
+"""
