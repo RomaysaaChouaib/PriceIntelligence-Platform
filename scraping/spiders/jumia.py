@@ -200,7 +200,7 @@ class JumiaScraper:
                 response = requests.get(url, headers=HEADERS, timeout=10)
                 if response.status_code == 200:
                     return response
-                if response.status_code == 429:
+                if response.status_code == 429: # trop de requete
                     wait = backoff * (attempt + 1) * 2
                     time.sleep(wait)
                     continue
@@ -283,6 +283,7 @@ class JumiaScraper:
 
                 if response is None: break
 
+                # Parsing HTML
                 soup = BeautifulSoup(response.text, "html.parser")
                 items = soup.select("article.prd")
 
@@ -293,7 +294,7 @@ class JumiaScraper:
 
                 pages_without_results = 0
                 new_on_page = 0
-
+                # Extraction produit
                 for item in items:
                     title_tag = item.select_one(".name")
                     price_tag = item.select_one(".prc")
@@ -354,7 +355,14 @@ class JumiaScraper:
             dict_writer.writerows(products)
         print(f"\nExportation réussie : {filename} ({len(products)} produits)")
 
-# --- Exemple d'exécution ---
-# scraper = JumiaScraper()
-# data = scraper.scrape("laptop")
-# scraper.export_to_csv(data)
+
+"""
+query → generate_queries
+      → pages
+      → request (headers)
+      → parse HTML
+      → filter produits
+      → remove duplicates
+      → store products
+      → export CSV / DB
+"""

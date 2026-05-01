@@ -161,6 +161,8 @@ def scrape_all(request):
     db = MySQLWriter()
     results = {"jumia": [], "amazon": [], "aliexpress": []}
     errors = []
+    total_inserted = 0  # On va compter les insertions au fur et à mesure
+
     try:
         with ThreadPoolExecutor(max_workers=3) as executor:
             futures = {
@@ -168,11 +170,28 @@ def scrape_all(request):
                 executor.submit(scrape_amazon_product, query): "amazon",
                 executor.submit(lambda q: AliexpressScraper().scrape(q, max_pages=20), query): "aliexpress",
             }
+
+            # as_completed se déclenche dès qu'UN thread (un scraper) a terminé
             for future in as_completed(futures):
                 source = futures[future]
                 try:
                     data = future.result()
-                    results[source] = data if data else []
+                    
+                    if data:
+                        results[source] = data
+                        
+                        # ─────────────────────────────────────────────
+                        # INSERTION IMMÉDIATE (sans attendre les autres)
+                        # ─────────────────────────────────────────────
+                        try:
+                            db.insert_products(data)
+                            total_inserted += len(data)
+                            print(f"✅ [{source}] inséré immédiatement : {len(data)} produits")
+                        except Exception as db_err:
+                            errors.append(f"DB Error for {source}: {str(db_err)}")
+                    else:
+                        results[source] = []
+
                 except Exception as e:
                     errors.append(f"{source} error: {str(e)}")
                     results[source] = []
@@ -182,18 +201,31 @@ def scrape_all(request):
         if all_products:
             db.insert_products(all_products)
             inserted = len(all_products)
+        # ─────────────────────────────────────────────
+        # FIN DU SCRAPING (Tous les threads sont terminés)
+        # ─────────────────────────────────────────────
         db.close()
+        
+        total_scraped = len(results["jumia"]) + len(results["amazon"]) + len(results["aliexpress"])
 
+        # ─────────────────────────────────────────────
+        # RESPONSE JSON
+        # ─────────────────────────────────────────────
         return JsonResponse({
             "success": True,
             "query": query,
             "jumia_count": len(results["jumia"]),
             "amazon_count": len(results["amazon"]),
             "aliexpress_count": len(results["aliexpress"]),
-            "total_scraped": len(all_products),
-            "inserted": inserted,
+
+            # global
+            "total_scraped": total_scraped,
+            "inserted": total_inserted,
+
+            # erreurs éventuelles
             "errors": errors,
-            "message": f"{inserted} produits enregistrés depuis 3 sources"
+
+            "message": f"{total_inserted} produits enregistrés depuis 3 sources"
         })
     except Exception as e:
         db.close()

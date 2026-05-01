@@ -10,16 +10,10 @@ class MySQLWriter:
     def __init__(self):
       # On récupère les valeurs depuis le .env
         # os.getenv("NOM_VARIABLE", "VALEUR_PAR_DEFAUT")
-       
         db_host = os.getenv("DB_HOST", "127.0.0.1")
         db_user = os.getenv("DB_USER", "root")
-        db_pass = os.getenv("DB_PASSWORD")
+        db_pass = os.getenv("DB_PASSWORD") 
         db_name = os.getenv("DB_NAME", "price_project")
-
-        # 🔍 DEBUG
-        print("HOST:", db_host)
-        print("USER:", db_user)
-        print("PASS:", db_pass)
 
         try:
             self.conn = mysql.connector.connect(
@@ -29,12 +23,10 @@ class MySQLWriter:
                 database=db_name,
                 port=3306
             )
-
             self.cursor = self.conn.cursor()
-            print("✅ Connexion MySQL réussie")
-
+            # print("Connexion réussie à la base de données")
         except mysql.connector.Error as err:
-            print(f"❌ Erreur MySQL : {err}")
+            print(f"Erreur de connexion MySQL : {err}")
             raise
         #Cursor = outil pour exécuter SQL
     # =========================
@@ -198,61 +190,69 @@ class MySQLWriter:
             products.append(item)
 
         return products
-    # =========================
-    # CACHE DM
-    # =========================
-    def get_cache(self, key):
-        """Retourne le cache si valide, None sinon"""
-        sql = """
-        SELECT result, products_count, is_valid 
-        FROM dm_cache 
-        WHERE cache_key = %s AND is_valid = TRUE
-        """
-        self.cursor.execute(sql, (key,))
-        row = self.cursor.fetchone()
-        if not row:
-            return None
-        
-        result, cached_count, is_valid = row
-        current_count = self.count_all_products()
-        
-        # Si nouveaux produits ajoutés → cache invalide
-        if current_count != cached_count:
-            self.invalidate_cache(key)
-            return None
-        
-        import json
-        return json.loads(result)
 
-    def save_cache(self, key, data):
-        """Sauvegarde le résultat DM"""
-        import json
-        count = self.count_all_products()
-        sql = """
-        INSERT INTO dm_cache (cache_key, result, products_count, is_valid)
-        VALUES (%s, %s, %s, TRUE)
-        ON DUPLICATE KEY UPDATE
-            result = VALUES(result),
-            products_count = VALUES(products_count),
-            is_valid = TRUE,
-            created_at = NOW()
-        """
-        self.cursor.execute(sql, (key, json.dumps(data, default=str), count))
-        self.conn.commit()
-        print(f"✔ Cache '{key}' sauvegardé")
-
-    def invalidate_cache(self, key=None):
-        """Invalide un cache spécifique ou tout le cache"""
-        if key:
-            self.cursor.execute(
-                "UPDATE dm_cache SET is_valid = FALSE WHERE cache_key = %s", (key,)
-            )
-        else:
-            # Invalide TOUT le cache (quand nouveaux produits ajoutés)
-            self.cursor.execute("UPDATE dm_cache SET is_valid = FALSE")
-        self.conn.commit()
     # =========================
     # 7. CLOSE CONNECTION
+    # =========================
+    def close(self):
+    # INSERT ACCESSORIES
+    # =========================
+    def insert_accessories(self, accessories):
+        sql = """
+        INSERT INTO accessories
+        (category, title, price, currency, old_price, brand, source, link, image, search_query, page, in_stock, is_gaming, date_scraped)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        ON DUPLICATE KEY UPDATE 
+            price = VALUES(price),
+            currency = VALUES(currency),
+            old_price = VALUES(old_price),
+            date_scraped = VALUES(date_scraped);
+        """
+
+        count = 0
+        for a in accessories:
+            try:
+                # --- TRAITEMENT DU PRIX ---
+                raw_price = a.get("price", "0")
+                if raw_price == "N/A" or not raw_price:
+                    price_val = 0.0
+                else:
+                    # Remplacer la virgule par un point
+                    price_val = float(str(raw_price).replace(',', '.'))
+                
+                # --- TRAITEMENT DE L'ANCIEN PRIX ---
+                raw_old_price = a.get("old_price", None)
+                if raw_old_price == "N/A" or not raw_old_price:
+                    old_price_val = None
+                else:
+                    # Remplacer la virgule par un point
+                    old_price_val = float(str(raw_old_price).replace(',', '.'))
+
+                values = (
+                    a.get("category"),
+                    a.get("title"),
+                    price_val,                  # Prix corrigé
+                    a.get("currency", "EUR"),   # <-- AJOUT DE LA DEVISE ICI
+                    old_price_val,              # Ancien prix corrigé
+                    a.get("brand"),
+                    a.get("source"),
+                    a.get("link"),
+                    a.get("image"),
+                    a.get("search_query"),
+                    int(a.get("page", 1)),
+                    bool(a.get("in_stock", True)),
+                    bool(a.get("is_gaming", False)),
+                    a.get("date_scraped")
+                )
+                self.cursor.execute(sql, values)
+                count += 1
+            except Exception as e:
+                print(f"Erreur insertion accessoire: {e} | Données: Prix='{a.get('price')}', Old='{a.get('old_price')}'")
+
+        self.conn.commit()
+        print(f"✔ {count} accessoires insérés dans MySQL")
+    # =========================
+    # 8. CLOSE CONNECTION
     # =========================
     def close(self):
         self.cursor.close()

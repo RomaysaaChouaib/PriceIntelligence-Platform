@@ -97,7 +97,9 @@ class AliexpressScraper:
         total_height = page.evaluate("document.body.scrollHeight")
         current = 0
         step = random.randint(300, 600)
+        #chaque scroll = entre 300 et 600 pixels
         while current < total_height:
+            #simule humain qui scroll
             page.evaluate(f"window.scrollBy(0, {step})")
             time.sleep(random.uniform(0.4, 1.0))
             current += step

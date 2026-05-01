@@ -12,7 +12,7 @@ def test_full_search():
     scraper = JumiaScraper()
 
     # 2. Lancer le scraping (le résultat est une liste de dictionnaires)
-    results = scraper.scrape(query)
+    results = scraper.scrape(query, max_pages=20)
 
     print("-" * 50)
     print(f"Nombre total de produits uniques trouvés : {len(results)}")
@@ -27,13 +27,13 @@ def test_full_search():
 
     # 4. EXPORTATION EN CSV (La nouvelle fonctionnalité)
     if results:
-        scraper.export_to_csv(results, "resultats_jumia_laptops.csv")
+        scraper.export_to_csv(results, "souris_jumia_laptops.csv")
     else:
         print("Aucun résultat à exporter.")
-    # 3. SAVE TO MYSQL
-    db = MySQLWriter()
-    db.insert_products(results)
-    print("Data saved to MySQL successfully!")
+    # # 3. SAVE TO MYSQL
+    # db = MySQLWriter()
+    # db.insert_products(results)
+    # print("Data saved to MySQL successfully!")
     
 if __name__ == "__main__":
     test_full_search()
