@@ -198,7 +198,59 @@ class MySQLWriter:
             products.append(item)
 
         return products
+    # =========================
+    # CACHE DM
+    # =========================
+    def get_cache(self, key):
+        """Retourne le cache si valide, None sinon"""
+        sql = """
+        SELECT result, products_count, is_valid 
+        FROM dm_cache 
+        WHERE cache_key = %s AND is_valid = TRUE
+        """
+        self.cursor.execute(sql, (key,))
+        row = self.cursor.fetchone()
+        if not row:
+            return None
+        
+        result, cached_count, is_valid = row
+        current_count = self.count_all_products()
+        
+        # Si nouveaux produits ajoutés → cache invalide
+        if current_count != cached_count:
+            self.invalidate_cache(key)
+            return None
+        
+        import json
+        return json.loads(result)
 
+    def save_cache(self, key, data):
+        """Sauvegarde le résultat DM"""
+        import json
+        count = self.count_all_products()
+        sql = """
+        INSERT INTO dm_cache (cache_key, result, products_count, is_valid)
+        VALUES (%s, %s, %s, TRUE)
+        ON DUPLICATE KEY UPDATE
+            result = VALUES(result),
+            products_count = VALUES(products_count),
+            is_valid = TRUE,
+            created_at = NOW()
+        """
+        self.cursor.execute(sql, (key, json.dumps(data, default=str), count))
+        self.conn.commit()
+        print(f"✔ Cache '{key}' sauvegardé")
+
+    def invalidate_cache(self, key=None):
+        """Invalide un cache spécifique ou tout le cache"""
+        if key:
+            self.cursor.execute(
+                "UPDATE dm_cache SET is_valid = FALSE WHERE cache_key = %s", (key,)
+            )
+        else:
+            # Invalide TOUT le cache (quand nouveaux produits ajoutés)
+            self.cursor.execute("UPDATE dm_cache SET is_valid = FALSE")
+        self.conn.commit()
     # =========================
     # 7. CLOSE CONNECTION
     # =========================
