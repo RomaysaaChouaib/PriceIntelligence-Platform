@@ -45,20 +45,31 @@ class PriceIntelligencePipeline:
         print(results["rules"])
     """
 
-    def __init__(self, csv_path: str = None, n_clusters: int = 4):
-        self.csv_path   = csv_path or DEFAULT_CSV
+    import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
+from scraping.db.mysql_writer import MySQLWriter
+
+class PriceIntelligencePipeline:
+
+    def __init__(self, n_clusters: int = 4):
+        # ← supprime csv_path complètement
         self.n_clusters = n_clusters
         self.df_raw     = None
-        self.df         = None       # DataFrame final enrichi
+        self.df         = None
         self.results    = {}
-
-    # ── Chargement ────────────────────────────────────────────────────────
 
     def load(self) -> "PriceIntelligencePipeline":
         print(f"\n{'='*60}")
-        print(f"[Pipeline] Chargement : {self.csv_path}")
-        self.df_raw = pd.read_csv(self.csv_path)
-        print(f"[Pipeline] {len(self.df_raw)} lignes chargées, {len(self.df_raw.columns)} colonnes")
+        print(f"[Pipeline] Chargement depuis MySQL...")
+        db = MySQLWriter()
+        try:
+            total = db.count_all_products()
+            raw   = db.get_all_products_paginated(limit=total, offset=0)
+        finally:
+            db.close()
+        self.df_raw = pd.DataFrame(raw)
+        print(f"[Pipeline] {len(self.df_raw)} produits chargés depuis MySQL")
         return self
 
     # ── Prétraitement ─────────────────────────────────────────────────────
@@ -155,18 +166,5 @@ class PriceIntelligencePipeline:
     # ── Export ────────────────────────────────────────────────────────────
 
     def export(self, output_dir: str = ".") -> None:
-        """Exporte les résultats principaux en CSV."""
-        os.makedirs(output_dir, exist_ok=True)
-
-        if self.df is not None:
-            self.df.to_csv(os.path.join(output_dir, "products_enriched.csv"), index=False)
-            print(f"  → products_enriched.csv")
-
-        for name in ["stats_by_brand", "stats_by_cat", "cluster_summary",
-                     "anomaly_summary", "anomalies", "rules", "optimal_k_scores"]:
-            obj = self.results.get(name)
-            if isinstance(obj, pd.DataFrame) and not obj.empty:
-                obj.to_csv(os.path.join(output_dir, f"{name}.csv"), index=False)
-                print(f"  → {name}.csv")
-
-        print(f"[Pipeline] Export dans : {output_dir}")
+        """Export désactivé — les données sont dans MySQL/dm_cache."""
+        print("[Pipeline] données stockées dans MySQL.")
