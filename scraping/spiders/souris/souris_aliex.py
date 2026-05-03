@@ -195,20 +195,32 @@ class SourisAliexpressScraper:
                             title_lower = title_text.lower()
 
                             # --- PRIX ---
-                            price_val = 0.0 
-                            currency = "inconnu" # Par défaut
+                          # --- PRIX (LOGIQUE CORRIGÉE CIBLANT UNIQUEMENT .lw_el) ---
+                            price_val = 0.0 # Valeur par défaut numérique
+                            currency = "inconnu"
                             
-                            price_el = item.query_selector('[class*="price"], .lw_lm, [class*="multi--price"]')
+                            # On cible spécifiquement la classe vue sur ta capture d'écran
+                            price_el = item.query_selector('.lw_el')
+                            
                             if price_el:
-                                raw_price = price_el.inner_text().strip()
+                                # Astuce : On essaie d'abord de prendre l'aria-label (plus propre), sinon on prend le texte à l'intérieur
+                                raw_price = price_el.get_attribute("aria-label") 
+                                if not raw_price:
+                                    raw_price = price_el.inner_text().strip()
+                                
+                                # Nettoyage : On ne garde que les chiffres, points et virgules
                                 clean_price = re.sub(r'[^\d.,]', '', raw_price)
                                 
                                 if clean_price:
+                                    # Gestion des formats (ex: 5.899,99 ou 5,899.99)
                                     if ',' in clean_price and '.' in clean_price:
+                                        # Si la virgule est après le point, c'est le séparateur décimal (Format EU)
                                         if clean_price.rfind(',') > clean_price.rfind('.'):
                                             clean_price = clean_price.replace('.', '').replace(',', '.')
+                                        # Sinon le point est la décimale (Format US)
                                         else:
                                             clean_price = clean_price.replace(',', '')
+                                    # Si on a juste une virgule (ex: 12,50)
                                     elif ',' in clean_price:
                                         clean_price = clean_price.replace(',', '.')
                                     
@@ -216,29 +228,15 @@ class SourisAliexpressScraper:
                                         price_val = float(clean_price)
                                     except ValueError:
                                         price_val = 0.0
-                                
+                            
+                                # Extraction de la devise
                                 if 'MAD' in raw_price: currency = 'MAD'
+                                elif '€' in raw_price or 'EUR' in raw_price: currency = 'EUR'
                                 elif '$' in raw_price or 'USD' in raw_price: currency = 'USD'
-                                else: currency = "inconnu" # Par défaut
+                                else:
+                                    match_curr = re.search(r'([A-Za-z]+|€|\$|£)', raw_price)
+                                    if match_curr: currency = match_curr.group(1)
 
-                            # --- ANCIEN PRIX (OLD PRICE) ---
-                            old_price_val = None
-                            old_price_el = item.query_selector('span[class*="original-price"], div[class*="discount"], [class*="oldPrice"]')
-                            if old_price_el:
-                                raw_old_price = old_price_el.inner_text().strip()
-                                clean_old_price = re.sub(r'[^\d.,]', '', raw_old_price)
-                                if clean_old_price:
-                                    if ',' in clean_old_price and '.' in clean_old_price:
-                                        if clean_old_price.rfind(',') > clean_old_price.rfind('.'):
-                                            clean_old_price = clean_old_price.replace('.', '').replace(',', '.')
-                                        else:
-                                            clean_old_price = clean_old_price.replace(',', '')
-                                    elif ',' in clean_old_price:
-                                        clean_old_price = clean_old_price.replace(',', '.')
-                                    try:
-                                        old_price_val = float(clean_old_price)
-                                    except ValueError:
-                                        old_price_val = None
 
                             # --- Lien ---
                             link_el = item.query_selector('a[href*="/item/"]') or (item if item.get_attribute("href") else None)
@@ -261,7 +259,6 @@ class SourisAliexpressScraper:
                             results.append({
                                 "title": title_text,
                                 "price": price_val,
-                                "old_price": old_price_val,
                                 "currency": currency,  # Dynamique, par défaut inconnu
                                 "brand": title_text.split()[0] if title_text.split() else "Inconnu",
                                 "category": "mouse",

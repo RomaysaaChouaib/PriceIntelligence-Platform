@@ -6,21 +6,21 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # --- Imports des classes (adapte les chemins selon ton projet) ---
-from scraping.spiders.Sac import SacLaptopAmazonScraper
+from scraping.spiders.Sac import SacLaptopAliexpressScraper
 from scraping.core.cleaner import remove_duplicates
 from scraping.db.mysql_writer import MySQLWriter
 
 def run_single_amazon_search():
     # Configuration
     query = "sac_laptop"
-    pages_to_scrape = 20
+    pages_to_scrape = 7
     
     print("=" * 60)
     print(f"🚀 Lancement du scraping Amazon pour : {query}")
     print("=" * 60)
 
     # 1. Initialisation du scraper et de la DB
-    scraper = SacLaptopAmazonScraper()
+    scraper = SacLaptopAliexpressScraper()
     db = MySQLWriter()
     
     try:

@@ -20,36 +20,34 @@ class AliexpressScraper:
 
         related = {
           "laptop": [
-            "laptop",
-            "laptop computer",
-            "portable laptop computer",
-            "gaming laptop computer",
-            "business laptop computer",
-            "office laptop computer",
-            "slim laptop computer",
-            "ultrabook laptop",
-            "student laptop computer",
-            "hp laptop",
+            # "laptop",
+            # "laptop computer",
+            # "portable laptop computer",
+            # "gaming laptop computer",
+            # "business laptop computer",
+            # "office laptop computer",
+            # "slim laptop computer",
+            # "ultrabook laptop",
+            # "student laptop computer",
+            # "hp laptop",
             # # --- Tailles écran ---
-            "laptop 13 inch",
-            "laptop 16 inch",
-            "laptop 17 inch",
-            # # --- OS & caractéristiques ---
+            # "laptop 13 inch",
+            # "laptop 16 inch",
+            # "laptop 17 inch",
+            # # # # --- OS & caractéristiques ---
             # "windows 11 laptop",
             # "laptop touchscreen",
-            # # --- RAM / STOCKAGE ---
-            "laptop 16gb ram",
-            "laptop 32gb ram",
-            "laptop 512gb ssd",
+            # # # --- RAM / STOCKAGE ---
+            # "laptop 16gb ram",
+            # "laptop 32gb ram",
 
-            # --- APPLE ---
+            # # --- APPLE ---
             "pc portable",
             "macbook pro m3",
             "macbook pro m3 pro",
             "macbook pro m3 max",
-            "macbook pro 14 m3",
             "macbook pro 16 m3",
-            # --- LENOVO ---
+            #--- LENOVO ---
             "lenovo thinkpad laptop",
             "laptop lenovo",
             # --- DELL ---
@@ -61,11 +59,9 @@ class AliexpressScraper:
             "asus zenbook laptop",
             "asus zenbook pro 14",
             # --- MSI ---
-            "msi gaming laptop",
             "msi stealth 16",
             # --- AUTRES MARQUES ---
             "microsoft surface laptop",
-            "surface pro laptop",
             # --- CPU INTEL ---
             "laptop intel core i5",
             "laptop intel core i7",
@@ -73,12 +69,8 @@ class AliexpressScraper:
             "laptop intel core ultra 5",
             "laptop intel core ultra 7",
             "laptop intel core ultra 9",
-            "laptop 13th gen intel",
-            "laptop 14th gen intel",
+            "laptop rtx 3036",
             # --- CPU AMD ---
-            "laptop ryzen 5",
-            "laptop ryzen 7",
-            "laptop ryzen 9",
             # --- USAGE ---
             "workstation laptop",
             "video editing laptop",
@@ -235,13 +227,18 @@ class AliexpressScraper:
                                 continue
 
                             # --- PRIX (LOGIQUE CORRIGÉE POUR MYSQL) ---
+                           # --- PRIX (LOGIQUE CORRIGÉE CIBLANT UNIQUEMENT .lw_el) ---
                             price_val = 0.0 # Valeur par défaut numérique
                             currency = "inconnu"
                             
-                            price_el = item.query_selector('[class*="price"], .lw_lm, [class*="multi--price"]')
+                            # On cible spécifiquement la classe vue sur ta capture d'écran
+                            price_el = item.query_selector('.lw_el')
                             
                             if price_el:
-                                raw_price = price_el.inner_text().strip()
+                                # Astuce : On essaie d'abord de prendre l'aria-label (plus propre), sinon on prend le texte à l'intérieur
+                                raw_price = price_el.get_attribute("aria-label") 
+                                if not raw_price:
+                                    raw_price = price_el.inner_text().strip()
                                 
                                 # Nettoyage : On ne garde que les chiffres, points et virgules
                                 clean_price = re.sub(r'[^\d.,]', '', raw_price)
@@ -263,7 +260,7 @@ class AliexpressScraper:
                                         price_val = float(clean_price)
                                     except ValueError:
                                         price_val = 0.0
-                                
+                            
                                 # Extraction de la devise
                                 if 'MAD' in raw_price: currency = 'MAD'
                                 elif '€' in raw_price or 'EUR' in raw_price: currency = 'EUR'

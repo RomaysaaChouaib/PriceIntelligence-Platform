@@ -39,8 +39,8 @@ class MySQLWriter:
         (title, price, currency, brand, source, link, image, search_query, page, is_gaming, date_scraped)
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         ON DUPLICATE KEY UPDATE 
-            price = IF(price != VALUES(price), VALUES(price), price),
-            date_scraped = IF(price != VALUES(price), VALUES(date_scraped), date_scraped);
+           price = VALUES(price),
+            date_scraped = VALUES(date_scraped);
         """
 
         count = 0
@@ -65,7 +65,7 @@ class MySQLWriter:
                     p.get("title"),
                     final_price,       # Prix nettoyé au format float
                     p.get("currency"), # <--- NOUVEAU CHAMP ICI
-                    p.get("brand"),
+                    str(p.get("brand", ""))[:50],
                     p.get("source"),
                     p.get("link"),
                     p.get("image"),
@@ -190,22 +190,72 @@ class MySQLWriter:
             products.append(item)
 
         return products
+    
 
     # =========================
-    # 7. CLOSE CONNECTION
+    # CACHE DM
     # =========================
-    def close(self):
+    def get_cache(self, key):
+        """Retourne le cache si valide, None sinon"""
+        sql = """
+        SELECT result, products_count, is_valid 
+        FROM dm_cache 
+        WHERE cache_key = %s AND is_valid = TRUE
+        """
+        self.cursor.execute(sql, (key,))
+        row = self.cursor.fetchone()
+        if not row:
+            return None
+        
+        result, cached_count, is_valid = row
+        current_count = self.count_all_products()
+        
+        # Si nouveaux produits ajoutés → cache invalide
+        if current_count != cached_count:
+            self.invalidate_cache(key)
+            return None
+        
+        import json
+        return json.loads(result)
+
+    def save_cache(self, key, data):
+        """Sauvegarde le résultat DM"""
+        import json
+        count = self.count_all_products()
+        sql = """
+        INSERT INTO dm_cache (cache_key, result, products_count, is_valid)
+        VALUES (%s, %s, %s, TRUE)
+        ON DUPLICATE KEY UPDATE
+            result = VALUES(result),
+            products_count = VALUES(products_count),
+            is_valid = TRUE,
+            created_at = NOW()
+        """
+        self.cursor.execute(sql, (key, json.dumps(data, default=str), count))
+        self.conn.commit()
+        print(f"✔ Cache '{key}' sauvegardé")
+
+    def invalidate_cache(self, key=None):
+        """Invalide un cache spécifique ou tout le cache"""
+        if key:
+            self.cursor.execute(
+                "UPDATE dm_cache SET is_valid = FALSE WHERE cache_key = %s", (key,)
+            )
+        else:
+            # Invalide TOUT le cache (quand nouveaux produits ajoutés)
+            self.cursor.execute("UPDATE dm_cache SET is_valid = FALSE")
+        self.conn.commit()
+
     # INSERT ACCESSORIES
     # =========================
     def insert_accessories(self, accessories):
         sql = """
         INSERT INTO accessories
-        (category, title, price, currency, old_price, brand, source, link, image, search_query, page, in_stock, is_gaming, date_scraped)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        (category, title, price, currency, brand, source, link, image, search_query, page, in_stock, is_gaming, date_scraped)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         ON DUPLICATE KEY UPDATE 
             price = VALUES(price),
             currency = VALUES(currency),
-            old_price = VALUES(old_price),
             date_scraped = VALUES(date_scraped);
         """
 
@@ -220,20 +270,12 @@ class MySQLWriter:
                     # Remplacer la virgule par un point
                     price_val = float(str(raw_price).replace(',', '.'))
                 
-                # --- TRAITEMENT DE L'ANCIEN PRIX ---
-                raw_old_price = a.get("old_price", None)
-                if raw_old_price == "N/A" or not raw_old_price:
-                    old_price_val = None
-                else:
-                    # Remplacer la virgule par un point
-                    old_price_val = float(str(raw_old_price).replace(',', '.'))
 
                 values = (
                     a.get("category"),
                     a.get("title"),
                     price_val,                  # Prix corrigé
                     a.get("currency", "EUR"),   # <-- AJOUT DE LA DEVISE ICI
-                    old_price_val,              # Ancien prix corrigé
                     a.get("brand"),
                     a.get("source"),
                     a.get("link"),
@@ -251,6 +293,8 @@ class MySQLWriter:
 
         self.conn.commit()
         print(f"✔ {count} accessoires insérés dans MySQL")
+
+
     # =========================
     # 8. CLOSE CONNECTION
     # =========================
