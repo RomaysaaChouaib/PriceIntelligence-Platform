@@ -109,29 +109,9 @@ CREATE TABLE `dm_stats` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `products`
+-- End of dump
 --
 
-DROP TABLE IF EXISTS `products`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `products` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(500) DEFAULT NULL,
-  `price` decimal(15,2) DEFAULT NULL,
-  `brand` varchar(100) DEFAULT NULL,
-  `source` varchar(50) DEFAULT NULL,
-  `link` text,
-  `image` text,
-  `search_query` varchar(100) DEFAULT NULL,
-  `page` int DEFAULT NULL,
-  `is_gaming` tinyint(1) DEFAULT NULL,
-  `date_scraped` datetime DEFAULT NULL,
-  `currency` varchar(10) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_link` (`link`(255))
-) ENGINE=InnoDB AUTO_INCREMENT=56072 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
