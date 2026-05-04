@@ -7,4 +7,5 @@ pip install celery redis
 pip install django-redis
 
 C:\Program Files\Redis>redis-server.exe
-celery -A config worker --loglevel=info --pool=solo
+
++celery -A config worker --loglevel=info --pool=solo
