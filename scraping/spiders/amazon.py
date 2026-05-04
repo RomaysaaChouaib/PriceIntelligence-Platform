@@ -4,6 +4,7 @@ import random
 import re
 from datetime import datetime
 from playwright.sync_api import sync_playwright
+from django.core.cache import cache
 """
 sync_playwright:LIBRAIRIE TRÈS IMPORTANTE
 permet de :
@@ -108,9 +109,17 @@ class AmazonScraper:
             page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
             for query in queries:
+                # 🛑 VÉRIFICATION 1 : Arrêt avant de changer de mot-clé
+                if cache.get("STOP_SCRAPING"):
+                    print(f"🛑 Scraping Amazon annulé depuis le cache (Mot-clé: {query}).")
+                    break # Casse la boucle des mots-clés
                 formatted_query = query.replace(" ", "+")
                 # pagination
                 for p_idx in range(1, max_pages + 1):
+                    # 🛑 VÉRIFICATION 2 : Arrêt avant de charger une nouvelle page
+                    if cache.get("STOP_SCRAPING"):
+                        print(f"🛑 Scraping Amazon annulé depuis le cache (Page {p_idx}).")
+                        break # Casse la boucle de pagination
                     url = f"{self.base_url}{formatted_query}&page={p_idx}"
                     
                     try:
