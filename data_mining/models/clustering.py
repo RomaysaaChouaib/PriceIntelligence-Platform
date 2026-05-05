@@ -1,6 +1,6 @@
 # data_mining/models/clustering.py
 """
-Clustering des produits par prix et caractéristiques.
+Clustering des produits par prix et caractéristiques techniques.
 Algorithmes : KMeans, DBSCAN, Agglomeratif.
 """
 
@@ -11,7 +11,6 @@ from sklearn.metrics import silhouette_score, davies_bouldin_score
 from sklearn.preprocessing import RobustScaler
 
 
-# Noms lisibles des segments (attribués après tri par prix médian)
 SEGMENT_LABELS = [
     "Entrée de gamme",
     "Milieu de gamme bas",
@@ -20,14 +19,45 @@ SEGMENT_LABELS = [
     "Premium",
 ]
 
+# Features disponibles par priorité
+ALL_FEATURES = [
+    'log_price',     # Toujours disponible
+    'cpu_score',     # Extrait du titre
+    'ram_gb',        # Extrait du titre
+    'storage_gb',    # Extrait du titre
+    'has_gpu',       # Extrait du titre
+    'is_gaming',     # Extrait du titre
+]
 
-def _prepare_features(df: pd.DataFrame, features: list = None) -> np.ndarray:
-    """Prépare la matrice de features normalisée."""
+
+def _prepare_features(df: pd.DataFrame, features: list = None) -> tuple:
+    """
+    Prépare la matrice de features normalisée.
+    Sélectionne automatiquement les features disponibles.
+    """
     if features is None:
-        features = [c for c in ["log_price", "ram_gb", "storage_gb"] if c in df.columns]
+        features = []
+        for col in ALL_FEATURES:
+            if col in df.columns:
+                # Ajouter la feature si elle a au moins 20% de valeurs non-nulles
+                non_null = df[col].notna().mean()
+                if non_null >= 0.20:
+                    features.append(col)
+
+        # Toujours garder log_price
+        if 'log_price' not in features and 'log_price' in df.columns:
+            features = ['log_price'] + features
+
     X = df[features].copy()
+
+    # Convertir booléens en int
+    for col in X.columns:
+        if X[col].dtype == bool:
+            X[col] = X[col].astype(int)
+
     # Remplir valeurs manquantes par la médiane
     X = X.fillna(X.median())
+
     scaler = RobustScaler()
     return scaler.fit_transform(X), features
 
@@ -38,12 +68,6 @@ def kmeans_clustering(
     features: list = None,
     random_state: int = 42,
 ) -> pd.DataFrame:
-    """
-    KMeans clustering sur les produits.
-
-    Retourne le DataFrame avec une colonne 'cluster' (label lisible)
-    et une colonne 'cluster_id' (entier).
-    """
     df = df.copy()
     X, used_features = _prepare_features(df, features)
 
@@ -55,7 +79,6 @@ def kmeans_clustering(
 
     df["cluster_id"] = labels
 
-    # Trier clusters par prix médian et attribuer label lisible
     medians = df.groupby("cluster_id")["price"].median().sort_values()
     id_to_label = {}
     for rank, cid in enumerate(medians.index):
@@ -65,9 +88,8 @@ def kmeans_clustering(
             id_to_label[cid] = f"Cluster {rank + 1}"
     df["cluster"] = df["cluster_id"].map(id_to_label)
 
-    # Métriques
-    sil   = silhouette_score(X, labels) if len(set(labels)) > 1 else 0
-    db    = davies_bouldin_score(X, labels) if len(set(labels)) > 1 else float("inf")
+    sil = silhouette_score(X, labels) if len(set(labels)) > 1 else 0
+    db  = davies_bouldin_score(X, labels) if len(set(labels)) > 1 else float("inf")
 
     print(f"  [kmeans] k={n_clusters} | Silhouette={sil:.4f} | Davies-Bouldin={db:.4f}")
     print(f"  [kmeans] Features utilisées : {used_features}")
@@ -86,10 +108,6 @@ def find_optimal_k(
     k_range: range = range(2, 8),
     features: list = None,
 ) -> pd.DataFrame:
-    """
-    Cherche le k optimal via Silhouette et Davies-Bouldin.
-    Retourne un DataFrame avec les scores pour chaque k.
-    """
     X, _ = _prepare_features(df, features)
     results = []
     for k in k_range:
@@ -101,8 +119,8 @@ def find_optimal_k(
         db  = davies_bouldin_score(X, labels)
         results.append({
             "k": k,
-            "inertia":   round(model.inertia_, 2),
-            "silhouette": round(sil, 4),
+            "inertia":        round(model.inertia_, 2),
+            "silhouette":     round(sil, 4),
             "davies_bouldin": round(db, 4),
         })
     return pd.DataFrame(results)
@@ -114,10 +132,6 @@ def dbscan_clustering(
     min_samples: int = 5,
     features: list = None,
 ) -> pd.DataFrame:
-    """
-    DBSCAN clustering — détecte automatiquement le nombre de clusters
-    et identifie les outliers (label = -1).
-    """
     df = df.copy()
     X, _ = _prepare_features(df, features)
 
@@ -142,7 +156,6 @@ def agglomerative_clustering(
     n_clusters: int = 4,
     features: list = None,
 ) -> pd.DataFrame:
-    """Clustering hiérarchique agglomératif."""
     df = df.copy()
     X, _ = _prepare_features(df, features)
 
@@ -151,8 +164,10 @@ def agglomerative_clustering(
     df["cluster_id"] = labels
 
     medians = df.groupby("cluster_id")["price"].median().sort_values()
-    id_to_label = {cid: SEGMENT_LABELS[rank] if rank < len(SEGMENT_LABELS) else f"Cluster {rank+1}"
-                   for rank, cid in enumerate(medians.index)}
+    id_to_label = {
+        cid: SEGMENT_LABELS[rank] if rank < len(SEGMENT_LABELS) else f"Cluster {rank+1}"
+        for rank, cid in enumerate(medians.index)
+    }
     df["cluster"] = df["cluster_id"].map(id_to_label)
 
     sil = silhouette_score(X, labels) if len(set(labels)) > 1 else 0
@@ -161,15 +176,9 @@ def agglomerative_clustering(
 
 
 def cluster_summary(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Résumé statistique par cluster.
-    """
     if "cluster" not in df.columns:
         return pd.DataFrame()
 
-    cols = {
-        "price": ["count", "mean", "median", "min", "max", "std"],
-    }
     summary = df.groupby("cluster")["price"].agg(
         count="count",
         mean="mean",
@@ -188,5 +197,13 @@ def cluster_summary(df: pd.DataFrame) -> pd.DataFrame:
     if "is_gaming" in df.columns:
         gaming_pct = df.groupby("cluster")["is_gaming"].mean().round(3) * 100
         summary["gaming_%"] = gaming_pct.round(1)
+
+    if "cpu_score" in df.columns:
+        avg_cpu = df.groupby("cluster")["cpu_score"].mean().round(1)
+        summary["avg_cpu_score"] = avg_cpu
+
+    if "ram_gb" in df.columns:
+        avg_ram = df.groupby("cluster")["ram_gb"].mean().round(1)
+        summary["avg_ram_gb"] = avg_ram
 
     return summary.reset_index()

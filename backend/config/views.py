@@ -9,16 +9,11 @@ sys.path.insert(0, BASE_DIR)
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-# ── Scraping ───────────────────────────────────────────────────────
 from scraping.db.mysql_writer import MySQLWriter
-######### Jumia ##################
 from scraping.core.scraper import scrape_product
-########## Amazon ##################
 from scraping.core.scraper_amazon import scrape_amazon_product, AmazonScraper
-############ Aliexpress ############
 from scraping.core.scraper_aliex import AliexpressScraper
 
-# ── Data Mining ───────────────────────────────────────────────────────────────
 from data_mining.preprocessing.clean_data import clean_dataframe
 from data_mining.preprocessing.feature_engineering import add_features_dataframe
 from data_mining.preprocessing.normalize import normalize_dataframe, get_price_percentiles
@@ -32,7 +27,6 @@ from data_mining.models.anomaly import (
 from data_mining.models.association import run_association_analysis
 
 
-# ── Corrige erreurs JSON avec numpy ───────────────────────────────
 def safe_json(obj):
     if isinstance(obj, (np.integer, np.int64, np.int32)): return int(obj)
     if isinstance(obj, (np.floating, np.float64, np.float32)): return float(obj)
@@ -42,43 +36,26 @@ def safe_json(obj):
     raise TypeError(f"Type non sérialisable: {type(obj)}")
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# NOUVELLE FONCTION : charge les données depuis MySQL (plus de CSV)
-# ════════════════════════════════════════════════════════════════════════════
-
 def load_from_db():
-    """
-    Charge tous les produits depuis MySQL, les convertit en DataFrame pandas,
-    puis applique le même pipeline de prétraitement que load_pipeline() faisait sur le CSV.
-    """
     db = MySQLWriter()
     try:
-        # Récupère tous les produits depuis MySQL
-        # get_all_products_paginated retourne des dicts — on prend tout d'un coup
         total = db.count_all_products()
         raw_products = db.get_all_products_paginated(limit=total, offset=0)
     finally:
         db.close()
 
     if not raw_products:
-        # Retourne un DataFrame vide avec les colonnes attendues si la BD est vide
-        return pd.DataFrame(columns=['title', 'price', 'brand', 'source', 'link', 'image',
-                                     'search_query', 'page', 'is_gaming', 'date_scraped'])
+        return pd.DataFrame(columns=[
+            'title', 'price', 'brand', 'source', 'link',
+            'image', 'search_query', 'page', 'is_gaming', 'date_scraped'
+        ])
 
-    # Convertit la liste de dicts en DataFrame
     df = pd.DataFrame(raw_products)
-
-    # Applique le même pipeline de prétraitement qu'avant
     df = clean_dataframe(df)
     df = add_features_dataframe(df)
     df, _ = normalize_dataframe(df, method='robust')
-
     return df
 
-
-# ════════════════════════════════════════════════════════════════════════════
-# VUE 1 — SCRAPING
-# ════════════════════════════════════════════════════════════════════════════
 
 def scrape_jumia(request):
     query = request.GET.get("query", "pc portable").strip().lower()
@@ -90,14 +67,9 @@ def scrape_jumia(request):
             db.insert_products(products)
             inserted = len(products)
         db.close()
-        return JsonResponse({
-            "success": True,
-            "source": "scraping -> mysql",
-            "query": query,
-            "scraped": len(products),
-            "inserted": inserted,
-            "message": f"{inserted} produits enregistrés dans MySQL"
-        })
+        return JsonResponse({"success": True, "source": "scraping -> mysql",
+            "query": query, "scraped": len(products), "inserted": inserted,
+            "message": f"{inserted} produits enregistrés dans MySQL"})
     except Exception as e:
         db.close()
         return JsonResponse({"success": False, "error": str(e)}, status=500)
@@ -114,17 +86,11 @@ def scrap_amazon(request):
             db.insert_products(products)
             inserted = len(products)
         db.close()
-        return JsonResponse({
-            "success": True,
-            "source": "scraping -> mysql",
-            "query": query,
-            "scraped": scraped_count,
-            "inserted": inserted,
-            "message": f"{inserted} produits Amazon enregistrés dans MySQL"
-        })
+        return JsonResponse({"success": True, "source": "scraping -> mysql",
+            "query": query, "scraped": scraped_count, "inserted": inserted,
+            "message": f"{inserted} produits Amazon enregistrés dans MySQL"})
     except Exception as e:
-        if 'db' in locals():
-            db.close()
+        if 'db' in locals(): db.close()
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
@@ -139,17 +105,11 @@ def scrap_aliexpress(request):
             db.insert_products(products)
             inserted = len(products)
         db.close()
-        return JsonResponse({
-            "success": True,
-            "source": "Aliexpress -> mysql",
-            "query": query,
-            "scraped": len(products) if products else 0,
-            "inserted": inserted,
-            "message": f"{inserted} produits AliExpress enregistrés dans MySQL"
-        })
+        return JsonResponse({"success": True, "source": "Aliexpress -> mysql",
+            "query": query, "scraped": len(products) if products else 0,
+            "inserted": inserted, "message": f"{inserted} produits AliExpress enregistrés dans MySQL"})
     except Exception as e:
-        if db:
-            db.close()
+        if db: db.close()
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
@@ -183,72 +143,46 @@ def scrape_all(request):
             db.insert_products(all_products)
             inserted = len(all_products)
         db.close()
-
-        return JsonResponse({
-            "success": True,
-            "query": query,
-            "jumia_count": len(results["jumia"]),
-            "amazon_count": len(results["amazon"]),
-            "aliexpress_count": len(results["aliexpress"]),
-            "total_scraped": len(all_products),
-            "inserted": inserted,
-            "errors": errors,
-            "message": f"{inserted} produits enregistrés depuis 3 sources"
-        })
+        return JsonResponse({"success": True, "query": query,
+            "jumia_count": len(results["jumia"]), "amazon_count": len(results["amazon"]),
+            "aliexpress_count": len(results["aliexpress"]), "total_scraped": len(all_products),
+            "inserted": inserted, "errors": errors,
+            "message": f"{inserted} produits enregistrés depuis 3 sources"})
     except Exception as e:
         db.close()
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# VUE SEARCH — recherche directe dans MySQL (inchangée)
-# ════════════════════════════════════════════════════════════════════════════
-
 def search_view(request):
-    query = request.GET.get("query", "").strip().lower()
-    page = int(request.GET.get("page", 1))
-    limit = int(request.GET.get("limit", 20))
+    query  = request.GET.get("query", "").strip().lower()
+    page   = int(request.GET.get("page", 1))
+    limit  = int(request.GET.get("limit", 20))
     offset = (page - 1) * limit
-
     db = MySQLWriter()
     if query:
         all_products = db.get_products_by_query(query)
-        total = len(all_products)
+        total    = len(all_products)
         products = all_products[offset: offset + limit]
     else:
-        total = db.count_all_products()
+        total    = db.count_all_products()
         products = db.get_all_products_paginated(limit, offset)
     db.close()
+    return JsonResponse({"source": "mysql", "query": query, "total": total,
+        "page": page, "pages": (total // limit) + (1 if total % limit else 0),
+        "products": products})
 
-    return JsonResponse({
-        "source": "mysql only",
-        "query": query,
-        "total": total,
-        "page": page,
-        "pages": (total // limit) + (1 if total % limit else 0),
-        "products": products
-    })
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# VUE 2 — PRODUITS DATA MINING  (maintenant depuis MySQL)
-# ════════════════════════════════════════════════════════════════════════════
 
 def products_view(request):
     try:
-        df = load_from_db()  # ← depuis MySQL, plus de CSV
-
         query = request.GET.get('query', '').lower().strip()
         page  = int(request.GET.get('page', 1))
         limit = int(request.GET.get('limit', 20))
-
+        df = load_from_db()
         if query:
             df = df[df['title'].str.lower().str.contains(query, na=False)]
-
         total   = len(df)
         start   = (page - 1) * limit
         page_df = df.iloc[start: start + limit]
-
         products = []
         for _, row in page_df.iterrows():
             products.append({
@@ -264,159 +198,139 @@ def products_view(request):
                 'ram_gb':         int(row['ram_gb'])     if pd.notna(row.get('ram_gb'))     else None,
                 'storage_gb':     int(row['storage_gb']) if pd.notna(row.get('storage_gb')) else None,
             })
-
-        return JsonResponse({
-            'source':   'mysql',  # ← indique la source
-            'total':    total,
-            'page':     page,
-            'pages':    (total + limit - 1) // limit,
-            'products': products,
-        })
+        return JsonResponse({'source': 'mysql', 'total': total, 'page': page,
+            'pages': (total + limit - 1) // limit, 'products': products})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# VUE 3 — STATISTIQUES (maintenant depuis MySQL)
-# ════════════════════════════════════════════════════════════════════════════
-
 def stats_view(request):
     try:
-        df = load_from_db()  # ← depuis MySQL, plus de CSV
+        db = MySQLWriter()
+        cached = db.get_cache('stats')
+        if cached:
+            db.close()
+            return JsonResponse(cached)
+        db.close()
 
+        df          = load_from_db()
         stats       = descriptive_stats(df)
         by_brand    = stats_by_brand(df).head(10).to_dict(orient='records')
         by_cat      = stats_by_category(df).to_dict(orient='records')
         gaming      = gaming_vs_non_gaming(df)
         percentiles = get_price_percentiles(df)
-
         counts, edges = np.histogram(df['price'], bins=12)
-        distribution = [
-            {
-                'label': f"{int(edges[i]):,}–{int(edges[i+1]):,}",
-                'count': int(counts[i]),
-                'min':   round(float(edges[i]), 0),
-                'max':   round(float(edges[i+1]), 0),
-            }
-            for i in range(len(counts))
-        ]
+        distribution = [{'label': f"{int(edges[i]):,}–{int(edges[i+1]):,}",
+            'count': int(counts[i]), 'min': round(float(edges[i]), 0),
+            'max': round(float(edges[i+1]), 0)} for i in range(len(counts))]
+
+        result = {'source': 'mysql', 'stats': stats, 'by_brand': by_brand,
+            'by_category': by_cat, 'gaming': gaming,
+            'percentiles': {k: round(float(v), 2) for k, v in percentiles.items()},
+            'distribution': distribution}
+
         db2 = MySQLWriter()
-        db2.save_cache('stats', {'stats': stats, 'by_brand': by_brand, 'by_category': by_cat})
+        db2.save_cache('stats', result)
         db2.close()
-        return JsonResponse({
-            'source':       'mysql',
-            'stats':        stats,
-            'by_brand':     by_brand,
-            'by_category':  by_cat,
-            'gaming':       gaming,
-            'percentiles':  {k: round(float(v), 2) for k, v in percentiles.items()},
-            'distribution': distribution,
-        }, json_dumps_params={'default': safe_json})
+        return JsonResponse(result, json_dumps_params={'default': safe_json})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
-# ════════════════════════════════════════════════════════════════════════════
-# VUE 4 — CLUSTERING (maintenant depuis MySQL)
-# ════════════════════════════════════════════════════════════════════════════
 
 def clustering_view(request):
     try:
-        algo = request.GET.get('algo', 'kmeans').lower()
-        df   = load_from_db()  # ← depuis MySQL, plus de CSV
+        algo      = request.GET.get('algo', 'kmeans').lower()
+        cache_key = f'clustering_{algo}'
 
+        db = MySQLWriter()
+        cached = db.get_cache(cache_key)
+        if cached:
+            db.close()
+            return JsonResponse(cached)
+        db.close()
+
+        df = load_from_db()
         if algo == 'dbscan':
-            eps         = float(request.GET.get('eps', 0.5))
-            min_samples = int(request.GET.get('min_samples', 5))
+            eps         = float(request.GET.get('eps', 2.0))
+            min_samples = int(request.GET.get('min_samples', 30))
             df      = dbscan_clustering(df, eps=eps, min_samples=min_samples)
             summary = cluster_summary(df)
-            extra   = {'algo': 'dbscan', 'eps': eps, 'min_samples': min_samples,
-                       'n_clusters': int(df['cluster'].nunique())}
+            extra   = {'algo': 'dbscan', 'eps': eps,
+                    'min_samples': min_samples, 'n_clusters': int(df['cluster'].nunique())}
         else:
-            scores  = find_optimal_k(df, k_range=range(2, 7))
-            best_k  = int(scores.loc[scores['silhouette'].idxmax(), 'k'])
-            df      = kmeans_clustering(df, n_clusters=best_k)
+            df      = kmeans_clustering(df, n_clusters=4, features=['log_price'])
             summary = cluster_summary(df)
-            extra   = {'algo': 'kmeans', 'best_k': best_k,
-                       'silhouette': round(float(scores['silhouette'].max()), 4),
-                       'k_scores': scores.to_dict(orient='records')}
+            extra   = {'algo': 'kmeans', 'best_k': 4}
 
         scatter = []
         for _, row in df.sample(min(300, len(df)), random_state=42).iterrows():
-            scatter.append({
-                'title':   str(row['title'])[:60],
-                'price':   float(row['price']),
-                'cluster': str(row['cluster']),
-                'brand':   str(row.get('brand_detected', '')),
-                'gaming':  bool(row.get('is_gaming', False)),
-            })
-        
-        db2 = MySQLWriter()
-        db2.save_cache(f'clustering_{algo}', scatter)
-        db2.close()
+            scatter.append({'title': str(row['title'])[:60], 'price': float(row['price']),
+                'cluster': str(row['cluster']), 'brand': str(row.get('brand_detected', '')),
+                'gaming': bool(row.get('is_gaming', False))})
 
-        return JsonResponse({
-            'source': 'mysql',
-            **extra,
-            'summary': summary.to_dict(orient='records'),
-            'scatter': scatter,
-        }, json_dumps_params={'default': safe_json})
+        result = {'source': 'mysql', **extra,
+                  'summary': summary.to_dict(orient='records'), 'scatter': scatter}
+
+        # Nettoie les valeurs non-JSON (NaN, Infinity) avant sauvegarde
+        import json
+        clean_result = json.loads(json.dumps(result, default=safe_json))
+
+        db2 = MySQLWriter()
+        db2.save_cache(cache_key, clean_result)
+        db2.close()
+        return JsonResponse(clean_result, json_dumps_params={'default': safe_json})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# VUE 5 — ANOMALIES (maintenant depuis MySQL)
-# ════════════════════════════════════════════════════════════════════════════
 
 def anomalies_view(request):
     try:
-        df = load_from_db()  # ← depuis MySQL, plus de CSV
+        db = MySQLWriter()
+        cached = db.get_cache('anomalies')
+        if cached:
+            db.close()
+            return JsonResponse(cached)
+        db.close()
+
+        df = load_from_db()
         df = detect_iqr(df)
         df = detect_isolation_forest(df)
-
-        anom_df = get_anomalies(df, method='iforest')
+        anom_df   = get_anomalies(df, method='iforest')
         anomalies = []
         for _, row in anom_df.iterrows():
-            anomalies.append({
-                'title':          str(row['title'])[:80],
-                'price':          float(row['price']),
+            anomalies.append({'title': str(row['title'])[:80], 'price': float(row['price']),
                 'brand_detected': str(row.get('brand_detected', '')),
-                'price_category': str(row.get('price_category', '')),
-            })
+                'price_category': str(row.get('price_category', ''))})
+
+        result = {'source': 'mysql', 'summary': anomaly_summary(df).to_dict(orient='records'),
+                  'anomalies': anomalies, 'total': len(anomalies)}
 
         db2 = MySQLWriter()
-        db2.save_cache('anomalies', anomalies)
+        db2.save_cache('anomalies', result)
         db2.close()
-        return JsonResponse({
-            'source':    'mysql',
-            'summary':   anomaly_summary(df).to_dict(orient='records'),
-            'anomalies': anomalies,
-            'total':     len(anomalies),
-        }, json_dumps_params={'default': safe_json})
+        return JsonResponse(result, json_dumps_params={'default': safe_json})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# VUE 6 — RÈGLES D'ASSOCIATION (maintenant depuis MySQL)
-# ════════════════════════════════════════════════════════════════════════════
-
 def association_view(request):
     try:
-        df    = load_from_db()  # ← depuis MySQL, plus de CSV
-        df    = kmeans_clustering(df, n_clusters=4)
-        rules = run_association_analysis(
-            df, min_support=0.08, min_confidence=0.60, min_lift=1.2
-        )
+        db = MySQLWriter()
+        cached = db.get_cache('association')
+        if cached:
+            db.close()
+            return JsonResponse(cached)
+        db.close()
+
+        df    = load_from_db()
+        df = kmeans_clustering(df, n_clusters=4, features=['log_price'])
+        rules = run_association_analysis(df, min_support=0.08, min_confidence=0.60, min_lift=1.2)
         rules_list = rules.to_dict(orient='records') if not rules.empty else []
+
+        result = {'source': 'mysql', 'total': len(rules_list), 'rules': rules_list}
+
         db2 = MySQLWriter()
-        db2.save_cache('association', rules_list)
+        db2.save_cache('association', result)
         db2.close()
-        return JsonResponse({
-            'source': 'mysql',
-            'total':  len(rules),
-            'rules':  rules.to_dict(orient='records') if not rules.empty else [],
-        }, json_dumps_params={'default': safe_json})
+        return JsonResponse(result, json_dumps_params={'default': safe_json})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

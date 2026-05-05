@@ -41,14 +41,13 @@ class MySQLWriter:
     # 1. INSERT FROM SCRAPING
     # =========================
     def insert_products(self, products):
-        # Ajout de 'currency' et de la gestion des doublons (ON DUPLICATE KEY UPDATE)
         sql = """
-        INSERT INTO products
-        (title, price, currency, brand, source, link, image, search_query, page, is_gaming, date_scraped)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        ON DUPLICATE KEY UPDATE 
-            price = IF(price != VALUES(price), VALUES(price), price),
-            date_scraped = IF(price != VALUES(price), VALUES(date_scraped), date_scraped);
+            INSERT INTO products
+            (title, price, currency, brand, source, link, image, search_query, page, is_gaming, date_scraped)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            ON DUPLICATE KEY UPDATE 
+                link = VALUES(link),
+                date_scraped = VALUES(date_scraped);
         """
 
         count = 0
@@ -227,7 +226,21 @@ class MySQLWriter:
     def save_cache(self, key, data):
         """Sauvegarde le résultat DM"""
         import json
+        import math
         count = self.count_all_products()
+
+        # Nettoie les valeurs non-JSON (NaN, Infinity, etc.)
+        def clean(obj):
+            if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+                return None
+            if isinstance(obj, dict):
+                return {k: clean(v) for k, v in obj.items()}
+            if isinstance(obj, list):
+                return [clean(i) for i in obj]
+            return obj
+
+        data = clean(data)
+
         sql = """
         INSERT INTO dm_cache (cache_key, result, products_count, is_valid)
         VALUES (%s, %s, %s, TRUE)
@@ -240,7 +253,6 @@ class MySQLWriter:
         self.cursor.execute(sql, (key, json.dumps(data, default=str), count))
         self.conn.commit()
         print(f"✔ Cache '{key}' sauvegardé")
-
     def invalidate_cache(self, key=None):
         """Invalide un cache spécifique ou tout le cache"""
         if key:

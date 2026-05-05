@@ -4,9 +4,13 @@ import pandas as pd
 import re
 
 EXCLUDED_KEYWORDS = [
-    "souris", "mouse", "sac", "bag", "accessoire", "clavier", "keyboard",
-    "ecran", "écran", "moniteur", "webcam", "casque", "headset", "imprimante",
-    "printer", "stylet", "hub usb", "refroidisseur", "cooling pad",
+    "souris",
+    "clavier", "keyboard",
+    "webcam", "casque", "headset",
+    "imprimante", "printer",
+    "stylet", "hub usb",
+    "refroidisseur", "cooling pad",
+    "moniteur",
 ]
 
 PRICE_CENTIMES_THRESHOLD = 100_000
@@ -14,18 +18,42 @@ PRICE_MIN = 500
 PRICE_MAX = 200_000
 
 
-def fix_jumia_price(price: float) -> float:
-    """Corrige les prix Jumia exprimés en centimes."""
-    if price > PRICE_CENTIMES_THRESHOLD:
-        price = price / 100
-    return price
+# Taux de conversion approximatifs en MAD
+CONVERSION_RATES = {
+    'USD': 10.0,   # 1$ = ~10 MAD
+    'EUR': 11.0,   # 1€ = ~11 MAD
+    'GBP': 13.0,   # 1£ = ~13 MAD
+    'MAD': 1.0,
+}
+
+def convert_to_mad(price: float, currency: str) -> float:
+    """Convertit le prix en MAD selon la devise."""
+    if not currency:
+        return price
+    currency = str(currency).strip().upper()
+    rate = CONVERSION_RATES.get(currency, 1.0)
+    return price * rate
 
 
 def is_excluded(title: str) -> bool:
-    """Retourne True si le produit doit être filtré (accessoire non-PC)."""
-    t = title.lower()
-    return any(kw in t for kw in EXCLUDED_KEYWORDS)
-
+    """Filtre les accessoires — garde tout ce qui contient laptop/ordinateur."""
+    t = title.lower().strip()
+    
+    # Si le titre contient un mot laptop → toujours garder
+    laptop_keywords = [
+        'laptop', 'ordinateur', 'notebook', 'pc portable', 
+        'computer', 'chromebook', 'ultrabook', 'macbook'
+    ]
+    if any(kw in t for kw in laptop_keywords):
+        return False  # ← garder ce produit
+    
+    # Sinon filtrer si contient un mot accessoire
+    accessoire_keywords = [
+        'souris', 'clavier', 'keyboard', 'webcam', 'casque',
+        'headset', 'imprimante', 'printer', 'refroidisseur',
+        'cooling pad', 'moniteur', 'hub usb', 'stylet',
+    ]
+    return any(kw in t for kw in accessoire_keywords)
 
 def normalize_title(title: str) -> str:
     """Nettoie et normalise un titre produit."""
@@ -42,8 +70,9 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
     # 1. Supprimer doublons
+# 1. Supprimer doublons (on garde les produits avec liens différents)
     before = len(df)
-    df.drop_duplicates(subset=["title", "price"], inplace=True)
+    df.drop_duplicates(subset=["title", "price", "link"], inplace=True)
     print(f"  [clean] Doublons supprimés : {before - len(df)}")
 
     # 2. Filtrer accessoires
@@ -55,8 +84,13 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df["price"] = pd.to_numeric(df["price"], errors="coerce")
     df.dropna(subset=["price"], inplace=True)
 
-    # 4. Corriger prix Jumia (centimes → MAD)
-    df["price"] = df["price"].apply(fix_jumia_price)
+    # 4. Convertir prix selon devise
+    if "currency" in df.columns:
+        df["price"] = df.apply(
+            lambda row: convert_to_mad(row["price"], row.get("currency")), axis=1
+        )
+    else:
+        df["price"] = df["price"].apply(fix_jumia_price)
 
     # 5. Filtrer prix hors plage réaliste
     mask_price = (df["price"] >= PRICE_MIN) & (df["price"] <= PRICE_MAX)
