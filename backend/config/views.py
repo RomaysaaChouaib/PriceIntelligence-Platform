@@ -56,7 +56,6 @@ def load_from_db():
     df, _ = normalize_dataframe(df, method='robust')
     return df
 
-
 # ════════════════════════════════════════════════════════════════════════════
 # VUE 1 — SCRAPING
 # ════════════════════════════════════════════════════════════════════════════
@@ -66,7 +65,6 @@ def load_from_db():
 #     global STOP_SCRAPING
 #     STOP_SCRAPING = True
 #     return JsonResponse({"message": "Signal d'arrêt envoyé (STOP_SCRAPING = True)"})
-
 from config.celery import app # Assure-toi d'importer ton app Celery pour pouvoir contrôler les tâches
 from django.core.cache import cache
 @csrf_exempt
