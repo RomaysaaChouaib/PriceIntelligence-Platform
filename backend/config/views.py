@@ -316,6 +316,51 @@ def search_view(request):
         "page": page, "pages": (total // limit) + (1 if total % limit else 0),
         "products": products})
 
+    return JsonResponse({
+        "source": "mysql only",
+        "query": query,
+        "total": total,
+        "page": page,
+        "pages": (total // limit) + (1 if total % limit else 0),
+        "products": products
+    })
+
+# Accessoire de Laptop:
+from django.http import JsonResponse
+# N'oublie pas d'importer ta classe MySQLWriter en haut du fichier si ce n'est pas déjà fait
+# from chemin.vers.ton.fichier import MySQLWriter
+
+def search_accessoire_view(request):
+    query = request.GET.get("query", "").strip().lower()
+    page = int(request.GET.get("page", 1))
+    limit = int(request.GET.get("limit", 20))
+    offset = (page - 1) * limit
+
+    db = MySQLWriter()
+    
+    if query:
+        # Utilisation de la méthode pour les accessoires
+        all_accessories = db.get_accessories_by_query(query)
+        total = len(all_accessories)
+        accessories = all_accessories[offset: offset + limit]
+    else:
+        # Comptage et pagination globale pour les accessoires
+        total = db.count_all_accessories()
+        accessories = db.get_all_accessories_paginated(limit, offset)
+        
+    db.close()
+
+    return JsonResponse({
+        "source": "mysql only",
+        "query": query,
+        "total": total,
+        "page": page,
+        "pages": (total // limit) + (1 if total % limit else 0),
+        "accessories": accessories  # J'ai renommé la clé "products" en "accessories" pour plus de logique
+    })
+# ════════════════════════════════════════════════════════════════════════════
+# VUE 2 — PRODUITS DATA MINING  (maintenant depuis MySQL)
+# ════════════════════════════════════════════════════════════════════════════
 
 def products_view(request):
     try:

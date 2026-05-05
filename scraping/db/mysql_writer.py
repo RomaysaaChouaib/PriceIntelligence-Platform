@@ -305,6 +305,116 @@ class MySQLWriter:
 
         self.conn.commit()
         print(f"✔ {count} accessoires insérés dans MySQL")
+    
+
+    # =========================
+    # GET ACCESSORIES BY QUERY
+    # =========================
+    def get_accessories_by_query(self, query):
+        sql = """
+        SELECT
+            id, category, title, price, currency, brand, source, link, image,
+            search_query, page, in_stock, is_gaming, date_scraped
+        FROM accessories
+        WHERE LOWER(search_query) LIKE %s
+        ORDER BY id DESC
+        """
+
+        self.cursor.execute(sql, (f"%{query.lower()}%",))
+        rows = self.cursor.fetchall()
+        columns = [col[0] for col in self.cursor.description]
+
+        accessories = []
+        for row in rows:
+            item = dict(zip(columns, row))
+            item["price"] = float(item["price"]) if item["price"] is not None else 0
+            item["is_gaming"] = bool(item["is_gaming"])
+            item["in_stock"] = bool(item["in_stock"]) # Spécifique aux accessoires
+            accessories.append(item)
+
+        return accessories
+
+    # =========================
+    # COUNT ALL ACCESSORIES
+    # =========================
+    def count_all_accessories(self):
+        sql = "SELECT COUNT(*) FROM accessories"
+        self.cursor.execute(sql)
+        return self.cursor.fetchone()[0]
+
+    # =========================
+    # GET ALL ACCESSORIES PAGINATED
+    # =========================
+    def get_all_accessories_paginated(self, limit, offset):
+        sql = """
+        SELECT *
+        FROM accessories
+        ORDER BY id DESC
+        LIMIT %s OFFSET %s
+        """
+        
+        self.cursor.execute(sql, (limit, offset))
+        rows = self.cursor.fetchall()
+        columns = [col[0] for col in self.cursor.description]
+
+        accessories = []
+        for row in rows:
+            item = dict(zip(columns, row))
+            item["price"] = float(item["price"]) if item["price"] is not None else 0
+            item["is_gaming"] = bool(item["is_gaming"])
+            item["in_stock"] = bool(item.get("in_stock", True))
+            accessories.append(item)
+
+        return accessories
+
+    # =========================
+    # COUNT ACCESSORIES SEARCH RESULTS
+    # =========================
+    def count_accessories_search(self, query):
+        sql = """
+        SELECT COUNT(*)
+        FROM accessories
+        WHERE LOWER(title) LIKE %s
+           OR LOWER(brand) LIKE %s
+           OR LOWER(search_query) LIKE %s
+           OR LOWER(category) LIKE %s 
+        """
+        # J'ai ajouté la recherche par 'category' car c'est utile pour les accessoires
+        term = f"%{query.lower()}%"
+        self.cursor.execute(sql, (term, term, term, term))
+        return self.cursor.fetchone()[0]
+
+    # =========================
+    # SEARCH ACCESSORIES PAGINATED
+    # =========================
+    def search_accessories_paginated(self, query, limit, offset):
+        sql = """
+        SELECT *
+        FROM accessories
+        WHERE LOWER(title) LIKE %s
+           OR LOWER(brand) LIKE %s
+           OR LOWER(search_query) LIKE %s
+           OR LOWER(category) LIKE %s
+        ORDER BY id DESC
+        LIMIT %s OFFSET %s
+        """
+
+        term = f"%{query.lower()}%"
+        self.cursor.execute(sql, (term, term, term, term, limit, offset))
+
+        rows = self.cursor.fetchall()
+        columns = [col[0] for col in self.cursor.description]
+
+        accessories = []
+        for row in rows:
+            item = dict(zip(columns, row))
+            item["price"] = float(item["price"]) if item["price"] is not None else 0
+            item["is_gaming"] = bool(item["is_gaming"])
+            item["in_stock"] = bool(item.get("in_stock", True))
+            accessories.append(item)
+
+        return accessories
+
 
 
     # =========================
