@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.core.cache import cache
 import requests
 #Librairie pour faire des requêtes HTTP
 from bs4 import BeautifulSoup
@@ -200,7 +201,7 @@ class JumiaScraper:
                 response = requests.get(url, headers=HEADERS, timeout=10)
                 if response.status_code == 200:
                     return response
-                if response.status_code == 429:
+                if response.status_code == 429: # trop de requete
                     wait = backoff * (attempt + 1) * 2
                     time.sleep(wait)
                     continue
@@ -214,75 +215,59 @@ class JumiaScraper:
         seen_titles = set()
 
         pc_keywords = [
-    "laptop", "notebook", "pc portable", "ordinateur portable",
-    "ordinateur", "macbook", "ultrabook", "chromebook",
-
-    # bureau
-    "desktop", "pc bureau", "all in one", "mini pc",
-
-    # gaming
-    "gaming laptop", "gamer", "rog", "omen", "legion", "victus",
-
-    # marques / séries
-    "thinkpad", "ideapad", "vivobook", "zenbook",
-    "pavilion", "inspiron", "latitude", "xps",
-    "aspire", "swift", "elitebook", "probook"
-]
+            "laptop", "notebook", "pc portable", "ordinateur portable",
+            "ordinateur", "macbook", "ultrabook", "chromebook",
+            "desktop", "pc bureau", "all in one", "mini pc",
+            "gaming laptop", "gamer", "rog", "omen", "legion", "victus",
+            "thinkpad", "ideapad", "vivobook", "zenbook",
+            "pavilion", "inspiron", "latitude", "xps",
+            "aspire", "swift", "elitebook", "probook"
+        ]
 
         excluded = [
-    # sacs
-    "sac", "bag", "backpack", "cartable", "sacoche", "toploader",
-
-    # stickers
-    "sticker", "stickers", "autocollant", "autocollants", "skin", "decal",
-
-    # souris clavier
-    "souris", "mouse", "clavier", "keyboard",
-
-    # charge
-    "chargeur", "charger", "battery", "batterie", 'Hyper Station',
-
-
-    # écran
-    "écran", "ecran", "screen", "monitor",
-
-    # protection
-    "housse", "coque", "cover", "case",
-
-    # support
-    "support", "stand", "holder", "dock", "hub",
-
-    # cables
-    "cable", "câble", "adaptateur", "adapter",
-
-    # audio
-    "speaker", "haut parleur", "haut-parleur", "enceinte", "casque", "écouteur",
-
-    # lampes
-    "lampe", "lamp", "light",
-
-    # stockage
-    "disque dur", "hard drive", "hdd", "ssd externe",
-
-    # autres
-    "tablette", "smartphone", "tv", "projecteur", "webcam",'Manette','USB','usb','xbox','playstation'
-    'Msi','PC Steam', 'Lenovo Legion','Legion','Asus ROG','ROG','HP Omen','Omen','Acer Predator','Predator',
-    'notebook',
-]
+            "sac", "bag", "backpack", "cartable", "sacoche", "toploader",
+            "sticker", "stickers", "autocollant", "autocollants", "skin", "decal",
+            "souris", "mouse", "clavier", "keyboard",
+            "chargeur", "charger", "battery", "batterie", 'Hyper Station',
+            "écran", "ecran", "screen", "monitor",
+            "housse", "coque", "cover", "case",
+            "support", "stand", "holder", "dock", "hub",
+            "cable", "câble", "adaptateur", "adapter",
+            "speaker", "haut parleur", "haut-parleur", "enceinte", "casque", "écouteur",
+            "lampe", "lamp", "light",
+            "disque dur", "hard drive", "hdd", "ssd externe",
+            "tablette", "smartphone", "tv", "projecteur", "webcam",'Manette','USB','usb','xbox','playstation',
+            'Msi','PC Steam', 'Lenovo Legion','Legion','Asus ROG','ROG','HP Omen','Omen','Acer Predator','Predator',
+            'notebook',
+        ]
 
         queries = self.generate_queries(query)
         total_queries = len(queries)
 
         for q_idx, search_word in enumerate(queries, 1):
+            
+            # 🛑 VÉRIFICATION 1 : Est-ce qu'on doit s'arrêter avant de changer de mot-clé ?
+            if cache.get("STOP_SCRAPING"):
+                print("🛑 Scraping annulé depuis le cache (Changement de mot-clé).")
+                break # Casse la boucle des mots-clés
+
             print(f"\n[{q_idx}/{total_queries}] Recherche : '{search_word}'")
             pages_without_results = 0
+            
             # Pagination
             for page in range(1, max_pages + 1):
+                
+                # 🛑 VÉRIFICATION 2 : Est-ce qu'on doit s'arrêter avant de charger une nouvelle page ?
+                if cache.get("STOP_SCRAPING"):
+                    print(f"🛑 Scraping annulé depuis le cache (Page {page}).")
+                    break # Casse la boucle de pagination
+
                 url = f"{self.base_url}?q={search_word}&page={page}"
                 response = self._get_with_retry(url)
 
                 if response is None: break
 
+                # Parsing HTML
                 soup = BeautifulSoup(response.text, "html.parser")
                 items = soup.select("article.prd")
 
@@ -293,7 +278,8 @@ class JumiaScraper:
 
                 pages_without_results = 0
                 new_on_page = 0
-
+                
+                # Extraction produit
                 for item in items:
                     title_tag = item.select_one(".name")
                     price_tag = item.select_one(".prc")
@@ -303,7 +289,8 @@ class JumiaScraper:
 
                     title_text = title_tag.get_text(strip=True)
                     title_lower = " " + title_text.lower() + " "
-                    price_val = clean_price(price_tag.get_text(strip=True))
+                    # Assure-toi que ta fonction clean_price est bien définie
+                    price_val = clean_price(price_tag.get_text(strip=True)) 
 
                     is_pc = any(word in title_lower for word in pc_keywords)
                     is_bad = any(word in title_lower for word in excluded)
@@ -313,7 +300,9 @@ class JumiaScraper:
                         product_link = href if href.startswith("http") else "https://www.jumia.ma" + href
 
                         if product_link in seen_links: continue
-                        norm_title = self._normalize_title(title_text)
+                        
+                        # Assure-toi que self._normalize_title est bien définie
+                        norm_title = self._normalize_title(title_text) 
                         if norm_title in seen_titles: continue
 
                         seen_links.add(product_link)
@@ -322,12 +311,11 @@ class JumiaScraper:
                         img_tag = item.select_one("img")
                         image_url = img_tag.get("data-src") or img_tag.get("src") or "" if img_tag else ""
 
-                        # AJOUT DES CHAMPS DEMANDÉS
                         products.append({
                             "title": title_text,
                             "price": price_val,
                             "brand": title_text.split()[0] if title_text.split() else "Inconnu",
-                            "source": self.source_name,
+                            "source": getattr(self, 'source_name', 'Jumia'), # Sécurisé
                             "link": product_link,
                             "image": image_url,
                             "search_query": search_word,
@@ -339,7 +327,8 @@ class JumiaScraper:
 
                 print(f"  Page {page} : {new_on_page} nouveaux | Total : {len(products)}")
                 time.sleep(0.5 if new_on_page == 0 else 1.0)
-
+                
+        # Le scraper va retourner les produits trouvés *avant* l'arrêt
         return products
     
     def export_to_csv(self, products, filename="jumia_laptops.csv"):
@@ -354,7 +343,14 @@ class JumiaScraper:
             dict_writer.writerows(products)
         print(f"\nExportation réussie : {filename} ({len(products)} produits)")
 
-# --- Exemple d'exécution ---
-# scraper = JumiaScraper()
-# data = scraper.scrape("laptop")
-# scraper.export_to_csv(data)
+
+"""
+query → generate_queries
+      → pages
+      → request (headers)
+      → parse HTML
+      → filter produits
+      → remove duplicates
+      → store products
+      → export CSV / DB
+"""

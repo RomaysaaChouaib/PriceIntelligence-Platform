@@ -1,4 +1,5 @@
 import csv
+from django.core.cache import cache
 import json
 import time
 import random
@@ -20,36 +21,34 @@ class AliexpressScraper:
 
         related = {
           "laptop": [
-            "laptop",
-            "laptop computer",
-            "portable laptop computer",
-            "gaming laptop computer",
-            "business laptop computer",
-            "office laptop computer",
-            "slim laptop computer",
-            "ultrabook laptop",
-            "student laptop computer",
-            "hp laptop",
+            # "laptop",
+            # "laptop computer",
+            # "portable laptop computer",
+            # "gaming laptop computer",
+            # "business laptop computer",
+            # "office laptop computer",
+            # "slim laptop computer",
+            # "ultrabook laptop",
+            # "student laptop computer",
+            # "hp laptop",
             # # --- Tailles écran ---
-            "laptop 13 inch",
-            "laptop 16 inch",
-            "laptop 17 inch",
-            # # --- OS & caractéristiques ---
+            # "laptop 13 inch",
+            # "laptop 16 inch",
+            # "laptop 17 inch",
+            # # # # --- OS & caractéristiques ---
             # "windows 11 laptop",
             # "laptop touchscreen",
-            # # --- RAM / STOCKAGE ---
-            "laptop 16gb ram",
-            "laptop 32gb ram",
-            "laptop 512gb ssd",
+            # # # --- RAM / STOCKAGE ---
+            # "laptop 16gb ram",
+            # "laptop 32gb ram",
 
-            # --- APPLE ---
+            # # --- APPLE ---
             "pc portable",
             "macbook pro m3",
             "macbook pro m3 pro",
             "macbook pro m3 max",
-            "macbook pro 14 m3",
             "macbook pro 16 m3",
-            # --- LENOVO ---
+            #--- LENOVO ---
             "lenovo thinkpad laptop",
             "laptop lenovo",
             # --- DELL ---
@@ -61,11 +60,9 @@ class AliexpressScraper:
             "asus zenbook laptop",
             "asus zenbook pro 14",
             # --- MSI ---
-            "msi gaming laptop",
             "msi stealth 16",
             # --- AUTRES MARQUES ---
             "microsoft surface laptop",
-            "surface pro laptop",
             # --- CPU INTEL ---
             "laptop intel core i5",
             "laptop intel core i7",
@@ -73,12 +70,8 @@ class AliexpressScraper:
             "laptop intel core ultra 5",
             "laptop intel core ultra 7",
             "laptop intel core ultra 9",
-            "laptop 13th gen intel",
-            "laptop 14th gen intel",
+            "laptop rtx 3036",
             # --- CPU AMD ---
-            "laptop ryzen 5",
-            "laptop ryzen 7",
-            "laptop ryzen 9",
             # --- USAGE ---
             "workstation laptop",
             "video editing laptop",
@@ -97,7 +90,9 @@ class AliexpressScraper:
         total_height = page.evaluate("document.body.scrollHeight")
         current = 0
         step = random.randint(300, 600)
+        #chaque scroll = entre 300 et 600 pixels
         while current < total_height:
+            #simule humain qui scroll
             page.evaluate(f"window.scrollBy(0, {step})")
             time.sleep(random.uniform(0.4, 1.0))
             current += step
@@ -187,11 +182,19 @@ class AliexpressScraper:
                 pass
 
             for query in queries:
+                # 🛑 VÉRIFICATION 1 : Arrêt avant de changer de mot-clé
+                if cache.get("STOP_SCRAPING"):
+                    print(f"🛑 Scraping Amazon annulé depuis le cache (Mot-clé: {query}).")
+                    break # Casse la boucle des mots-clés
                 formatted_query = query.replace(" ", "+")
                 print(f"\n🔍 Requête : «{query}»")
                 consecutive_fails = 0
 
                 for p_idx in range(1, max_pages + 1):
+                    # 🛑 VÉRIFICATION 2 : Arrêt avant de charger une nouvelle page
+                    if cache.get("STOP_SCRAPING"):
+                        print(f"🛑 Scraping Amazon annulé depuis le cache (Page {p_idx}).")
+                        break # Casse la boucle de pagination
                     url = f"{self.base_url}{formatted_query}&page={p_idx}"
 
                     try:
@@ -233,13 +236,18 @@ class AliexpressScraper:
                                 continue
 
                             # --- PRIX (LOGIQUE CORRIGÉE POUR MYSQL) ---
+                           # --- PRIX (LOGIQUE CORRIGÉE CIBLANT UNIQUEMENT .lw_el) ---
                             price_val = 0.0 # Valeur par défaut numérique
                             currency = "inconnu"
                             
-                            price_el = item.query_selector('[class*="price"], .lw_lm, [class*="multi--price"]')
+                            # On cible spécifiquement la classe vue sur ta capture d'écran
+                            price_el = item.query_selector('.lw_el')
                             
                             if price_el:
-                                raw_price = price_el.inner_text().strip()
+                                # Astuce : On essaie d'abord de prendre l'aria-label (plus propre), sinon on prend le texte à l'intérieur
+                                raw_price = price_el.get_attribute("aria-label") 
+                                if not raw_price:
+                                    raw_price = price_el.inner_text().strip()
                                 
                                 # Nettoyage : On ne garde que les chiffres, points et virgules
                                 clean_price = re.sub(r'[^\d.,]', '', raw_price)
@@ -261,7 +269,7 @@ class AliexpressScraper:
                                         price_val = float(clean_price)
                                     except ValueError:
                                         price_val = 0.0
-                                
+                            
                                 # Extraction de la devise
                                 if 'MAD' in raw_price: currency = 'MAD'
                                 elif '€' in raw_price or 'EUR' in raw_price: currency = 'EUR'

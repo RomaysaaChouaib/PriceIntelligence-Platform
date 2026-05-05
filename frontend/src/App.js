@@ -154,12 +154,7 @@ const CLUSTER_COLORS = ["#e74c3c","#3498db","#2ecc71","#f39c12","#9b59b6","#1abc
 
 // ══════════════════════════════════════════════════════════════════
 // 🛒 ONGLET PRODUITS
-// ══════════════════════════════════════════════════════════════════
-// 🛒 ONGLET PRODUITS (CORRIGÉ)
-// ══════════════════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════════════════
-// 🛒 ONGLET PRODUITS (CORRIGÉ POUR FORCER ?query=laptop)
-// ══════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════
 function TabProducts() {
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState([]);
@@ -170,6 +165,9 @@ function TabProducts() {
   const [pages, setPages] = useState(1);
   const [scrapeMsg, setScrapeMsg] = useState("");
   const [scrapeTarget, setScrapeTarget] = useState("");
+  
+  // 🔥 AJOUT : État pour stocker l'ID de la tâche Celery en cours
+  const [currentTaskId, setCurrentTaskId] = useState(null);
 
   // 🛡️ Fonction utilitaire pour récupérer le token d'authentification
   const getAuthHeaders = () => {
@@ -222,12 +220,11 @@ function TabProducts() {
     setLoading(false);
   };
 
-  // 3. Logique de Scraping CORRIGÉE
+  // 3. Logique de Scraping
   const runScrape = async (target) => {
     setLoading(true);
     setScrapeTarget(target);
     
-    // 🔥 MODIFICATION ICI : On force "laptop" si l'utilisateur n'a rien écrit
     const finalQuery = query.trim() !== "" ? query.trim() : "laptop";
     const searchParam = `?query=${encodeURIComponent(finalQuery)}`;
     
@@ -243,18 +240,22 @@ function TabProducts() {
         default: endpoint = "search/";
       }
 
-      // L'URL appelée sera toujours ex: http://127.0.0.1:8000/api/scrape/amazon/?query=laptop
       const res = await fetch(`${API}/${endpoint}${searchParam}`, {
         headers: getAuthHeaders()
       });
       const data = await res.json();
 
       if (data.success) {
+        // 🔥 AJOUT : On sauvegarde le task_id renvoyé par le backend
+        if (data.task_id) {
+            setCurrentTaskId(data.task_id);
+        }
+        
         setScrapeMsg(`✅ ${data.message}`);
         setMode("db");
         fetchDB(1); 
       } else {
-        setScrapeMsg(`❌ Erreur: ${data.error || "Problème lors du scraping"}`);
+        setScrapeMsg(`❌ ${data.message || data.error || "Problème lors du scraping"}`);
       }
     } catch (e) {
       console.error(e);
@@ -264,7 +265,33 @@ function TabProducts() {
     setScrapeTarget("");
   };
 
-  // 🎨 Styles de base pour les boutons de scraping corrigés
+  // 🔥 4. Fonction STOP MODIFIÉE POUR ENVOYER LE TASK_ID
+  const handleStop = async () => {
+    if (!currentTaskId) {
+      setScrapeMsg("❌ Impossible d'arrêter : aucune tâche en cours ou Task ID introuvable.");
+      return;
+    }
+
+    setScrapeMsg("⏳ Demande d'arrêt envoyée...");
+    try {
+      // 🔥 AJOUT : Envoi du task_id dans l'URL (GET)
+      const res = await fetch(`${API}/scrape/Stop/?task_id=${currentTaskId}`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+          setScrapeMsg(`🛑 ${data.message || "Scraping arrêté."}`);
+          setCurrentTaskId(null); // On réinitialise l'ID de la tâche après l'arrêt
+      } else {
+          setScrapeMsg(`❌ Erreur: ${data.message || "Impossible d'arrêter"}`);
+      }
+    } catch (e) {
+      console.error("Erreur lors de l'arrêt:", e);
+      setScrapeMsg("❌ Erreur lors de l'envoi de l'arrêt.");
+    }
+  };
+
   const scrapeBtnStyle = {
     padding: '10px 16px',
     border: 'none',
@@ -354,6 +381,14 @@ function TabProducts() {
               {loading && scrapeTarget === "all" ? "⏳ Scraping..." : "🔥 Tout Scraper"}
             </button>
 
+            {/* 🛑 BOUTON STOP (Maintenant toujours visible) */}
+            <button 
+              onClick={handleStop}
+              style={{ ...scrapeBtnStyle, background: '#ef4444' }}
+            >
+              <X size={18} style={{ marginRight: '8px' }} /> STOP
+            </button>
+
           </div>
         </div>
       )}
@@ -366,9 +401,9 @@ function TabProducts() {
                borderRadius: '8px', 
                marginBottom: '15px', 
                fontWeight: '500',
-               color: scrapeMsg.includes('✅') ? '#166534' : scrapeMsg.includes('⏳') ? '#0f172a' : '#991b1b',
-               backgroundColor: scrapeMsg.includes('✅') ? '#dcfce7' : scrapeMsg.includes('⏳') ? '#f1f5f9' : '#fee2e2',
-               border: `1px solid ${scrapeMsg.includes('✅') ? '#bbf7d0' : scrapeMsg.includes('⏳') ? '#e2e8f0' : '#fecaca'}`
+               color: scrapeMsg.includes('✅') ? '#166534' : (scrapeMsg.includes('⏳') || scrapeMsg.includes('🛑')) ? '#0f172a' : '#991b1b',
+               backgroundColor: scrapeMsg.includes('✅') ? '#dcfce7' : (scrapeMsg.includes('⏳') || scrapeMsg.includes('🛑')) ? '#f1f5f9' : '#fee2e2',
+               border: `1px solid ${scrapeMsg.includes('✅') ? '#bbf7d0' : (scrapeMsg.includes('⏳') || scrapeMsg.includes('🛑')) ? '#e2e8f0' : '#fecaca'}`
              }}>
           {scrapeMsg}
         </div>

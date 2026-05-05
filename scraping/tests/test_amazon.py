@@ -88,6 +88,7 @@ def run_test():
     if results:
         # Affichage du JSON pur dans le terminal
         print(json.dumps(results, indent=4, ensure_ascii=False))
+        # dumps=convertit en string json
         # Export CSV en parallèle
         scraper.export_to_csv(results)
     else:

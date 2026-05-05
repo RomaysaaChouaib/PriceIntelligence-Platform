@@ -1,26 +1,46 @@
-import json
-from scraping.spiders.aliexpress import AliexpressScraper
+# Import de la classe AliexpressScraper (adapte le chemin selon ta structure)
+from scraping.core.scraper_aliex import AliexpressScraper 
 
-def run_test():
-    # On donne le mot de base, le scraper s'occupe de la liste !
-    base_keyword = "laptop"
-    
+# Import pour la database
+from scraping.db.mysql_writer import MySQLWriter
+
+def test_full_search():
+    query = "laptop"
+
+    print(f"🚀 Lancement du test de scraping AliExpress pour : {query}")
+    print("=" * 50)
+
+    # 1. Instancier le scraper
     scraper = AliexpressScraper()
-    
-    print("🚀 Lancement du scraper furtif AliExpress (DrissionPage)...")
-    
-    # max_pages=20 (AliExpress peut bloquer avant, c'est normal)
-    results = scraper.scrape(base_keyword, max_pages=10)
-    
+
+    # 2. Lancer le scraping (j'ai mis max_pages=2 pour tester plus vite)
+    results = scraper.scrape(query, max_pages=9)
+
+    print("-" * 50)
+    print(f"📦 Nombre total de produits trouvés : {len(results)}")
+    print("-" * 50)
+
+    # 3. Affichage des 10 premiers résultats avec les nouveaux champs (price et old_price)
+    for p in results[:10]:
+        print(f"[{p.get('source', 'AliExpress')}] (Query: {p.get('search_query')} | Page: {p.get('page')})")
+        print(f" {p.get('brand')} - {p.get('title')[:50]}...")
+        print(f" 💰 Prix actuel: {p.get('price')} {p.get('currency')} | Ancien prix: {p.get('old_price')} {p.get('currency')}")
+        print(f" 🔗 Lien: {p.get('link')[:60]}...")
+        print("-" * 20)
+
+    # 4. EXPORTATION EN CSV 
     if results:
-        # Affichage du JSON pur dans le terminal (les 5 premiers pour ne pas polluer)
-        print(json.dumps(results[:5], indent=4, ensure_ascii=False)) 
-        
-        # Export CSV 
-        scraper.export_to_csv(results)
-        print(f"\n✅ Terminé ! {len(results)} produits trouvés sur AliExpress et sauvegardés dans 'resultats_aliexpress.csv'.")
+        scraper.export_to_csv(results, "test_aliexpress_laptops.csv")
     else:
-        print(json.dumps({"error": "Aucun résultat trouvé. AliExpress a peut-être bloqué la requête."}, indent=4, ensure_ascii=False))
+        print("⚠️ Aucun résultat à exporter.")
+
+    # 5. SAUVEGARDE DANS MYSQL (AVEC MISE À JOUR DES PRIX)
+    if results:
+        print("💾 Envoi des données vers MySQL...")
+        db = MySQLWriter()
+        # C'est cette méthode qui va gérer l'insertion OU la mise à jour
+        db.insert_products(results) 
+        print("✅ Données sauvegardées et prix mis à jour avec succès !")
 
 if __name__ == "__main__":
-    run_test()
+    test_full_search()
