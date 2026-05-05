@@ -160,7 +160,7 @@ function TabProducts() {
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState("db"); // "csv", "db", ou "scrape"
+  const [mode, setMode] = useState("db"); // "csv", "db", "db_accessoire", ou "scrape"
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [scrapeMsg, setScrapeMsg] = useState("");
@@ -220,6 +220,27 @@ function TabProducts() {
     setLoading(false);
   };
 
+  // 🔥 NOUVEAU : Fetch pour les Accessoires (MySQL)
+  const fetchAccessories = async (p = 1) => {
+    setLoading(true);
+    setMode("db_accessoire");
+    setScrapeMsg("");
+    try {
+      const res = await fetch(`${API}/search/Accessoire/?query=${query}&page=${p}&limit=20`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      // On met les accessoires dans le state "products" pour ne pas casser l'affichage en bas
+      setProducts(data.accessories || []); 
+      setTotal(data.total || 0);
+      setPages(data.pages || 1);
+      setPage(p);
+    } catch (e) {
+      console.error(e);
+    }
+    setLoading(false);
+  };
+
   // 3. Logique de Scraping
   const runScrape = async (target) => {
     setLoading(true);
@@ -246,7 +267,6 @@ function TabProducts() {
       const data = await res.json();
 
       if (data.success) {
-        // 🔥 AJOUT : On sauvegarde le task_id renvoyé par le backend
         if (data.task_id) {
             setCurrentTaskId(data.task_id);
         }
@@ -265,7 +285,7 @@ function TabProducts() {
     setScrapeTarget("");
   };
 
-  // 🔥 4. Fonction STOP MODIFIÉE POUR ENVOYER LE TASK_ID
+  // 4. Fonction STOP
   const handleStop = async () => {
     if (!currentTaskId) {
       setScrapeMsg("❌ Impossible d'arrêter : aucune tâche en cours ou Task ID introuvable.");
@@ -274,7 +294,6 @@ function TabProducts() {
 
     setScrapeMsg("⏳ Demande d'arrêt envoyée...");
     try {
-      // 🔥 AJOUT : Envoi du task_id dans l'URL (GET)
       const res = await fetch(`${API}/scrape/Stop/?task_id=${currentTaskId}`, {
         headers: getAuthHeaders()
       });
@@ -282,7 +301,7 @@ function TabProducts() {
       
       if (data.success) {
           setScrapeMsg(`🛑 ${data.message || "Scraping arrêté."}`);
-          setCurrentTaskId(null); // On réinitialise l'ID de la tâche après l'arrêt
+          setCurrentTaskId(null); 
       } else {
           setScrapeMsg(`❌ Erreur: ${data.message || "Impossible d'arrêter"}`);
       }
@@ -325,6 +344,10 @@ function TabProducts() {
           <button className={`pip-mode-btn ${mode === "db" ? "active" : ""}`} onClick={() => fetchDB(1)}>
             🗄️ Produits (DB)
           </button>
+          {/* 🔥 NOUVEAU BOUTON ICI */}
+          <button className={`pip-mode-btn ${mode === "db_accessoire" ? "active" : ""}`} onClick={() => fetchAccessories(1)}>
+            🎧 Accessoires (DB)
+          </button>
           <button className={`pip-mode-btn ${mode === "scrape" ? "active" : ""}`} onClick={() => setMode("scrape")}>
             🕷️ Scraper
           </button>
@@ -332,7 +355,12 @@ function TabProducts() {
 
         {mode !== "scrape" && (
           <button 
-            onClick={() => (mode === "csv" ? fetchCSV(1) : fetchDB(1))} 
+            // 🔥 NOUVELLE LOGIQUE POUR LE BOUTON RECHERCHE
+            onClick={() => {
+              if (mode === "csv") fetchCSV(1);
+              else if (mode === "db_accessoire") fetchAccessories(1);
+              else fetchDB(1);
+            }} 
             disabled={loading} 
             className="pip-search-btn"
           >
@@ -381,7 +409,6 @@ function TabProducts() {
               {loading && scrapeTarget === "all" ? "⏳ Scraping..." : "🔥 Tout Scraper"}
             </button>
 
-            {/* 🛑 BOUTON STOP (Maintenant toujours visible) */}
             <button 
               onClick={handleStop}
               style={{ ...scrapeBtnStyle, background: '#ef4444' }}
@@ -413,13 +440,14 @@ function TabProducts() {
       <div className="pip-status-bar" style={{ marginBottom: '15px' }}>
         <strong>{total}</strong> produits trouvés
         <span className="mode-tag" style={{ marginLeft: '10px', padding: '4px 8px', borderRadius: '4px', background: '#e2e8f0', fontSize: '12px', fontWeight: '600' }}>
-          {mode === "csv" ? "Fichier CSV" : mode === "db" ? "Base de données" : "Mode Scraping"}
+          {/* 🔥 MISE A JOUR DU TAG */}
+          {mode === "csv" ? "Fichier CSV" : mode === "db" ? "Base de données" : mode === "db_accessoire" ? "Accessoires" : "Mode Scraping"}
         </span>
       </div>
 
       {/* 📦 Liste des produits ou Spinner */}
       {loading && mode !== "scrape" ? (
-        <Spinner />
+        <div className="spinner-placeholder">Chargement...</div> /* Remplace par <Spinner /> si le composant est dispo */
       ) : (
         <>
           <div className="pip-product-list">
@@ -428,7 +456,7 @@ function TabProducts() {
                 {item.is_gaming && <span className="pip-gaming-tag">🎮 Gaming</span>}
                 {item.image && <img src={item.image} alt={item.title} className="pip-product-img" />}
                 <div className="pip-card-content">
-                  <span className="pip-brand-label">{item.brand_detected || "Inconnu"}</span>
+                  <span className="pip-brand-label">{item.brand_detected || item.brand || "Inconnu"}</span>
                   <h3 className="pip-card-title">{item.title}</h3>
                   <p className="pip-price">{item.price?.toLocaleString()} MAD</p>
                   <div className="pip-card-footer">
@@ -446,14 +474,24 @@ function TabProducts() {
           {pages > 1 && (
             <div className="pip-pagination">
               <button 
-                onClick={() => (mode === "csv" ? fetchCSV(page - 1) : fetchDB(page - 1))} 
+                // 🔥 NOUVELLE LOGIQUE DE PAGINATION
+                onClick={() => {
+                  if (mode === "csv") fetchCSV(page - 1);
+                  else if (mode === "db_accessoire") fetchAccessories(page - 1);
+                  else fetchDB(page - 1);
+                }} 
                 disabled={page <= 1}
               >
                 ←
               </button>
               <span>{page} / {pages}</span>
               <button 
-                onClick={() => (mode === "csv" ? fetchCSV(page + 1) : fetchDB(page + 1))} 
+                // 🔥 NOUVELLE LOGIQUE DE PAGINATION
+                onClick={() => {
+                  if (mode === "csv") fetchCSV(page + 1);
+                  else if (mode === "db_accessoire") fetchAccessories(page + 1);
+                  else fetchDB(page + 1);
+                }} 
                 disabled={page >= pages}
               >
                 →

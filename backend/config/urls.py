@@ -15,6 +15,7 @@ urlpatterns = [
     path("api/scrape/Stop/", views.stop_scraping_action),
     path('api/search/', views.search_view),
     # Accessoire :
+    path('api/search/Accessoire/', views.search_accessoire_view),
     path('api/products/', views.products_view),
     path('api/stats/', views.stats_view),
     path('api/clustering/', views.clustering_view),
