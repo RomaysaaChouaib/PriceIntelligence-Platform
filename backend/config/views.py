@@ -57,102 +57,248 @@ def load_from_db():
     return df
 
 
+# ════════════════════════════════════════════════════════════════════════════
+# VUE 1 — SCRAPING
+# ════════════════════════════════════════════════════════════════════════════
+# STOP_SCRAPING = False
+# def stop_scraping_action(request):
+#     """ Fonction pour demander l'arrêt """
+#     global STOP_SCRAPING
+#     STOP_SCRAPING = True
+#     return JsonResponse({"message": "Signal d'arrêt envoyé (STOP_SCRAPING = True)"})
+
+from config.celery import app # Assure-toi d'importer ton app Celery pour pouvoir contrôler les tâches
+from django.core.cache import cache
+@csrf_exempt
+def stop_scraping_action(request):
+    task_id = None
+    
+    # 1. On essaie de récupérer le task_id selon la méthode (GET ou POST)
+    if request.method == "GET":
+        task_id = request.GET.get("task_id")
+    elif request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            task_id = data.get("task_id")
+        except json.JSONDecodeError:
+            task_id = request.POST.get("task_id")
+
+    # 2. MÉTHODE DOUCE : On met le cache à True (utile si tu as mis des break dans tes boucles)
+    cache.set("STOP_SCRAPING", True, 300)
+
+    # 3. Vérification du task_id
+    if not task_id:
+        return JsonResponse({
+            "success": False, 
+            "message": "Signal d'arrêt envoyé au cache, mais impossible de tuer Celery car aucun task_id n'a été fourni."
+        }, status=400)
+
+    # 4. MÉTHODE FORTE : On tue immédiatement la tâche Celery
+    try:
+        from config.celery import app # Remplace par le bon nom de dossier
+        app.control.revoke(task_id, terminate=True)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": f"Erreur Celery: {str(e)}"})
+
+    return JsonResponse({
+        "success": True, 
+        "message": f"Le scraping (Tâche {task_id}) a été stoppé avec succès."
+    })
+from .tasks import scrape_jumia_task
+
 def scrape_jumia(request):
     query = request.GET.get("query", "pc portable").strip().lower()
-    db = MySQLWriter()
-    try:
-        products = scrape_product(query)
-        inserted = 0
-        if products:
-            db.insert_products(products)
-            inserted = len(products)
-        db.close()
-        return JsonResponse({"success": True, "source": "scraping -> mysql",
-            "query": query, "scraped": len(products), "inserted": inserted,
-            "message": f"{inserted} produits enregistrés dans MySQL"})
-    except Exception as e:
-        db.close()
-        return JsonResponse({"success": False, "error": str(e)}, status=500)
+    
+    # On lance la tâche en arrière-plan sans attendre
+    task = scrape_jumia_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement
+        "message": "Le scraping a commencé en arrière-plan."
+    })
 
 
 def scrap_amazon(request):
+    global STOP_SCRAPING
+    STOP_SCRAPING = False  # Reset au lancement
+    
     query = request.GET.get("query", "laptop").strip().lower()
     db = MySQLWriter()
+    
     try:
+        # Étape 1 : On lance la récupération (Amazon est souvent long)
         products = scrape_amazon_product(query)
+        
+        # Étape 2 : VERIFICATION DU SIGNAL D'ARRÊT
+        # Si la variable est passée à True pendant l'étape 1
+        if STOP_SCRAPING:
+            db.close()
+            return JsonResponse({
+                "success": False, 
+                "message": "Scraping Amazon interrompu manuellement. Aucune insertion effectuée."
+            })
+
+        # Étape 3 : Traitement normal si pas d'arrêt
         inserted = 0
         scraped_count = len(products) if products else 0
+        
         if products:
             db.insert_products(products)
             inserted = len(products)
+            
         db.close()
-        return JsonResponse({"success": True, "source": "scraping -> mysql",
-            "query": query, "scraped": scraped_count, "inserted": inserted,
-            "message": f"{inserted} produits Amazon enregistrés dans MySQL"})
+        return JsonResponse({
+            "success": True,
+            "source": "scraping -> mysql",
+            "query": query,
+            "scraped": scraped_count,
+            "inserted": inserted,
+            "message": f"{inserted} produits Amazon enregistrés dans MySQL"
+        })
+        
     except Exception as e:
-        if 'db' in locals(): db.close()
+        if 'db' in locals():
+            db.close()
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
 def scrap_aliexpress(request):
+    global STOP_SCRAPING
+    STOP_SCRAPING = False  # Reset pour permettre un nouveau lancement
+    
     query = request.GET.get("query", "laptop").strip().lower()
     db = MySQLWriter()
+    
     try:
         scraper = AliexpressScraper()
+        
+        # Le scraper va travailler ici (max_pages=20 peut être long)
         products = scraper.scrape(query, max_pages=20)
+        
+        # --- VÉRIFICATION DU SIGNAL D'ARRÊT ---
+        if STOP_SCRAPING:
+            db.close()
+            return JsonResponse({
+                "success": False, 
+                "message": "Processus AliExpress stoppé par l'utilisateur. Aucune insertion effectuée."
+            })
+        # --------------------------------------
+
         inserted = 0
         if products:
             db.insert_products(products)
             inserted = len(products)
+            
         db.close()
-        return JsonResponse({"success": True, "source": "Aliexpress -> mysql",
-            "query": query, "scraped": len(products) if products else 0,
-            "inserted": inserted, "message": f"{inserted} produits AliExpress enregistrés dans MySQL"})
+        return JsonResponse({
+            "success": True,
+            "source": "Aliexpress -> mysql",
+            "query": query,
+            "scraped": len(products) if products else 0,
+            "inserted": inserted,
+            "message": f"{inserted} produits AliExpress enregistrés dans MySQL"
+        })
+        
     except Exception as e:
-        if db: db.close()
+        if 'db' in locals():
+            db.close()
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from .tasks import scrape_all_task 
 
-@csrf_exempt
 def scrape_all(request):
     query = request.GET.get("query", "laptop").strip().lower()
-    db = MySQLWriter()
-    results = {"jumia": [], "amazon": [], "aliexpress": []}
-    errors = []
-    try:
-        with ThreadPoolExecutor(max_workers=3) as executor:
-            futures = {
-                executor.submit(scrape_product, query): "jumia",
-                executor.submit(scrape_amazon_product, query): "amazon",
-                executor.submit(lambda q: AliexpressScraper().scrape(q, max_pages=20), query): "aliexpress",
-            }
-            for future in as_completed(futures):
-                source = futures[future]
-                try:
-                    data = future.result()
-                    results[source] = data if data else []
-                except Exception as e:
-                    errors.append(f"{source} error: {str(e)}")
-                    results[source] = []
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = scrape_all_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
+# Ancienne version de scrape_all (sans Celery, avec vérification du signal d'arrêt)
+# @csrf_exempt
+# def scrape_all(request):
+#     global STOP_SCRAPING
+#     STOP_SCRAPING = False # On réinitialise à chaque appel
+    
+#     query = request.GET.get("query", "laptop").strip().lower()
+#     db = MySQLWriter()
+#     results = {"jumia": [], "amazon": [], "aliexpress": []}
+#     errors = []
+#     total_inserted = 0
 
-        all_products = results["jumia"] + results["amazon"] + results["aliexpress"]
-        inserted = 0
-        if all_products:
-            db.insert_products(all_products)
-            inserted = len(all_products)
-        db.close()
-        return JsonResponse({"success": True, "query": query,
-            "jumia_count": len(results["jumia"]), "amazon_count": len(results["amazon"]),
-            "aliexpress_count": len(results["aliexpress"]), "total_scraped": len(all_products),
-            "inserted": inserted, "errors": errors,
-            "message": f"{inserted} produits enregistrés depuis 3 sources"})
-    except Exception as e:
-        db.close()
-        return JsonResponse({"success": False, "error": str(e)}, status=500)
+#     try:
+#         with ThreadPoolExecutor(max_workers=3) as executor:
+#             futures = {
+#                 executor.submit(scrape_product, query): "jumia",
+#                 executor.submit(scrape_amazon_product, query): "amazon",
+#                 executor.submit(lambda q: AliexpressScraper().scrape(q, max_pages=20), query): "aliexpress",
+#             }
+
+#             for future in as_completed(futures):
+#                 source = futures[future]
+                
+#                 # --- AJOUT SÉCURITÉ STOP ---
+#                 if STOP_SCRAPING:
+#                     errors.append(f"Interruption : Les données de {source} ont été ignorées.")
+#                     continue 
+#                 # ---------------------------
+
+#                 try:
+#                     data = future.result()
+                    
+#                     if data:
+#                         results[source] = data
+                        
+#                         # Deuxième vérification juste avant l'écriture MySQL
+#                         if not STOP_SCRAPING:
+#                             try:
+#                                 db.insert_products(data)
+#                                 total_inserted += len(data)
+#                                 print(f"✅ [{source}] inséré immédiatement : {len(data)} produits")
+#                             except Exception as db_err:
+#                                 errors.append(f"DB Error for {source}: {str(db_err)}")
+#                     else:
+#                         results[source] = []
+
+#                 except Exception as e:
+#                     errors.append(f"{source} error: {str(e)}")
+#                     results[source] = []
+
+#         db.close()
+        
+#         total_scraped = len(results["jumia"]) + len(results["amazon"]) + len(results["aliexpress"])
+
+#         return JsonResponse({
+#             "success": not STOP_SCRAPING,
+#             "query": query,
+#             "jumia_count": len(results["jumia"]),
+#             "amazon_count": len(results["amazon"]),
+#             "aliexpress_count": len(results["aliexpress"]),
+#             "total_scraped": total_scraped,
+#             "inserted": total_inserted,
+#             "errors": errors,
+#             "message": "Scraping interrompu" if STOP_SCRAPING else f"{total_inserted} produits enregistrés"
+#         })
+#     except Exception as e:
+#         if 'db' in locals(): db.close()
+#         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
+from celery.result import AsyncResult
+
+def check_status(request, task_id):
+    res = AsyncResult(task_id)
+    return JsonResponse({
+        "task_id": task_id,
+        "status": res.status, # PENDING, PROGRESS, SUCCESS
+        "result": res.result if res.ready() else None
+    })
 def search_view(request):
     query  = request.GET.get("query", "").strip().lower()
     page   = int(request.GET.get("page", 1))
