@@ -195,7 +195,7 @@ class MySQLWriter:
     # =========================
     # CACHE DM
     # =========================
-    def get_cache(self, key):
+     def get_cache(self, key):
         """Retourne le cache si valide, None sinon"""
         sql = """
         SELECT result, products_count, is_valid 
@@ -221,7 +221,21 @@ class MySQLWriter:
     def save_cache(self, key, data):
         """Sauvegarde le résultat DM"""
         import json
+        import math
         count = self.count_all_products()
+
+        # Nettoie les valeurs non-JSON (NaN, Infinity, etc.)
+        def clean(obj):
+            if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+                return None
+            if isinstance(obj, dict):
+                return {k: clean(v) for k, v in obj.items()}
+            if isinstance(obj, list):
+                return [clean(i) for i in obj]
+            return obj
+
+        data = clean(data)
+
         sql = """
         INSERT INTO dm_cache (cache_key, result, products_count, is_valid)
         VALUES (%s, %s, %s, TRUE)
@@ -234,7 +248,6 @@ class MySQLWriter:
         self.cursor.execute(sql, (key, json.dumps(data, default=str), count))
         self.conn.commit()
         print(f"✔ Cache '{key}' sauvegardé")
-
     def invalidate_cache(self, key=None):
         """Invalide un cache spécifique ou tout le cache"""
         if key:
@@ -245,7 +258,6 @@ class MySQLWriter:
             # Invalide TOUT le cache (quand nouveaux produits ajoutés)
             self.cursor.execute("UPDATE dm_cache SET is_valid = FALSE")
         self.conn.commit()
-
     # INSERT ACCESSORIES
     # =========================
     def insert_accessories(self, accessories):
