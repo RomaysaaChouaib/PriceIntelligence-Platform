@@ -6,8 +6,14 @@ Orchestration : Chargement → Nettoyage → Features → Normalisation
 """
 
 import os
+import sys
 import pandas as pd
 import numpy as np
+
+# Ajout du chemin racine pour accéder au module scraping
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
+from scraping.db.mysql_writer import MySQLWriter
 
 from data_mining.preprocessing.clean_data import clean_dataframe
 from data_mining.preprocessing.feature_engineering import add_features_dataframe
@@ -24,12 +30,7 @@ from data_mining.models.anomaly import (
     detect_iqr, detect_zscore, detect_isolation_forest, anomaly_summary, get_anomalies,
 )
 from data_mining.models.association import run_association_analysis
-
-
-# Chemin par défaut vers le CSV du backend
-DEFAULT_CSV = os.path.join(
-    os.path.dirname(__file__), "..", "..", "backend", "resultats_frontend.csv"
-)
+from data_mining.visualization.prepare_data import prepare_all_for_frontend
 
 
 class PriceIntelligencePipeline:
@@ -45,15 +46,7 @@ class PriceIntelligencePipeline:
         print(results["rules"])
     """
 
-    import sys, os
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
-
-from scraping.db.mysql_writer import MySQLWriter
-
-class PriceIntelligencePipeline:
-
     def __init__(self, n_clusters: int = 4):
-        # ← supprime csv_path complètement
         self.n_clusters = n_clusters
         self.df_raw     = None
         self.df         = None
@@ -159,6 +152,7 @@ class PriceIntelligencePipeline:
                 .run_association()
         )
         self.results["df"] = self.df
+        self.results["frontend_payload"] = prepare_all_for_frontend(self.df, self.results)
         print(f"\n{'='*60}")
         print(f"[Pipeline] ✅ Terminé — {len(self.results)} résultats disponibles")
         return self.results
