@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.core.cache import cache
 import requests
 from bs4 import BeautifulSoup
 import time
@@ -82,9 +83,18 @@ class SourisJumiaScraper:
         queries = self.generate_queries(query)
         
         for q_idx, search_word in enumerate(queries, 1):
+                 # 🛑 VÉRIFICATION 1 : Est-ce qu'on doit s'arrêter avant de changer de mot-clé ?
+            if cache.get("STOP_SCRAPING"):
+                print("🛑 Scraping annulé depuis le cache (Changement de mot-clé).")
+                break # Casse la boucle des mots-clés
             print(f"\n[{q_idx}/{len(queries)}] Recherche Jumia : '{search_word}'")
             
             for page in range(1, max_pages + 1):
+                       
+                # 🛑 VÉRIFICATION 2 : Est-ce qu'on doit s'arrêter avant de charger une nouvelle page ?
+                if cache.get("STOP_SCRAPING"):
+                    print(f"🛑 Scraping annulé depuis le cache (Page {page}).")
+                    break # Casse la boucle de pagination
                 url = f"{self.base_url}?q={search_word}&page={page}"
                 response = self._get_with_retry(url)
 
@@ -179,8 +189,3 @@ class SourisJumiaScraper:
             dict_writer.writeheader()
             dict_writer.writerows(products)
         print(f"\nExportation réussie : {filename}")
-
-# Exemple d'utilisation :
-# scraper = SourisJumiaScraper()
-# resultats = scraper.scrape("souris")
-# scraper.export_to_csv(resultats)

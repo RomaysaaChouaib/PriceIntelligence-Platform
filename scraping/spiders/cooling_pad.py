@@ -1,6 +1,7 @@
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
+from django.core.cache import cache
 import time
 import re
 import csv
@@ -75,9 +76,18 @@ class CoolingPadJumia:
         queries = self.generate_queries(query)
         
         for q_idx, search_word in enumerate(queries, 1):
+                    
+            # 🛑 VÉRIFICATION 1 : Est-ce qu'on doit s'arrêter avant de changer de mot-clé ?
+            if cache.get("STOP_SCRAPING"):
+                print("🛑 Scraping annulé depuis le cache (Changement de mot-clé).")
+                break # Casse la boucle des mots-clés
             print(f"\n[{q_idx}/{len(queries)}] Recherche Jumia : '{search_word}'")
             
             for page in range(1, max_pages + 1):
+                   # 🛑 VÉRIFICATION 2 : Est-ce qu'on doit s'arrêter avant de charger une nouvelle page ?
+                if cache.get("STOP_SCRAPING"):
+                    print(f"🛑 Scraping annulé depuis le cache (Page {page}).")
+                    break # Casse la boucle de pagination
                 url = f"{self.base_url}?q={search_word}&page={page}"
                 response = self._get_with_retry(url)
 
@@ -268,10 +278,18 @@ class CoolingPadAmazon:
             page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
             for search_word in queries: 
+                      # 🛑 VÉRIFICATION 1 : Arrêt avant de changer de mot-clé
+                if cache.get("STOP_SCRAPING"):
+                    print(f"🛑 Scraping Amazon annulé depuis le cache (Mot-clé: {search_word}).")
+                    break # Casse la boucle des mots-clés
                 print(f"\n--- Recherche Amazon : '{search_word}' ---")
                 formatted_query = search_word.replace(" ", "+")
                 
                 for page_idx in range(1, max_pages + 1): 
+                         # 🛑 VÉRIFICATION 2 : Arrêt avant de charger une nouvelle page
+                    if cache.get("STOP_SCRAPING"):
+                        print(f"🛑 Scraping Amazon annulé depuis le cache (Page {page_idx}).")
+                        break # Casse la boucle de pagination
                     url = f"{self.base_url}{formatted_query}&page={page_idx}"
                     
                     try:
@@ -527,12 +545,20 @@ class CoolingPadAliexpress:
                 pass
 
             for query in queries:
+                        # 🛑 VÉRIFICATION 1 : Arrêt avant de changer de mot-clé
+                if cache.get("STOP_SCRAPING"):
+                    print(f"🛑 Scraping Amazon annulé depuis le cache (Mot-clé: {query}).")
+                    break # Casse la boucle des mots-clés
                 formatted_query = query.replace(" ", "+")
                 search_word = query # Pour correspondre à ton append
                 print(f"\n🔍 Requête : «{query}»")
                 consecutive_fails = 0
 
                 for page_idx in range(1, max_pages + 1):
+                       # 🛑 VÉRIFICATION 2 : Arrêt avant de charger une nouvelle page
+                    if cache.get("STOP_SCRAPING"):
+                        print(f"🛑 Scraping Amazon annulé depuis le cache (Page {page_idx}).")
+                        break # Casse la boucle de pagination
                     url = f"{self.base_url}{formatted_query}&page={page_idx}"
 
                     try:
