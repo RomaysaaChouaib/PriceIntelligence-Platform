@@ -3,13 +3,12 @@ import os, sys, json
 import numpy as np
 import pandas as pd
 import math
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, BASE_DIR)
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-
+# Scraping
 from scraping.db.mysql_writer import MySQLWriter
 from scraping.core.scraper import scrape_product
 from scraping.core.scraper_amazon import scrape_amazon_product, AmazonScraper
@@ -66,7 +65,7 @@ def load_from_db():
 #     global STOP_SCRAPING
 #     STOP_SCRAPING = True
 #     return JsonResponse({"message": "Signal d'arrêt envoyé (STOP_SCRAPING = True)"})
-from config.celery import app # Assure-toi d'importer ton app Celery pour pouvoir contrôler les tâches
+from config.celery import app 
 from django.core.cache import cache
 @csrf_exempt
 def stop_scraping_action(request):
@@ -103,13 +102,13 @@ def stop_scraping_action(request):
         "success": True, 
         "message": f"Le scraping (Tâche {task_id}) a été stoppé avec succès."
     })
-from .tasks import scrape_jumia_task
+from . import tasks
 
 def scrape_jumia(request):
     query = request.GET.get("query", "pc portable").strip().lower()
     
     # On lance la tâche en arrière-plan sans attendre
-    task = scrape_jumia_task.delay(query)
+    task = tasks.scrape_jumia_task.delay(query)
     
     return JsonResponse({
         "success": True,
@@ -206,13 +205,12 @@ def scrap_aliexpress(request):
 
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from .tasks import scrape_all_task 
 
 def scrape_all(request):
     query = request.GET.get("query", "laptop").strip().lower()
     
     # On lance la tâche globale en arrière-plan sans attendre
-    task = scrape_all_task.delay(query)
+    task = tasks.scrape_all_task.delay(query)
     
     return JsonResponse({
         "success": True,
@@ -326,10 +324,75 @@ def search_view(request):
     })
 
 # Accessoire de Laptop:
-from django.http import JsonResponse
-# N'oublie pas d'importer ta classe MySQLWriter en haut du fichier si ce n'est pas déjà fait
-# from chemin.vers.ton.fichier import MySQLWriter
+# 1-souris
+def scrape_all_souris(request):
+    query = request.GET.get("query", "souris").strip().lower()
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = tasks.scrape_all_mouse_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
 
+# 2-sac:
+def scrape_all_sac(request):
+    query = request.GET.get("query", "sac_laptop").strip().lower()
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = tasks.scrape_all_sac_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
+
+# 3-usb:
+def scrape_all_usb(request):
+    query = request.GET.get("query", "usb_flash_drive").strip().lower()
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = tasks.scrape_all_usb_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
+
+#4-laptop stand:
+def scrape_all_laptop_stand(request):
+    query = request.GET.get("query", "laptop_stand").strip().lower()
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = tasks.scrape_all_laptop_stand_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
+
+
+#5-cooling pad:
+def scrape_all_cooling_pad(request):
+    query = request.GET.get("query", "cooling_pad").strip().lower()
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = tasks.scrape_all_cooling_pad_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
+
+
+
+# affichage des produits accessoires depuis MySQL uniquement
 def search_accessoire_view(request):
     query = request.GET.get("query", "").strip().lower()
     page = int(request.GET.get("page", 1))
@@ -358,6 +421,7 @@ def search_accessoire_view(request):
         "pages": (total // limit) + (1 if total % limit else 0),
         "accessories": accessories  # J'ai renommé la clé "products" en "accessories" pour plus de logique
     })
+
 # ════════════════════════════════════════════════════════════════════════════
 # VUE 2 — PRODUITS DATA MINING  (maintenant depuis MySQL)
 # ════════════════════════════════════════════════════════════════════════════
@@ -400,7 +464,7 @@ def stats_view(request):
         cached = db.get_cache('stats')
         if cached:
             db.close()
-            return JsonResponse(cached)
+            return JsonResponse(cached,safe=False)
         db.close()
 
         df          = load_from_db()
@@ -422,7 +486,7 @@ def stats_view(request):
         db2 = MySQLWriter()
         db2.save_cache('stats', result)
         db2.close()
-        return JsonResponse(result, json_dumps_params={'default': safe_json})
+        return JsonResponse(result, json_dumps_params={'default': safe_json},safe=False)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -436,7 +500,8 @@ def clustering_view(request):
         cached = db.get_cache(cache_key)
         if cached:
             db.close()
-            return JsonResponse(cached)
+            # 🔥 CORRECTION ICI : ajout de safe=False
+            return JsonResponse(cached, safe=False)
         db.close()
 
         df = load_from_db()
@@ -461,7 +526,6 @@ def clustering_view(request):
         result = {'source': 'mysql', **extra,
                   'summary': summary.to_dict(orient='records'), 'scatter': scatter}
 
-        # Nettoie les valeurs non-JSON (NaN, Infinity) avant sauvegarde
         import json
         clean_result = json.loads(json.dumps(result, default=safe_json))
 
@@ -478,7 +542,8 @@ def anomalies_view(request):
         cached = db.get_cache('anomalies')
         if cached:
             db.close()
-            return JsonResponse(cached)
+            # 🔥 CORRECTION ICI : ajout de safe=False
+            return JsonResponse(cached, safe=False)
         db.close()
 
         df = load_from_db()
@@ -508,7 +573,8 @@ def association_view(request):
         cached = db.get_cache('association')
         if cached:
             db.close()
-            return JsonResponse(cached)
+            # 🔥 CORRECTION ICI : ajout de safe=False
+            return JsonResponse(cached, safe=False)
         db.close()
 
         df    = load_from_db()

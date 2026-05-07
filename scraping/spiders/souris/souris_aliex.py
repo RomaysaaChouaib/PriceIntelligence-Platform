@@ -4,6 +4,7 @@ import time
 import random
 import re
 from datetime import datetime
+from django.core.cache import cache
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
 
 class SourisAliexpressScraper:
@@ -147,12 +148,20 @@ class SourisAliexpressScraper:
                 pass
 
             for query in queries:
+                      # 🛑 VÉRIFICATION 1 : Arrêt avant de changer de mot-clé
+                if cache.get("STOP_SCRAPING"):
+                    print(f"🛑 Scraping Amazon annulé depuis le cache (Mot-clé: {query}).")
+                    break # Casse la boucle des mots-clés
                 formatted_query = query.replace(" ", "+")
                 search_word = query # Pour correspondre à ton append
                 print(f"\n🔍 Requête : «{query}»")
                 consecutive_fails = 0
 
                 for page_idx in range(1, max_pages + 1):
+                          # 🛑 VÉRIFICATION 2 : Arrêt avant de charger une nouvelle page
+                    if cache.get("STOP_SCRAPING"):
+                        print(f"🛑 Scraping Amazon annulé depuis le cache (Page {p_idx}).")
+                        break # Casse la boucle de pagination
                     url = f"{self.base_url}{formatted_query}&page={page_idx}"
 
                     try:

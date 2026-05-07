@@ -9,3 +9,5 @@
 C:\Program Files\Redis>redis-server.exe
 
 +celery -A config worker --loglevel=info --pool=solo
+
+# pour vider file d'attente :celery -A config purge

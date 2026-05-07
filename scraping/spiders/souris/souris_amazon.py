@@ -3,6 +3,7 @@ import time
 import random
 import re
 from datetime import datetime
+from django.core.cache import cache
 from playwright.sync_api import sync_playwright
 
 """
@@ -27,44 +28,44 @@ class SourisAmazonScraper:
         # Dictionnaire adapté pour les souris
         related = {
             "souris": [
-                # "souris", # Terme principal
-                # "souris gamer",
-                # "souris sans fil",
-                # "souris filaire",
-                # "souris bluetooth",
-                # "souris ergonomique",
-                # "souris verticale",
-                # "souris silencieuse",
-                # "souris rechargeable",
-                # "souris pc",
-                # "souris mac",
-                # "souris ordinateur portable",
-                # "souris pas cher",
-                # # Marques et Modèles populaires
-                # "souris logitech",
-                # "logitech mx master",
-                # "logitech g502",
-                # "logitech g pro superlight",
-                # "souris razer",
-                # "razer deathadder",
-                # "razer viper",
-                # "razer basilisk",
-                # "souris corsair",
-                # "souris steelseries",
-                # "souris roccat",
-                # "souris asus rog",
-                # "souris hp",
-                # "souris dell",
-                # "apple magic mouse",
-                # "souris microsoft",
-                # # Spécifications techniques
-                # "souris rgb",
-                # "souris legere",
-                # "souris mmo",
-                # "souris gaucher",
-                # "souris 10000 dpi",
-                # "souris 20000 dpi",
-                # "souris avec fil"
+                "souris", # Terme principal
+                "souris gamer",
+                "souris sans fil",
+                "souris filaire",
+                "souris bluetooth",
+                "souris ergonomique",
+                "souris verticale",
+                "souris silencieuse",
+                "souris rechargeable",
+                "souris pc",
+                "souris mac",
+                "souris ordinateur portable",
+                "souris pas cher",
+                # Marques et Modèles populaires
+                "souris logitech",
+                "logitech mx master",
+                "logitech g502",
+                "logitech g pro superlight",
+                "souris razer",
+                "razer deathadder",
+                "razer viper",
+                "razer basilisk",
+                "souris corsair",
+                "souris steelseries",
+                "souris roccat",
+                "souris asus rog",
+                "souris hp",
+                "souris dell",
+                "apple magic mouse",
+                "souris microsoft",
+                # Spécifications techniques
+                "souris rgb",
+                "souris legere",
+                "souris mmo",
+                "souris gaucher",
+                "souris 10000 dpi",
+                "souris 20000 dpi",
+                "souris avec fil"
             ]
         }
         return related.get(query.lower().strip(), [query])
@@ -87,10 +88,18 @@ class SourisAmazonScraper:
             page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
             for search_word in queries: 
+                     # 🛑 VÉRIFICATION 1 : Arrêt avant de changer de mot-clé
+                if cache.get("STOP_SCRAPING"):
+                    print(f"🛑 Scraping Amazon annulé depuis le cache (Mot-clé: {query}).")
+                    break # Casse la boucle des mots-clés
                 formatted_query = search_word.replace(" ", "+")
                 
                 # pagination
                 for page_idx in range(1, max_pages + 1): 
+                       # 🛑 VÉRIFICATION 2 : Arrêt avant de charger une nouvelle page
+                    if cache.get("STOP_SCRAPING"):
+                        print(f"🛑 Scraping Amazon annulé depuis le cache (Page {p_idx}).")
+                        break # Casse la boucle de pagination
                     url = f"{self.base_url}{formatted_query}&page={page_idx}"
                     
                     try:

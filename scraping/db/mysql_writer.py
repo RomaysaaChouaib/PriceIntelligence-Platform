@@ -195,7 +195,7 @@ class MySQLWriter:
     # =========================
     # CACHE DM
     # =========================
-     def get_cache(self, key):
+    def get_cache(self, key):
         """Retourne le cache si valide, None sinon"""
         sql = """
         SELECT result, products_count, is_valid 

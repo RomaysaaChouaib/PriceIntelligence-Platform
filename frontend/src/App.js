@@ -152,9 +152,10 @@ const CATEGORY_COLORS = {
 
 const CLUSTER_COLORS = ["#e74c3c","#3498db","#2ecc71","#f39c12","#9b59b6","#1abc9c"];
 
+
 // ══════════════════════════════════════════════════════════════════
 // 🛒 ONGLET PRODUITS
-// ═════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 function TabProducts() {
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState([]);
@@ -166,21 +167,22 @@ function TabProducts() {
   const [scrapeMsg, setScrapeMsg] = useState("");
   const [scrapeTarget, setScrapeTarget] = useState("");
   
-  // 🔥 AJOUT : État pour stocker l'ID de la tâche Celery en cours
   const [currentTaskId, setCurrentTaskId] = useState(null);
 
-  // 🛡️ Fonction utilitaire pour récupérer le token d'authentification
+  // 🔥 AJOUT : État pour gérer les deux sous-menus de scraping
+  const [scrapeCategory, setScrapeCategory] = useState("laptop"); // "laptop" ou "accessoire"
+
+  const API = "http://127.0.0.1:8000/api"; // Assure-toi de l'URL de ton API
+
   const getAuthHeaders = () => {
     const token = localStorage.getItem("access_token");
     return token ? { "Authorization": `Bearer ${token}` } : {};
   };
 
-  // Chargement initial
   useEffect(() => {
     fetchDB(1, "");
   }, []);
 
-  // 1. Fetch depuis le CSV
   const fetchCSV = async (p = 1) => {
     setLoading(true);
     setMode("csv");
@@ -200,7 +202,6 @@ function TabProducts() {
     setLoading(false);
   };
 
-  // 2. Fetch depuis la DB (MySQL)
   const fetchDB = async (p = 1) => {
     setLoading(true);
     setMode("db");
@@ -220,7 +221,6 @@ function TabProducts() {
     setLoading(false);
   };
 
-  // 🔥 NOUVEAU : Fetch pour les Accessoires (MySQL)
   const fetchAccessories = async (p = 1) => {
     setLoading(true);
     setMode("db_accessoire");
@@ -230,7 +230,6 @@ function TabProducts() {
         headers: getAuthHeaders()
       });
       const data = await res.json();
-      // On met les accessoires dans le state "products" pour ne pas casser l'affichage en bas
       setProducts(data.accessories || []); 
       setTotal(data.total || 0);
       setPages(data.pages || 1);
@@ -241,12 +240,20 @@ function TabProducts() {
     setLoading(false);
   };
 
-  // 3. Logique de Scraping
   const runScrape = async (target) => {
     setLoading(true);
     setScrapeTarget(target);
     
-    const finalQuery = query.trim() !== "" ? query.trim() : "laptop";
+    // --- 🔥 CORRECTION : Définir un mot-clé par défaut selon l'accessoire ---
+    let defaultQuery = "laptop"; // Par défaut pour Jumia/Amazon/Aliexpress
+    if (target === "souris") defaultQuery = "souris";
+    if (target === "laptop_stand") defaultQuery = "laptop_stand";
+    if (target === "cooling_pad") defaultQuery = "cooling_pad";
+    if (target === "sac_laptop") defaultQuery = "sac_laptop"; // Mot-clé plus précis pour les sacs
+    if (target === "usb") defaultQuery = "usb_flash_drive";
+
+    // Si query est vide, on prend defaultQuery, sinon on prend la saisie utilisateur
+    const finalQuery = query.trim() !== "" ? query.trim() : defaultQuery;
     const searchParam = `?query=${encodeURIComponent(finalQuery)}`;
     
     setScrapeMsg(`⏳ Scraping ${target} en cours pour "${finalQuery}"...`);
@@ -258,34 +265,47 @@ function TabProducts() {
         case "amazon": endpoint = "scrape/amazon/"; break;
         case "aliexpress": endpoint = "scrape/aliexpress/"; break;
         case "all": endpoint = "scrape/All/"; break;
+        // Ces endpoints correspondent exactement à ton backend :
+        case "souris": endpoint = "scrape/souris/"; break;
+        case "laptop_stand": endpoint = "scrape/laptop_stand/"; break;
+        case "cooling_pad": endpoint = "scrape/cooling_pad/"; break;
+        case "sac_laptop": endpoint = "scrape/sac_laptop/"; break;
+        case "usb": endpoint = "scrape/usb/"; break;
         default: endpoint = "search/";
       }
 
-      const res = await fetch(`${API}/${endpoint}${searchParam}`, {
+      // On s'assure que l'URL est bien construite sans double slash
+      const url = `${API}/${endpoint}${searchParam}`;
+      console.log("Appel API vers :", url); // Regarde dans la console (F12) pour vérifier l'URL
+
+      const res = await fetch(url, {
         headers: getAuthHeaders()
       });
       const data = await res.json();
 
       if (data.success) {
-        if (data.task_id) {
-            setCurrentTaskId(data.task_id);
-        }
-        
+        if (data.task_id) setCurrentTaskId(data.task_id);
         setScrapeMsg(`✅ ${data.message}`);
-        setMode("db");
-        fetchDB(1); 
+        
+        // Après un scraping d'accessoire, on recharge la vue accessoire
+        if (target !== "jumia" && target !== "amazon" && target !== "aliexpress" && target !== "all") {
+            setMode("db_accessoire");
+            fetchAccessories(1);
+        } else {
+            setMode("db");
+            fetchDB(1);
+        }
       } else {
         setScrapeMsg(`❌ ${data.message || data.error || "Problème lors du scraping"}`);
       }
     } catch (e) {
-      console.error(e);
+      console.error("Erreur Fetch:", e);
       setScrapeMsg(`❌ Erreur réseau sur ${target}`);
     }
     setLoading(false);
     setScrapeTarget("");
   };
 
-  // 4. Fonction STOP
   const handleStop = async () => {
     if (!currentTaskId) {
       setScrapeMsg("❌ Impossible d'arrêter : aucune tâche en cours ou Task ID introuvable.");
@@ -325,9 +345,21 @@ function TabProducts() {
     minWidth: '140px'
   };
 
+  // Style des boutons de sélection de catégorie (Laptop / Accessoire)
+  const categoryBtnStyle = (isActive) => ({
+    padding: '10px 20px',
+    border: 'none',
+    borderRadius: '8px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    backgroundColor: isActive ? '#1e293b' : '#e2e8f0',
+    color: isActive ? 'white' : '#475569',
+    transition: 'background-color 0.2s',
+    flex: 1
+  });
+
   return (
     <div>
-      {/* 🔍 Barre de recherche et modes */}
       <div className="pip-search-box">
         <input
           type="text"
@@ -344,7 +376,6 @@ function TabProducts() {
           <button className={`pip-mode-btn ${mode === "db" ? "active" : ""}`} onClick={() => fetchDB(1)}>
             🗄️ Produits (DB)
           </button>
-          {/* 🔥 NOUVEAU BOUTON ICI */}
           <button className={`pip-mode-btn ${mode === "db_accessoire" ? "active" : ""}`} onClick={() => fetchAccessories(1)}>
             🎧 Accessoires (DB)
           </button>
@@ -355,7 +386,6 @@ function TabProducts() {
 
         {mode !== "scrape" && (
           <button 
-            // 🔥 NOUVELLE LOGIQUE POUR LE BOUTON RECHERCHE
             onClick={() => {
               if (mode === "csv") fetchCSV(1);
               else if (mode === "db_accessoire") fetchAccessories(1);
@@ -373,49 +403,75 @@ function TabProducts() {
       {mode === "scrape" && (
         <div className="pip-card" style={{ marginBottom: '20px', padding: '20px' }}>
           <p style={{ marginBottom: '15px', fontWeight: 'bold', color: '#1e293b' }}>
-            Lancer un nouveau scraping vers la base de données :
+            Sélectionnez la catégorie à scraper :
           </p>
-          <div className="scrape-buttons-group" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            
-            <button 
-              onClick={() => runScrape("jumia")} 
-              disabled={loading} 
-              style={{ ...scrapeBtnStyle, background: '#f97316', opacity: loading ? 0.7 : 1 }}
-            >
-              {loading && scrapeTarget === "jumia" ? "⏳ Scraping..." : "Scraper Jumia"}
-            </button>
-            
-            <button 
-              onClick={() => runScrape("amazon")} 
-              disabled={loading} 
-              style={{ ...scrapeBtnStyle, background: '#232f3e', opacity: loading ? 0.7 : 1 }}
-            >
-              {loading && scrapeTarget === "amazon" ? "⏳ Scraping..." : "Scraper Amazon"}
-            </button>
-            
-            <button 
-              onClick={() => runScrape("aliexpress")} 
-              disabled={loading} 
-              style={{ ...scrapeBtnStyle, background: '#e62e04', opacity: loading ? 0.7 : 1 }}
-            >
-              {loading && scrapeTarget === "aliexpress" ? "⏳ Scraping..." : "Scraper AliExpress"}
-            </button>
-            
-            <button 
-              onClick={() => runScrape("all")} 
-              disabled={loading} 
-              style={{ ...scrapeBtnStyle, background: '#1e293b', opacity: loading ? 0.7 : 1 }}
-            >
-              {loading && scrapeTarget === "all" ? "⏳ Scraping..." : "🔥 Tout Scraper"}
-            </button>
 
+          {/* 🔥 AJOUT : Les 2 boutons pour basculer entre Laptop et Accessoire */}
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', maxWidth: '400px' }}>
+            <button 
+              onClick={() => setScrapeCategory("laptop")}
+              style={categoryBtnStyle(scrapeCategory === "laptop")}
+            >
+              💻 Laptops
+            </button>
+            <button 
+              onClick={() => setScrapeCategory("accessoire")}
+              style={categoryBtnStyle(scrapeCategory === "accessoire")}
+            >
+              🎧 Accessoires
+            </button>
+          </div>
+
+          <div className="scrape-buttons-group" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '15px' }}>
+            
+            {/* 🔥 AJOUT : Affichage conditionnel des 4 boutons Laptop */}
+            {scrapeCategory === "laptop" && (
+              <>
+                <button onClick={() => runScrape("jumia")} disabled={loading} style={{ ...scrapeBtnStyle, background: '#f97316', opacity: loading ? 0.7 : 1 }}>
+                  {loading && scrapeTarget === "jumia" ? "⏳ Scraping..." : "Scraper Jumia"}
+                </button>
+                <button onClick={() => runScrape("amazon")} disabled={loading} style={{ ...scrapeBtnStyle, background: '#232f3e', opacity: loading ? 0.7 : 1 }}>
+                  {loading && scrapeTarget === "amazon" ? "⏳ Scraping..." : "Scraper Amazon"}
+                </button>
+                <button onClick={() => runScrape("aliexpress")} disabled={loading} style={{ ...scrapeBtnStyle, background: '#e62e04', opacity: loading ? 0.7 : 1 }}>
+                  {loading && scrapeTarget === "aliexpress" ? "⏳ Scraping..." : "Scraper AliExpress"}
+                </button>
+                <button onClick={() => runScrape("all")} disabled={loading} style={{ ...scrapeBtnStyle, background: '#1e293b', opacity: loading ? 0.7 : 1 }}>
+                  {loading && scrapeTarget === "all" ? "⏳ Scraping..." : "🔥 Tout Scraper"}
+                </button>
+              </>
+            )}
+
+            {/* 🔥 AJOUT : Affichage conditionnel des 5 boutons Accessoire */}
+            {scrapeCategory === "accessoire" && (
+              <>
+                <button onClick={() => runScrape("souris")} disabled={loading} style={{ ...scrapeBtnStyle, background: '#3b82f6', opacity: loading ? 0.7 : 1 }}>
+                  {loading && scrapeTarget === "souris" ? "⏳ Scraping..." : "🖱️ Souris"}
+                </button>
+                <button onClick={() => runScrape("laptop_stand")} disabled={loading} style={{ ...scrapeBtnStyle, background: '#3b82f6', opacity: loading ? 0.7 : 1 }}>
+                  {loading && scrapeTarget === "laptop_stand" ? "⏳ Scraping..." : "🏗️ Support PC"}
+                </button>
+                <button onClick={() => runScrape("cooling_pad")} disabled={loading} style={{ ...scrapeBtnStyle, background: '#3b82f6', opacity: loading ? 0.7 : 1 }}>
+                  {loading && scrapeTarget === "cooling_pad" ? "⏳ Scraping..." : "❄️ Refroidisseur"}
+                </button>
+                <button onClick={() => runScrape("sac_laptop")} disabled={loading} style={{ ...scrapeBtnStyle, background: '#3b82f6', opacity: loading ? 0.7 : 1 }}>
+                  {loading && scrapeTarget === "sac_laptop" ? "⏳ Scraping..." : "🎒 Sac PC"}
+                </button>
+                <button onClick={() => runScrape("usb")} disabled={loading} style={{ ...scrapeBtnStyle, background: '#3b82f6', opacity: loading ? 0.7 : 1 }}>
+                  {loading && scrapeTarget === "usb" ? "⏳ Scraping..." : "💾 Clé USB"}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* 🔥 LE BOUTON STOP RESTE TOUJOURS VISIBLE */}
+          <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>
             <button 
               onClick={handleStop}
               style={{ ...scrapeBtnStyle, background: '#ef4444' }}
             >
               <X size={18} style={{ marginRight: '8px' }} /> STOP
             </button>
-
           </div>
         </div>
       )}
@@ -440,14 +496,13 @@ function TabProducts() {
       <div className="pip-status-bar" style={{ marginBottom: '15px' }}>
         <strong>{total}</strong> produits trouvés
         <span className="mode-tag" style={{ marginLeft: '10px', padding: '4px 8px', borderRadius: '4px', background: '#e2e8f0', fontSize: '12px', fontWeight: '600' }}>
-          {/* 🔥 MISE A JOUR DU TAG */}
           {mode === "csv" ? "Fichier CSV" : mode === "db" ? "Base de données" : mode === "db_accessoire" ? "Accessoires" : "Mode Scraping"}
         </span>
       </div>
 
-      {/* 📦 Liste des produits ou Spinner */}
+      {/* 📦 Liste des produits */}
       {loading && mode !== "scrape" ? (
-        <div className="spinner-placeholder">Chargement...</div> /* Remplace par <Spinner /> si le composant est dispo */
+        <div className="spinner-placeholder">Chargement...</div>
       ) : (
         <>
           <div className="pip-product-list">
@@ -458,7 +513,10 @@ function TabProducts() {
                 <div className="pip-card-content">
                   <span className="pip-brand-label">{item.brand_detected || item.brand || "Inconnu"}</span>
                   <h3 className="pip-card-title">{item.title}</h3>
-                  <p className="pip-price">{item.price?.toLocaleString()} MAD</p>
+                  <p className="pip-price">
+                    {item.price?.toLocaleString()}{" "}
+                    {item.currency && item.currency !== "N/A" ? item.currency : (item.source?.toLowerCase().includes("amazon") ? "€" : "MAD")}
+                  </p>
                   <div className="pip-card-footer">
                     <small style={{ color: '#64748b' }}>{item.source}</small>
                     <a href={item.link} target="_blank" rel="noreferrer" className="pip-view-btn">
@@ -474,7 +532,6 @@ function TabProducts() {
           {pages > 1 && (
             <div className="pip-pagination">
               <button 
-                // 🔥 NOUVELLE LOGIQUE DE PAGINATION
                 onClick={() => {
                   if (mode === "csv") fetchCSV(page - 1);
                   else if (mode === "db_accessoire") fetchAccessories(page - 1);
@@ -486,7 +543,6 @@ function TabProducts() {
               </button>
               <span>{page} / {pages}</span>
               <button 
-                // 🔥 NOUVELLE LOGIQUE DE PAGINATION
                 onClick={() => {
                   if (mode === "csv") fetchCSV(page + 1);
                   else if (mode === "db_accessoire") fetchAccessories(page + 1);
@@ -509,20 +565,29 @@ function TabProducts() {
 function TabStats() {
   const [data, setData] = useState(null);
   const [loading, setLoading]= useState(true);
+  
   useEffect(()=> {
     fetch(`${API}/stats/`).then(r=>r.json()).then(d=>{setData(d);setLoading(false);});
   }, []);
+  
   if (loading) return <Spinner />;
   if (!data) return <p>Erreur de chargement</p>;
-  const { stats, by_brand, by_category, gaming, distribution } = data;
+  
+  // 🔥 CORRECTION 1 : On donne une valeur par défaut "[]" ou "{}" si l'API ne renvoie rien pour ces clés
+  const { stats = {}, by_brand = [], by_category = [], gaming = {}, distribution = [] } = data;
+  
+  // 🔥 CORRECTION 2 : On calcule les valeurs max en sécurité pour éviter les bugs si les tableaux sont vides
+  const maxDistCount = distribution.length > 0 ? Math.max(...distribution.map(x => x.count)) : 1;
+  const maxCatCount = by_category.length > 0 ? Math.max(...by_category.map(x => x.count)) : 1;
+
   return (
     <div className="stats-page">
       <div className="pip-kpi-grid">
         {[
-          ["Produits", stats.count],
-          ["Médiane", `${stats.median?.toLocaleString()} MAD`],
-          ["Moyenne", `${Math.round(stats.mean)?.toLocaleString()} MAD`],
-          ["CV", `${stats.cv}%`],
+          ["Produits", stats.count || 0],
+          ["Médiane", `${stats.median?.toLocaleString() || 0} MAD`],
+          ["Moyenne", `${Math.round(stats.mean || 0)?.toLocaleString()} MAD`],
+          ["CV", `${stats.cv || 0}%`],
         ].map(([label,val], i)=> (
           <div className="pip-kpi-card" key={i}>
             <div className="pip-kpi-val">{val}</div>
@@ -530,36 +595,45 @@ function TabStats() {
           </div>
         ))}
       </div>
+      
       <div className="chart-card">
         <h3>📊 Distribution des prix</h3>
         <div className="histogram">
-          {distribution.map((b,i) => (
+          {/* 🔥 CORRECTION 3 : Le "?" avant le map protège contre "undefined" */}
+          {distribution?.map((b,i) => (
             <div className="bar-wrap" key={i}>
               <div className="bar-count">{b.count}</div>
-              <div className="bar" style={{height: Math.max(10, (b.count/Math.max(...distribution.map(x=>x.count)))*150)}}></div>
+              {/* On utilise notre variable sécurisée maxDistCount ici */}
+              <div className="bar" style={{height: Math.max(10, (b.count / maxDistCount) * 150)}}></div>
               <div className="bar-label">{b.label}</div>
             </div>
           ))}
         </div>
       </div>
+      
       <div className="two-cols">
         <div className="chart-card">
           <h3>🏷️ Par marque</h3>
           <table className="data-table">
             <thead><tr><th>Marque</th><th>Nb</th><th>Médiane</th></tr></thead>
             <tbody>
-              {by_brand.slice(0,6).map((b,i)=>(
+              {/* On protège le slice et le map */}
+              {by_brand?.slice(0,6)?.map((b,i)=>(
                 <tr key={i}><td><strong>{b.brand_detected}</strong></td><td>{b.count}</td><td>{b.median?.toLocaleString()}</td></tr>
               ))}
             </tbody>
           </table>
         </div>
+        
         <div className="chart-card">
           <h3>💰 Gammes</h3>
-          {by_category.map((c,i)=>(
+          {by_category?.map((c,i)=>(
             <div key={i} className="cat-row">
               <div className="cat-name">{c.price_category?.replace(/_/g," ")}</div>
-              <div className="cat-bar-bg"><div className="cat-bar" style={{width:`${(c.count/Math.max(...by_category.map(x=>x.count)))*100}%`, background:Object.values(CATEGORY_COLORS)[i]}}></div></div>
+              {/* On utilise notre variable sécurisée maxCatCount ici */}
+              <div className="cat-bar-bg">
+                <div className="cat-bar" style={{width:`${(c.count / maxCatCount) * 100}%`, background:Object.values(CATEGORY_COLORS)[i]}}></div>
+              </div>
               <div className="cat-count">{c.count}</div>
             </div>
           ))}
@@ -623,7 +697,8 @@ function TabClustering() {
       {loading ? <Spinner /> : data && (
         <>
           <div className="cluster-grid">
-            {data.summary?.map((c,i)=> (
+            {/* 🔥 Sécurisation avec data?.summary?.map */}
+            {data?.summary?.map((c,i)=> (
               <div className="cluster-card" key={i} style={{borderTop:`4px solid ${CLUSTER_COLORS[i%6]}`}}>
                 <div className="cluster-name">{c.cluster}</div>
                 <div className="cluster-count">{c.count} produits</div>
@@ -633,7 +708,7 @@ function TabClustering() {
           </div>
           <div className="chart-card">
             <h3>Visualisation des clusters</h3>
-            <ScatterPlot points={data.scatter || []} colorMap={colorMap} />
+            <ScatterPlot points={data?.scatter || []} colorMap={colorMap} />
           </div>
         </>
       )}
@@ -641,10 +716,14 @@ function TabClustering() {
   );
 }
 
-function ScatterPlot({points, colorMap}) {
-  if (!points.length) return null;
+// 🔥 Sécurisation : valeur par défaut "points = []"
+function ScatterPlot({points = [], colorMap}) {
+  // On vérifie que le tableau existe et n'est pas vide avant de continuer
+  if (!points || points.length === 0) return null;
+  
   const prices = points.map(p=>p.price);
   const minP = Math.min(...prices), maxP = Math.max(...prices);
+  
   return (
     <svg width="100%" height="200" className="scatter-svg">
       {points.map((p,i)=> (
@@ -667,13 +746,14 @@ function TabAnomalies() {
   return (
     <div className="stats-page">
       <div className="pip-kpi-grid">
-        <div className="pip-kpi-card warn"><div className="pip-kpi-val">{data?.total}</div><div className="pip-kpi-label">Anomalies</div></div>
+        <div className="pip-kpi-card warn"><div className="pip-kpi-val">{data?.total || 0}</div><div className="pip-kpi-label">Anomalies</div></div>
       </div>
       <div className="chart-card">
         <table className="data-table">
           <thead><tr><th>Produit</th><th>Gamme</th><th>Prix</th></tr></thead>
           <tbody>
-            {data?.anomalies.map((a,i)=>(
+            {/* 🔥 Sécurisation avec data?.anomalies?.map */}
+            {data?.anomalies?.map((a,i)=>(
               <tr key={i}><td className="td-title">{a.title}</td><td><Badge label={a.price_category} color={CATEGORY_COLORS[a.price_category]}/></td><td>{a.price?.toLocaleString()} MAD</td></tr>
             ))}
           </tbody>
@@ -698,7 +778,8 @@ function TabAssociation() {
       <div className="chart-card">
         <h3>🔗 Règles d'association</h3>
         <div className="rules-list">
-          {data?.rules.map((r,i)=>(
+          {/* 🔥 Sécurisation avec data?.rules?.map */}
+          {data?.rules?.map((r,i)=>(
             <div className="rule-card" key={i}>
               <div className="rule-body"><span className="rule-if">{r.antecedent}</span><span className="rule-arrow">→</span><span className="rule-then">{r.consequent}</span></div>
               <div className="rule-metrics"><span>Confiance: {(r.confidence*100).toFixed(1)}%</span></div>
