@@ -8,7 +8,7 @@ env_path = Path(__file__).resolve().parent.parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 class MySQLWriter:
     def __init__(self):
-      # On récupère les valeurs depuis le .env
+        # On récupère les valeurs depuis le .env
         # os.getenv("NOM_VARIABLE", "VALEUR_PAR_DEFAUT")
         db_host = os.getenv("DB_HOST", "127.0.0.1")
         db_user = os.getenv("DB_USER", "root")
@@ -195,7 +195,7 @@ class MySQLWriter:
     # =========================
     # CACHE DM
     # =========================
-     def get_cache(self, key):
+    def get_cache(self, key):
         """Retourne le cache si valide, None sinon"""
         sql = """
         SELECT result, products_count, is_valid 
