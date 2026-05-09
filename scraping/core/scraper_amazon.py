@@ -9,7 +9,7 @@ def scrape_amazon_product(query):
     
     # Attention : Ton AmazonScraper attend une liste de mots-clés (queries).
     # Donc on transforme la variable 'query' (chaîne de caractères) en liste : [query]
-    products = scraper.scrape([query], max_pages=20) 
+    products = scraper.scrape(query, max_pages=10) 
     
     # On retourne les produits après avoir enlevé les doublons
     return remove_duplicates(products)

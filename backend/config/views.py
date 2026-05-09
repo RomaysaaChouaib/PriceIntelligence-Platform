@@ -23,7 +23,10 @@ def _load_dm_results():
 
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, BASE_DIR)
 
+# Scraping
 from scraping.db.mysql_writer import MySQLWriter
 from scraping.core.scraper import scrape_product
 from scraping.core.scraper_amazon import scrape_amazon_product, AmazonScraper
@@ -77,7 +80,13 @@ def load_from_db():
 # ════════════════════════════════════════════════════════════════════════════
 # SCRAPING VIEWS (inchangées)
 # ════════════════════════════════════════════════════════════════════════════
-from config.celery import app
+# STOP_SCRAPING = False
+# def stop_scraping_action(request):
+#     """ Fonction pour demander l'arrêt """
+#     global STOP_SCRAPING
+#     STOP_SCRAPING = True
+#     return JsonResponse({"message": "Signal d'arrêt envoyé (STOP_SCRAPING = True)"})
+from config.celery import app 
 from django.core.cache import cache
 
 @csrf_exempt
@@ -105,15 +114,23 @@ def stop_scraping_action(request):
     except Exception as e:
         return JsonResponse({"success": False, "error": f"Erreur Celery: {str(e)}"})
 
-    return JsonResponse({"success": True, "message": f"Tâche {task_id} stoppée."})
-
-
-from .tasks import scrape_jumia_task
+    return JsonResponse({
+        "success": True, 
+        "message": f"Le scraping (Tâche {task_id}) a été stoppé avec succès."
+    })
+from . import tasks
 
 def scrape_jumia(request):
     query = request.GET.get("query", "pc portable").strip().lower()
-    task = scrape_jumia_task.delay(query)
-    return JsonResponse({"success": True, "task_id": task.id, "message": "Scraping démarré."})
+    
+    # On lance la tâche en arrière-plan sans attendre
+    task = tasks.scrape_jumia_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement
+        "message": "Le scraping a commencé en arrière-plan."
+    })
 
 
 def scrap_amazon(request):
@@ -168,13 +185,86 @@ def scrap_aliexpress(request):
 
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from .tasks import scrape_all_task
 
 def scrape_all(request):
     query = request.GET.get("query", "laptop").strip().lower()
-    task = scrape_all_task.delay(query)
-    return JsonResponse({"success": True, "task_id": task.id,
-                         "message": "Scraping global démarré (Jumia, Amazon, AliExpress)."})
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = tasks.scrape_all_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
+# Ancienne version de scrape_all (sans Celery, avec vérification du signal d'arrêt)
+# @csrf_exempt
+# def scrape_all(request):
+#     global STOP_SCRAPING
+#     STOP_SCRAPING = False # On réinitialise à chaque appel
+    
+#     query = request.GET.get("query", "laptop").strip().lower()
+#     db = MySQLWriter()
+#     results = {"jumia": [], "amazon": [], "aliexpress": []}
+#     errors = []
+#     total_inserted = 0
+
+#     try:
+#         with ThreadPoolExecutor(max_workers=3) as executor:
+#             futures = {
+#                 executor.submit(scrape_product, query): "jumia",
+#                 executor.submit(scrape_amazon_product, query): "amazon",
+#                 executor.submit(lambda q: AliexpressScraper().scrape(q, max_pages=20), query): "aliexpress",
+#             }
+
+#             for future in as_completed(futures):
+#                 source = futures[future]
+                
+#                 # --- AJOUT SÉCURITÉ STOP ---
+#                 if STOP_SCRAPING:
+#                     errors.append(f"Interruption : Les données de {source} ont été ignorées.")
+#                     continue 
+#                 # ---------------------------
+
+#                 try:
+#                     data = future.result()
+                    
+#                     if data:
+#                         results[source] = data
+                        
+#                         # Deuxième vérification juste avant l'écriture MySQL
+#                         if not STOP_SCRAPING:
+#                             try:
+#                                 db.insert_products(data)
+#                                 total_inserted += len(data)
+#                                 print(f"✅ [{source}] inséré immédiatement : {len(data)} produits")
+#                             except Exception as db_err:
+#                                 errors.append(f"DB Error for {source}: {str(db_err)}")
+#                     else:
+#                         results[source] = []
+
+#                 except Exception as e:
+#                     errors.append(f"{source} error: {str(e)}")
+#                     results[source] = []
+
+#         db.close()
+        
+#         total_scraped = len(results["jumia"]) + len(results["amazon"]) + len(results["aliexpress"])
+
+#         return JsonResponse({
+#             "success": not STOP_SCRAPING,
+#             "query": query,
+#             "jumia_count": len(results["jumia"]),
+#             "amazon_count": len(results["amazon"]),
+#             "aliexpress_count": len(results["aliexpress"]),
+#             "total_scraped": total_scraped,
+#             "inserted": total_inserted,
+#             "errors": errors,
+#             "message": "Scraping interrompu" if STOP_SCRAPING else f"{total_inserted} produits enregistrés"
+#         })
+#     except Exception as e:
+#         if 'db' in locals(): db.close()
+#         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
 from celery.result import AsyncResult
@@ -210,7 +300,85 @@ def search_view(request):
         "page": page, "pages": (total // limit) + (1 if total % limit else 0),
         "products": products})
 
+    return JsonResponse({
+        "source": "mysql only",
+        "query": query,
+        "total": total,
+        "page": page,
+        "pages": (total // limit) + (1 if total % limit else 0),
+        "products": products
+    })
 
+# Accessoire de Laptop:
+# 1-souris
+def scrape_all_souris(request):
+    query = request.GET.get("query", "souris").strip().lower()
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = tasks.scrape_all_mouse_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
+
+# 2-sac:
+def scrape_all_sac(request):
+    query = request.GET.get("query", "sac_laptop").strip().lower()
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = tasks.scrape_all_sac_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
+
+# 3-usb:
+def scrape_all_usb(request):
+    query = request.GET.get("query", "usb_flash_drive").strip().lower()
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = tasks.scrape_all_usb_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
+
+#4-laptop stand:
+def scrape_all_laptop_stand(request):
+    query = request.GET.get("query", "laptop_stand").strip().lower()
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = tasks.scrape_all_laptop_stand_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
+
+
+#5-cooling pad:
+def scrape_all_cooling_pad(request):
+    query = request.GET.get("query", "cooling_pad").strip().lower()
+    
+    # On lance la tâche globale en arrière-plan sans attendre
+    task = tasks.scrape_all_cooling_pad_task.delay(query)
+    
+    return JsonResponse({
+        "success": True,
+        "task_id": task.id,  # L'ID pour suivre l'avancement ou pour le forcer à s'arrêter
+        "message": "Le scraping global (Jumia, Amazon, Aliexpress) a commencé en arrière-plan."
+    })
+
+
+
+# affichage des produits accessoires depuis MySQL uniquement
 def search_accessoire_view(request):
     query  = request.GET.get("query", "").strip().lower()
     page   = int(request.GET.get("page", 1))
@@ -229,6 +397,18 @@ def search_accessoire_view(request):
         "page": page, "pages": (total // limit) + (1 if total % limit else 0),
         "accessories": accessories})
 
+    return JsonResponse({
+        "source": "mysql only",
+        "query": query,
+        "total": total,
+        "page": page,
+        "pages": (total // limit) + (1 if total % limit else 0),
+        "accessories": accessories  # J'ai renommé la clé "products" en "accessories" pour plus de logique
+    })
+
+# ════════════════════════════════════════════════════════════════════════════
+# VUE 2 — PRODUITS DATA MINING  (maintenant depuis MySQL)
+# ════════════════════════════════════════════════════════════════════════════
 
 def products_view(request):
     try:
@@ -273,7 +453,7 @@ def stats_view(request):
         cached = db.get_cache('stats')
         if cached:
             db.close()
-            return JsonResponse(cached)
+            return JsonResponse(cached,safe=False)
         db.close()
 
         # 2. Données précalculées dm_results.json
@@ -336,7 +516,7 @@ def stats_view(request):
         db2 = MySQLWriter()
         db2.save_cache('stats', result)
         db2.close()
-        return JsonResponse(result, json_dumps_params={'default': safe_json})
+        return JsonResponse(result, json_dumps_params={'default': safe_json},safe=False)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -351,7 +531,8 @@ def clustering_view(request):
         cached = db.get_cache(cache_key)
         if cached:
             db.close()
-            return JsonResponse(cached)
+            # 🔥 CORRECTION ICI : ajout de safe=False
+            return JsonResponse(cached, safe=False)
         db.close()
 
         # 2. dm_results.json (kmeans uniquement)
@@ -429,7 +610,8 @@ def anomalies_view(request):
         cached = db.get_cache('anomalies')
         if cached:
             db.close()
-            return JsonResponse(cached)
+            # 🔥 CORRECTION ICI : ajout de safe=False
+            return JsonResponse(cached, safe=False)
         db.close()
 
         # 2. dm_results.json
@@ -479,7 +661,8 @@ def association_view(request):
         cached = db.get_cache('association')
         if cached:
             db.close()
-            return JsonResponse(cached)
+            # 🔥 CORRECTION ICI : ajout de safe=False
+            return JsonResponse(cached, safe=False)
         db.close()
 
         # 2. dm_results.json

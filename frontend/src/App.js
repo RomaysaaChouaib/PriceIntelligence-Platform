@@ -154,175 +154,644 @@ function Login() {
 // 🛒 ONGLET PRODUITS — avec scraping + progression + historique
 // ══════════════════════════════════════════════════════════════════
 function TabProducts() {
-  const [query, setQuery]           = useState("");
-  const [products, setProducts]     = useState([]);
-  const [total, setTotal]           = useState(0);
-  const [page, setPage]             = useState(1);
-  const [pages, setPages]           = useState(1);
-  const [loading, setLoading]       = useState(false);
-  const [mode, setMode]             = useState("db");
+  const [query, setQuery] = useState("");
+  const [products, setProducts] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState("db");
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [scrapeMsg, setScrapeMsg] = useState("");
   const [scrapeTarget, setScrapeTarget] = useState("");
-  const [scrapeMsg, setScrapeMsg]   = useState("");
   const [currentTaskId, setCurrentTaskId] = useState(null);
+
   // ── Barre de progression ──
-  const [progress, setProgress]     = useState(0);
-  const [polling, setPolling]       = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [polling, setPolling] = useState(false);
 
-  useEffect(() => { fetchDB(1, ""); }, []);
+  // 🔥 AJOUT : État pour gérer les deux sous-menus de scraping
+  const [scrapeCategory, setScrapeCategory] = useState("laptop");
 
-  const fetchDB = async (p = 1, q = query) => {
+  const API = "http://127.0.0.1:8000/api";
+
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("access_token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  useEffect(() => {
+    fetchDB(1, "");
+  }, []);
+
+  const fetchCSV = async (p = 1) => {
     setLoading(true);
+    setMode("csv");
     setScrapeMsg("");
+
     try {
-      const data = await apiFetch(`/search/?query=${encodeURIComponent(q)}&page=${p}&limit=20`);
+      const res = await fetch(
+        `${API}/products/?query=${query}&page=${p}&limit=20`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+
+      const data = await res.json();
+
       setProducts(data.products || []);
       setTotal(data.total || 0);
       setPages(data.pages || 1);
       setPage(p);
-      setMode("db");
-    } catch (e) { setScrapeMsg(e.message); }
+    } catch (e) {
+      console.error(e);
+      setScrapeMsg("❌ Erreur lors du chargement CSV");
+    }
+
+    setLoading(false);
+  };
+
+  const fetchDB = async (p = 1) => {
+    setLoading(true);
+    setMode("db");
+    setScrapeMsg("");
+
+    try {
+      const res = await fetch(
+        `${API}/search/?query=${query}&page=${p}&limit=20`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+
+      const data = await res.json();
+
+      setProducts(data.products || []);
+      setTotal(data.total || 0);
+      setPages(data.pages || 1);
+      setPage(p);
+    } catch (e) {
+      console.error(e);
+      setScrapeMsg("❌ Erreur lors du chargement DB");
+    }
+
     setLoading(false);
   };
 
   const fetchAccessories = async (p = 1) => {
     setLoading(true);
+    setMode("db_accessoire");
+    setScrapeMsg("");
+
     try {
-      const data = await apiFetch(`/search/Accessoire/?query=${encodeURIComponent(query)}&page=${p}&limit=20`);
+      const res = await fetch(
+        `${API}/search/Accessoire/?query=${query}&page=${p}&limit=20`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+
+      const data = await res.json();
+
       setProducts(data.accessories || []);
       setTotal(data.total || 0);
       setPages(data.pages || 1);
       setPage(p);
-      setMode("db_accessoire");
-    } catch (e) { setScrapeMsg(e.message); }
-    setLoading(false);
-  };
+    } catch (e) {
+      console.error(e);
+      setScrapeMsg("❌ Erreur lors du chargement des accessoires");
+    }
 
-  // ── STOP scraping ──────────────────────────────────────────────
-  const handleStop = async () => {
-    if (!currentTaskId) { setScrapeMsg("❌ Aucune tâche en cours."); return; }
-    setScrapeMsg("⏳ Arrêt en cours…");
-    try {
-      const data = await apiFetch(`/scrape/Stop/?task_id=${currentTaskId}`);
-      setScrapeMsg(data.success ? `🛑 ${data.message || "Scraping arrêté."}` : `❌ ${data.message}`);
-      setCurrentTaskId(null);
-      setProgress(0);
-      setPolling(false);
-    } catch (e) { setScrapeMsg("❌ Erreur lors de l'arrêt."); }
+    setLoading(false);
   };
 
   // ── Polling du statut Celery ───────────────────────────────────
   const pollTaskStatus = (taskId, target) => {
     setPolling(true);
     setProgress(30);
+
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${API}/status/${taskId}/`, { headers: getAuthHeaders() });
+        const res = await fetch(`${API}/status/${taskId}/`, {
+          headers: getAuthHeaders(),
+        });
+
         const status = await res.json();
+
         if (status.status === "SUCCESS") {
           clearInterval(interval);
+
           setProgress(100);
           setPolling(false);
-          setScrapeMsg(`✅ Scraping ${target} terminé — ${status.result?.inserted || 0} produits`);
+
+          setScrapeMsg(
+            `✅ Scraping ${target} terminé — ${
+              status.result?.inserted || 0
+            } produits`
+          );
+
           // Sauvegarde historique
           fetch(`${API}/history/`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-            body: JSON.stringify({ query, source: target, count: status.result?.inserted || 0 })
+            headers: {
+              "Content-Type": "application/json",
+              ...getAuthHeaders(),
+            },
+            body: JSON.stringify({
+              query,
+              source: target,
+              count: status.result?.inserted || 0,
+            }),
           }).catch(() => {});
-          fetchDB(1, query);
-          setTimeout(() => { setProgress(0); setScrapeMsg(""); }, 3000);
+
+          if (
+            target !== "jumia" &&
+            target !== "amazon" &&
+            target !== "aliexpress" &&
+            target !== "all"
+          ) {
+            fetchAccessories(1);
+          } else {
+            fetchDB(1);
+          }
+
+          setTimeout(() => {
+            setProgress(0);
+            setScrapeMsg("");
+          }, 3000);
         } else if (status.status === "FAILURE") {
           clearInterval(interval);
+
           setPolling(false);
           setScrapeMsg("❌ Échec du scraping");
           setProgress(0);
         } else {
-          setProgress(p => Math.min(p + 8, 90));
+          setProgress((p) => Math.min(p + 8, 90));
         }
-      } catch { clearInterval(interval); setPolling(false); setProgress(0); }
+      } catch (e) {
+        console.error(e);
+
+        clearInterval(interval);
+        setPolling(false);
+        setProgress(0);
+      }
     }, 2000);
   };
 
-  // ── Lancer scraping ────────────────────────────────────────────
   const runScrape = async (target) => {
     setLoading(true);
     setScrapeTarget(target);
-    const q = query.trim() || "laptop";
-    setScrapeMsg(`⏳ Connexion à ${target}…`);
+
+    // --- 🔥 CORRECTION : Définir un mot-clé par défaut selon l'accessoire ---
+    let defaultQuery = "laptop";
+
+    if (target === "souris") defaultQuery = "souris";
+    if (target === "laptop_stand") defaultQuery = "laptop_stand";
+    if (target === "cooling_pad") defaultQuery = "cooling_pad";
+    if (target === "sac_laptop") defaultQuery = "sac_laptop";
+    if (target === "usb") defaultQuery = "usb_flash_drive";
+
+    const finalQuery =
+      query.trim() !== "" ? query.trim() : defaultQuery;
+
+    const searchParam = `?query=${encodeURIComponent(finalQuery)}`;
+
+    setScrapeMsg(
+      `⏳ Scraping ${target} en cours pour "${finalQuery}"...`
+    );
+
     setProgress(10);
+
     try {
-      const endpoints = { jumia: "scrape/jumia/", amazon: "scrape/amazon/", aliexpress: "scrape/aliexpress/", all: "scrape/All/" };
-      const res = await fetch(`${API}/${endpoints[target] || "search/"}?query=${encodeURIComponent(q)}`, { headers: getAuthHeaders() });
+      let endpoint = "";
+
+      switch (target) {
+        case "jumia":
+          endpoint = "scrape/jumia/";
+          break;
+
+        case "amazon":
+          endpoint = "scrape/amazon/";
+          break;
+
+        case "aliexpress":
+          endpoint = "scrape/aliexpress/";
+          break;
+
+        case "all":
+          endpoint = "scrape/All/";
+          break;
+
+        case "souris":
+          endpoint = "scrape/souris/";
+          break;
+
+        case "laptop_stand":
+          endpoint = "scrape/laptop_stand/";
+          break;
+
+        case "cooling_pad":
+          endpoint = "scrape/cooling_pad/";
+          break;
+
+        case "sac_laptop":
+          endpoint = "scrape/sac_laptop/";
+          break;
+
+        case "usb":
+          endpoint = "scrape/usb/";
+          break;
+
+        default:
+          endpoint = "search/";
+      }
+
+      const url = `${API}/${endpoint}${searchParam}`;
+
+      console.log("Appel API vers :", url);
+
+      const res = await fetch(url, {
+        headers: getAuthHeaders(),
+      });
+
       const data = await res.json();
+
       if (data.task_id) {
         setCurrentTaskId(data.task_id);
-        setScrapeMsg(`⏳ Scraping ${target} en cours pour "${q}"…`);
+
+        setScrapeMsg(
+          `⏳ Scraping ${target} en cours pour "${finalQuery}"...`
+        );
+
         pollTaskStatus(data.task_id, target);
       } else if (data.success) {
         setProgress(100);
+
         setScrapeMsg(`✅ ${data.message}`);
-        fetchDB(1, q);
-        setTimeout(() => { setProgress(0); setScrapeMsg(""); }, 3000);
+
+        if (
+          target !== "jumia" &&
+          target !== "amazon" &&
+          target !== "aliexpress" &&
+          target !== "all"
+        ) {
+          setMode("db_accessoire");
+          fetchAccessories(1);
+        } else {
+          setMode("db");
+          fetchDB(1);
+        }
+
+        setTimeout(() => {
+          setProgress(0);
+          setScrapeMsg("");
+        }, 3000);
       } else {
-        setScrapeMsg(`❌ ${data.message || data.error || "Erreur"}`);
+        setScrapeMsg(
+          `❌ ${
+            data.message || data.error || "Problème lors du scraping"
+          }`
+        );
+
         setProgress(0);
       }
     } catch (e) {
-      setScrapeMsg(`❌ Erreur réseau : ${e.message}`);
+      console.error("Erreur Fetch:", e);
+
+      setScrapeMsg(`❌ Erreur réseau sur ${target}`);
       setProgress(0);
     }
+
     setLoading(false);
     setScrapeTarget("");
   };
 
+  // ── STOP scraping ──────────────────────────────────────────────
+  const handleStop = async () => {
+    if (!currentTaskId) {
+      setScrapeMsg(
+        "❌ Impossible d'arrêter : aucune tâche en cours ou Task ID introuvable."
+      );
+
+      return;
+    }
+
+    setScrapeMsg("⏳ Demande d'arrêt envoyée...");
+
+    try {
+      const res = await fetch(
+        `${API}/scrape/Stop/?task_id=${currentTaskId}`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        setScrapeMsg(
+          `🛑 ${data.message || "Scraping arrêté."}`
+        );
+
+        setCurrentTaskId(null);
+        setProgress(0);
+        setPolling(false);
+      } else {
+        setScrapeMsg(
+          `❌ Erreur: ${
+            data.message || "Impossible d'arrêter"
+          }`
+        );
+      }
+    } catch (e) {
+      console.error("Erreur lors de l'arrêt:", e);
+
+      setScrapeMsg(
+        "❌ Erreur lors de l'envoi de l'arrêt."
+      );
+    }
+  };
+
   const scrapeBtnStyle = (bg) => ({
-    padding: "10px 16px", border: "none", borderRadius: "8px", color: "white",
-    fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center",
-    justifyContent: "center", transition: "opacity 0.2s", minWidth: "140px",
-    background: bg, opacity: (loading || polling) ? 0.7 : 1
+    padding: "10px 16px",
+    border: "none",
+    borderRadius: "8px",
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "opacity 0.2s",
+    minWidth: "140px",
+    background: bg,
+    opacity: loading || polling ? 0.7 : 1,
+  });
+
+  // Style des boutons de sélection de catégorie
+  const categoryBtnStyle = (isActive) => ({
+    padding: "10px 20px",
+    border: "none",
+    borderRadius: "8px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    backgroundColor: isActive ? "#1e293b" : "#e2e8f0",
+    color: isActive ? "white" : "#475569",
+    transition: "background-color 0.2s",
+    flex: 1,
   });
 
   return (
     <div>
-      {/* Barre de recherche */}
       <div className="pip-search-box">
         <input
           type="text"
           className="pip-search-input"
           placeholder='Rechercher un produit… (ex: "laptop", "redmi 14")'
           value={query}
-          onChange={e => setQuery(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter") fetchDB(1, query); }}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              if (mode === "csv") fetchCSV(1);
+              else if (mode === "db_accessoire")
+                fetchAccessories(1);
+              else fetchDB(1);
+            }
+          }}
         />
+
         <div className="pip-mode-toggle">
-          <button className={`pip-mode-btn ${mode === "db" ? "active" : ""}`} onClick={() => fetchDB(1, query)}>🗄️ Produits (DB)</button>
-          <button className={`pip-mode-btn ${mode === "db_accessoire" ? "active" : ""}`} onClick={() => fetchAccessories(1)}>🎧 Accessoires</button>
-          <button className={`pip-mode-btn ${mode === "scrape" ? "active" : ""}`} onClick={() => setMode("scrape")}>🕷️ Scraper</button>
+          <button
+            className={`pip-mode-btn ${
+              mode === "csv" ? "active" : ""
+            }`}
+            onClick={() => fetchCSV(1)}
+          >
+            📂 CSV
+          </button>
+
+          <button
+            className={`pip-mode-btn ${
+              mode === "db" ? "active" : ""
+            }`}
+            onClick={() => fetchDB(1)}
+          >
+            🗄️ Produits (DB)
+          </button>
+
+          <button
+            className={`pip-mode-btn ${
+              mode === "db_accessoire" ? "active" : ""
+            }`}
+            onClick={() => fetchAccessories(1)}
+          >
+            🎧 Accessoires
+          </button>
+
+          <button
+            className={`pip-mode-btn ${
+              mode === "scrape" ? "active" : ""
+            }`}
+            onClick={() => setMode("scrape")}
+          >
+            🕷️ Scraper
+          </button>
         </div>
+
         {mode !== "scrape" && (
-          <button onClick={() => fetchDB(1, query)} disabled={loading} className="pip-search-btn">
-            {loading ? "…" : "🔍 Rechercher"}
+          <button
+            onClick={() => {
+              if (mode === "csv") fetchCSV(1);
+              else if (mode === "db_accessoire")
+                fetchAccessories(1);
+              else fetchDB(1);
+            }}
+            disabled={loading}
+            className="pip-search-btn"
+          >
+            {loading ? "..." : "🔍 Rechercher"}
           </button>
         )}
       </div>
 
-      {/* Zone scraper */}
+      {/* 🕷️ Zone Scraper */}
       {mode === "scrape" && (
-        <div className="pip-card" style={{ marginBottom: 20, padding: 20 }}>
-          <p style={{ marginBottom: 15, fontWeight: "bold", color: "#1e293b" }}>Lancer un scraping :</p>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {[
-              { key: "jumia",      label: "Scraper Jumia",      bg: "#f97316" },
-              { key: "amazon",     label: "Scraper Amazon",     bg: "#232f3e" },
-              { key: "aliexpress", label: "Scraper AliExpress", bg: "#e62e04" },
-              { key: "all",        label: "🔥 Tout scraper",    bg: "#1e293b" },
-            ].map(({ key, label, bg }) => (
-              <button key={key} onClick={() => runScrape(key)} disabled={loading || polling} style={scrapeBtnStyle(bg)}>
-                {(loading || polling) && scrapeTarget === key ? "⏳ En cours…" : label}
-              </button>
-            ))}
-            <button onClick={handleStop} style={scrapeBtnStyle("#ef4444")}>
-              <X size={16} style={{ marginRight: 6 }} /> STOP
+        <div
+          className="pip-card"
+          style={{ marginBottom: 20, padding: 20 }}
+        >
+          <p
+            style={{
+              marginBottom: 15,
+              fontWeight: "bold",
+              color: "#1e293b",
+            }}
+          >
+            Sélectionnez la catégorie à scraper :
+          </p>
+
+          {/* 🔥 Catégories */}
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              marginBottom: "20px",
+              maxWidth: "400px",
+            }}
+          >
+            <button
+              onClick={() => setScrapeCategory("laptop")}
+              style={categoryBtnStyle(
+                scrapeCategory === "laptop"
+              )}
+            >
+              💻 Laptops
+            </button>
+
+            <button
+              onClick={() => setScrapeCategory("accessoire")}
+              style={categoryBtnStyle(
+                scrapeCategory === "accessoire"
+              )}
+            >
+              🎧 Accessoires
+            </button>
+          </div>
+
+          <div
+            className="scrape-buttons-group"
+            style={{
+              display: "flex",
+              gap: 10,
+              flexWrap: "wrap",
+              marginBottom: 15,
+            }}
+          >
+            {/* Laptop */}
+            {scrapeCategory === "laptop" && (
+              <>
+                <button
+                  onClick={() => runScrape("jumia")}
+                  disabled={loading || polling}
+                  style={scrapeBtnStyle("#f97316")}
+                >
+                  {(loading || polling) &&
+                  scrapeTarget === "jumia"
+                    ? "⏳ En cours…"
+                    : "Scraper Jumia"}
+                </button>
+
+                <button
+                  onClick={() => runScrape("amazon")}
+                  disabled={loading || polling}
+                  style={scrapeBtnStyle("#232f3e")}
+                >
+                  {(loading || polling) &&
+                  scrapeTarget === "amazon"
+                    ? "⏳ En cours…"
+                    : "Scraper Amazon"}
+                </button>
+
+                <button
+                  onClick={() => runScrape("aliexpress")}
+                  disabled={loading || polling}
+                  style={scrapeBtnStyle("#e62e04")}
+                >
+                  {(loading || polling) &&
+                  scrapeTarget === "aliexpress"
+                    ? "⏳ En cours…"
+                    : "Scraper AliExpress"}
+                </button>
+
+                <button
+                  onClick={() => runScrape("all")}
+                  disabled={loading || polling}
+                  style={scrapeBtnStyle("#1e293b")}
+                >
+                  {(loading || polling) &&
+                  scrapeTarget === "all"
+                    ? "⏳ En cours…"
+                    : "🔥 Tout Scraper"}
+                </button>
+              </>
+            )}
+
+            {/* Accessoires */}
+            {scrapeCategory === "accessoire" && (
+              <>
+                <button
+                  onClick={() => runScrape("souris")}
+                  disabled={loading || polling}
+                  style={scrapeBtnStyle("#3b82f6")}
+                >
+                  {(loading || polling) &&
+                  scrapeTarget === "souris"
+                    ? "⏳ En cours…"
+                    : "🖱️ Souris"}
+                </button>
+
+                <button
+                  onClick={() => runScrape("laptop_stand")}
+                  disabled={loading || polling}
+                  style={scrapeBtnStyle("#3b82f6")}
+                >
+                  {(loading || polling) &&
+                  scrapeTarget === "laptop_stand"
+                    ? "⏳ En cours…"
+                    : "🏗️ Support PC"}
+                </button>
+
+                <button
+                  onClick={() => runScrape("cooling_pad")}
+                  disabled={loading || polling}
+                  style={scrapeBtnStyle("#3b82f6")}
+                >
+                  {(loading || polling) &&
+                  scrapeTarget === "cooling_pad"
+                    ? "⏳ En cours…"
+                    : "❄️ Refroidisseur"}
+                </button>
+
+                <button
+                  onClick={() => runScrape("sac_laptop")}
+                  disabled={loading || polling}
+                  style={scrapeBtnStyle("#3b82f6")}
+                >
+                  {(loading || polling) &&
+                  scrapeTarget === "sac_laptop"
+                    ? "⏳ En cours…"
+                    : "🎒 Sac PC"}
+                </button>
+
+                <button
+                  onClick={() => runScrape("usb")}
+                  disabled={loading || polling}
+                  style={scrapeBtnStyle("#3b82f6")}
+                >
+                  {(loading || polling) &&
+                  scrapeTarget === "usb"
+                    ? "⏳ En cours…"
+                    : "💾 Clé USB"}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* STOP */}
+          <div
+            style={{
+              borderTop: "1px solid #e2e8f0",
+              paddingTop: "15px",
+            }}
+          >
+            <button
+              onClick={handleStop}
+              style={scrapeBtnStyle("#ef4444")}
+            >
+              <X
+                size={18}
+                style={{ marginRight: "8px" }}
+              />
+              STOP
             </button>
           </div>
         </div>
@@ -331,67 +800,213 @@ function TabProducts() {
       {/* ── Barre de progression ── */}
       {(polling || progress > 0) && (
         <div style={{ marginBottom: 16 }}>
-          <div style={{ height: 8, background: "#e2e8f0", borderRadius: 4, overflow: "hidden" }}>
-            <div style={{
-              height: "100%", borderRadius: 4,
-              background: "linear-gradient(90deg, #3b82f6, #8b5cf6)",
-              width: `${progress}%`, transition: "width 0.5s ease"
-            }} />
+          <div
+            style={{
+              height: 8,
+              background: "#e2e8f0",
+              borderRadius: 4,
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                height: "100%",
+                borderRadius: 4,
+                background:
+                  "linear-gradient(90deg, #3b82f6, #8b5cf6)",
+                width: `${progress}%`,
+                transition: "width 0.5s ease",
+              }}
+            />
           </div>
-          <p style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>{scrapeMsg}</p>
+
+          <p
+            style={{
+              fontSize: 12,
+              color: "#64748b",
+              marginTop: 4,
+            }}
+          >
+            {scrapeMsg}
+          </p>
         </div>
       )}
 
-      {/* Message statique (succès/erreur) */}
+      {/* 💬 Messages */}
       {scrapeMsg && !polling && progress === 0 && (
-        <div style={{
-          padding: "12px 16px", borderRadius: 8, marginBottom: 14, fontWeight: 500, fontSize: 13,
-          color: scrapeMsg.startsWith("✅") ? "#166534" : scrapeMsg.startsWith("⏳") ? "#0f172a" : "#991b1b",
-          background: scrapeMsg.startsWith("✅") ? "#dcfce7" : scrapeMsg.startsWith("⏳") ? "#f1f5f9" : "#fee2e2",
-          border: `1px solid ${scrapeMsg.startsWith("✅") ? "#bbf7d0" : scrapeMsg.startsWith("⏳") ? "#e2e8f0" : "#fecaca"}`
-        }}>
+        <div
+          style={{
+            padding: "12px 16px",
+            borderRadius: 8,
+            marginBottom: 14,
+            fontWeight: 500,
+            fontSize: 13,
+            color: scrapeMsg.startsWith("✅")
+              ? "#166534"
+              : scrapeMsg.startsWith("⏳") ||
+                scrapeMsg.startsWith("🛑")
+              ? "#0f172a"
+              : "#991b1b",
+            background: scrapeMsg.startsWith("✅")
+              ? "#dcfce7"
+              : scrapeMsg.startsWith("⏳") ||
+                scrapeMsg.startsWith("🛑")
+              ? "#f1f5f9"
+              : "#fee2e2",
+            border: `1px solid ${
+              scrapeMsg.startsWith("✅")
+                ? "#bbf7d0"
+                : scrapeMsg.startsWith("⏳") ||
+                  scrapeMsg.startsWith("🛑")
+                ? "#e2e8f0"
+                : "#fecaca"
+            }`,
+          }}
+        >
           {scrapeMsg}
         </div>
       )}
 
-      {/* Compteur */}
-      <div className="pip-status-bar" style={{ marginBottom: 15 }}>
-        <strong>{total.toLocaleString("fr-FR")}</strong> produits trouvés
-        <span style={{ marginLeft: 10, padding: "4px 8px", borderRadius: 4, background: "#e2e8f0", fontSize: 12, fontWeight: 600 }}>
-          {mode === "db" ? "Base de données" : mode === "db_accessoire" ? "Accessoires" : "Scraping"}
+      {/* 📊 Status */}
+      <div
+        className="pip-status-bar"
+        style={{ marginBottom: 15 }}
+      >
+        <strong>{total.toLocaleString("fr-FR")}</strong>{" "}
+        produits trouvés
+
+        <span
+          style={{
+            marginLeft: 10,
+            padding: "4px 8px",
+            borderRadius: 4,
+            background: "#e2e8f0",
+            fontSize: 12,
+            fontWeight: 600,
+          }}
+        >
+          {mode === "csv"
+            ? "Fichier CSV"
+            : mode === "db"
+            ? "Base de données"
+            : mode === "db_accessoire"
+            ? "Accessoires"
+            : "Scraping"}
         </span>
       </div>
 
-      {/* Liste produits */}
-      {loading && mode !== "scrape" ? <Spinner /> : (
+      {/* 📦 Produits */}
+      {loading && mode !== "scrape" ? (
+        <div className="spinner-placeholder">
+          Chargement...
+        </div>
+      ) : (
         <>
           <div className="pip-product-list">
             {products.map((item, i) => (
               <div className="pip-card" key={i}>
-                {item.is_gaming && <span className="pip-gaming-tag">🎮 Gaming</span>}
-                {item.image && <img src={item.image} alt={item.title} className="pip-product-img" />}
+                {item.is_gaming && (
+                  <span className="pip-gaming-tag">
+                    🎮 Gaming
+                  </span>
+                )}
+
+                {item.image && (
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="pip-product-img"
+                  />
+                )}
+
                 <div className="pip-card-content">
-                  <span className="pip-brand-label">{item.brand_detected || item.brand || "Inconnu"}</span>
-                  <h3 className="pip-card-title">{item.title}</h3>
-                  <p className="pip-price">{item.price?.toLocaleString("fr-FR")} MAD</p>
+                  <span className="pip-brand-label">
+                    {item.brand_detected ||
+                      item.brand ||
+                      "Inconnu"}
+                  </span>
+
+                  <h3 className="pip-card-title">
+                    {item.title}
+                  </h3>
+
+                  <p className="pip-price">
+                    {item.price?.toLocaleString("fr-FR")}{" "}
+                    {item.currency &&
+                    item.currency !== "N/A"
+                      ? item.currency
+                      : item.source
+                          ?.toLowerCase()
+                          .includes("amazon")
+                      ? "€"
+                      : "MAD"}
+                  </p>
+
                   <div className="pip-card-footer">
-                    <small style={{ color: "#64748b" }}>{item.source}</small>
-                    <a href={item.link} target="_blank" rel="noreferrer" className="pip-view-btn">Voir →</a>
+                    <small style={{ color: "#64748b" }}>
+                      {item.source}
+                    </small>
+
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="pip-view-btn"
+                    >
+                      Voir →
+                    </a>
                   </div>
                 </div>
               </div>
             ))}
+
             {products.length === 0 && !loading && (
-              <p style={{ color: "#94a3b8", textAlign: "center", padding: 40, fontSize: 14 }}>
-                Aucun produit. Lancez un scraping ou cherchez un terme différent.
+              <p
+                style={{
+                  color: "#94a3b8",
+                  textAlign: "center",
+                  padding: 40,
+                  fontSize: 14,
+                }}
+              >
+                Aucun produit. Lancez un scraping ou
+                cherchez un terme différent.
               </p>
             )}
           </div>
+
+          {/* 📄 Pagination */}
           {pages > 1 && (
             <div className="pip-pagination">
-              <button onClick={() => fetchDB(page - 1, query)} disabled={page <= 1}>←</button>
-              <span>{page} / {pages}</span>
-              <button onClick={() => fetchDB(page + 1, query)} disabled={page >= pages}>→</button>
+              <button
+                onClick={() => {
+                  if (mode === "csv")
+                    fetchCSV(page - 1);
+                  else if (mode === "db_accessoire")
+                    fetchAccessories(page - 1);
+                  else fetchDB(page - 1);
+                }}
+                disabled={page <= 1}
+              >
+                ←
+              </button>
+
+              <span>
+                {page} / {pages}
+              </span>
+
+              <button
+                onClick={() => {
+                  if (mode === "csv")
+                    fetchCSV(page + 1);
+                  else if (mode === "db_accessoire")
+                    fetchAccessories(page + 1);
+                  else fetchDB(page + 1);
+                }}
+                disabled={page >= pages}
+              >
+                →
+              </button>
             </div>
           )}
         </>
@@ -399,7 +1014,6 @@ function TabProducts() {
     </div>
   );
 }
-
 // ══════════════════════════════════════════════════════════════════
 // 📊 ONGLET STATISTIQUES — données réelles + Boxplot
 // ══════════════════════════════════════════════════════════════════
