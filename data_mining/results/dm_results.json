@@ -1,0 +1,5697 @@
+{
+  "laptops": {
+    "stats": {
+      "count": 27958,
+      "mean": 12600.08,
+      "median": 9259.08,
+      "std": 11267.37,
+      "min": 1500.0,
+      "max": 123285.14,
+      "p25": 3965.43,
+      "p75": 17240.98,
+      "p90": 27499.89,
+      "iqr": 13275.55,
+      "skewness": 1.9348,
+      "kurtosis": 5.8416,
+      "cv": 89.42
+    },
+    "best_k": 5,
+    "k_scores": [
+      {
+        "k": 2,
+        "inertia": 2949.2,
+        "silhouette": 0.6017,
+        "davies_bouldin": 0.5261
+      },
+      {
+        "k": 3,
+        "inertia": 1333.5,
+        "silhouette": 0.5813,
+        "davies_bouldin": 0.5239
+      },
+      {
+        "k": 4,
+        "inertia": 829.53,
+        "silhouette": 0.5527,
+        "davies_bouldin": 0.5265
+      },
+      {
+        "k": 5,
+        "inertia": 547.6,
+        "silhouette": 0.5529,
+        "davies_bouldin": 0.5178
+      },
+      {
+        "k": 6,
+        "inertia": 365.93,
+        "silhouette": 0.5595,
+        "davies_bouldin": 0.5093
+      },
+      {
+        "k": 7,
+        "inertia": 270.63,
+        "silhouette": 0.5573,
+        "davies_bouldin": 0.4981
+      }
+    ],
+    "kmeans_summary": [
+      {
+        "cluster": "Entrée de gamme",
+        "count": 3381,
+        "mean": 2118.79,
+        "median": 2162.43,
+        "min": 1500.0,
+        "max": 2808.79,
+        "std": 352.12,
+        "top_brand": "Acer",
+        "gaming_%": 20.1,
+        "avg_cpu_score": 0.9,
+        "avg_ram_gb": 22.3
+      },
+      {
+        "cluster": "Haut de gamme",
+        "count": 7124,
+        "mean": 16286.42,
+        "median": 15929.16,
+        "min": 11477.95,
+        "max": 22824.89,
+        "std": 3121.61,
+        "top_brand": "Lenovo",
+        "gaming_%": 32.4,
+        "avg_cpu_score": 5.5,
+        "avg_ram_gb": 25.5
+      },
+      {
+        "cluster": "Milieu de gamme",
+        "count": 7593,
+        "mean": 8404.42,
+        "median": 8349.0,
+        "min": 5576.89,
+        "max": 11475.04,
+        "std": 1739.87,
+        "top_brand": "Lenovo",
+        "gaming_%": 21.1,
+        "avg_cpu_score": 4.1,
+        "avg_ram_gb": 19.7
+      },
+      {
+        "cluster": "Milieu de gamme bas",
+        "count": 5618,
+        "mean": 3837.57,
+        "median": 3586.9,
+        "min": 2809.58,
+        "max": 5573.23,
+        "std": 720.11,
+        "top_brand": "2026",
+        "gaming_%": 50.0,
+        "avg_cpu_score": 3.8,
+        "avg_ram_gb": 18.1
+      },
+      {
+        "cluster": "Premium",
+        "count": 4242,
+        "mean": 33878.05,
+        "median": 30367.16,
+        "min": 22834.57,
+        "max": 123285.14,
+        "std": 10854.63,
+        "top_brand": "Lenovo",
+        "gaming_%": 66.8,
+        "avg_cpu_score": 6.1,
+        "avg_ram_gb": 37.1
+      }
+    ],
+    "dbscan_summary": [
+      {
+        "cluster": "Entrée de gamme",
+        "count": 3709,
+        "mean": 2190.21,
+        "median": 2189.0,
+        "min": 1500.0,
+        "max": 2999.0,
+        "std": 407.23,
+        "top_brand": "Acer",
+        "gaming_%": 21.1,
+        "avg_cpu_score": 1.0,
+        "avg_ram_gb": 21.8
+      },
+      {
+        "cluster": "Haut de gamme",
+        "count": 7450,
+        "mean": 17226.06,
+        "median": 16725.61,
+        "min": 12000.0,
+        "max": 24979.17,
+        "std": 3622.24,
+        "top_brand": "Lenovo",
+        "gaming_%": 33.7,
+        "avg_cpu_score": 5.5,
+        "avg_ram_gb": 26.6
+      },
+      {
+        "cluster": "Milieu de gamme",
+        "count": 7410,
+        "mean": 8756.02,
+        "median": 8525.33,
+        "min": 6000.0,
+        "max": 11989.89,
+        "std": 1738.44,
+        "top_brand": "Lenovo",
+        "gaming_%": 21.7,
+        "avg_cpu_score": 4.3,
+        "avg_ram_gb": 19.7
+      },
+      {
+        "cluster": "Milieu de gamme bas",
+        "count": 5832,
+        "mean": 4071.67,
+        "median": 3908.32,
+        "min": 3000.0,
+        "max": 5999.0,
+        "std": 871.19,
+        "top_brand": "2026",
+        "gaming_%": 48.2,
+        "avg_cpu_score": 3.7,
+        "avg_ram_gb": 18.7
+      },
+      {
+        "cluster": "Premium",
+        "count": 3557,
+        "mean": 35756.93,
+        "median": 32049.23,
+        "min": 25014.03,
+        "max": 123285.14,
+        "std": 10889.0,
+        "top_brand": "Lenovo",
+        "gaming_%": 70.8,
+        "avg_cpu_score": 6.2,
+        "avg_ram_gb": 37.0
+      }
+    ],
+    "dbscan_attrs": {
+      "eps": 0.1003,
+      "min_samples": 3,
+      "n_clusters": 5,
+      "n_outliers": 0,
+      "silhouette": 0.5354
+    },
+    "histogram": [
+      {
+        "label": "1,500–11,648",
+        "count": 16701
+      },
+      {
+        "label": "11,648–21,797",
+        "count": 6707
+      },
+      {
+        "label": "21,797–31,946",
+        "count": 2761
+      },
+      {
+        "label": "31,946–42,095",
+        "count": 1058
+      },
+      {
+        "label": "42,095–52,243",
+        "count": 468
+      },
+      {
+        "label": "52,243–62,392",
+        "count": 174
+      },
+      {
+        "label": "62,392–72,541",
+        "count": 56
+      },
+      {
+        "label": "72,541–82,690",
+        "count": 6
+      },
+      {
+        "label": "82,690–92,838",
+        "count": 3
+      },
+      {
+        "label": "92,838–102,987",
+        "count": 20
+      },
+      {
+        "label": "102,987–113,136",
+        "count": 2
+      },
+      {
+        "label": "113,136–123,285",
+        "count": 2
+      }
+    ],
+    "boxplot_by_source": [
+      {
+        "source": "AliExpress",
+        "count": 14395,
+        "min": 1500.74,
+        "q1": 3955.3,
+        "median": 8036.05,
+        "mean": 12370.18,
+        "q3": 17457.22,
+        "max": 112769.16
+      },
+      {
+        "source": "Amazon",
+        "count": 12993,
+        "min": 1500.4,
+        "q1": 5074.41,
+        "median": 10449.89,
+        "mean": 13095.79,
+        "q3": 17431.59,
+        "max": 123285.14
+      },
+      {
+        "source": "Jumia",
+        "count": 570,
+        "min": 1500.0,
+        "q1": 2599.25,
+        "median": 3799.0,
+        "mean": 7106.4,
+        "q3": 8296.75,
+        "max": 118001.0
+      }
+    ],
+    "cluster_scatter": [
+      {
+        "title": "PULWTOP MacBook Docking Station Dual Monitor with 2 HDMI 4K6",
+        "price": 2903.35,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Apple",
+        "gaming": false
+      },
+      {
+        "title": "acer Aspire 3 Ordinateur portable tactile 15,6\" AMD Ryzen 5 ",
+        "price": 8235.7,
+        "cluster": "Milieu de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "acer Ordinateur portable Chromebook Spin 311 convertible à é",
+        "price": 5132.93,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo IdeaPad 3 17IRU7 - Ordinateur Portable 17.3'' FHD (In",
+        "price": 9899.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "acer Aspire 16 I PC Portable 16\" WUXGA+ OLED 120 Hz I Intel ",
+        "price": 8525.33,
+        "cluster": "Milieu de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo Chromebook IdeaPad Slim 3, écran Full HD 14'' (1920 x",
+        "price": 3652.88,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "acer Chromebook 315 CB315-4H-C7R0, Ordinateur Portable 15,6'",
+        "price": 2189.0,
+        "cluster": "Entrée de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "14.1\" Laptop Computer Windows 11 Ssd Portable Notebook Pc In",
+        "price": 3279.48,
+        "cluster": "Milieu de gamme bas",
+        "brand": "14.1\"",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo V14 Ordinateur portable professionnel FHD 14\", Intel ",
+        "price": 15401.65,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo Legion 5 Ordinateur portable de jeu 16\" WQXGA 165 Hz,",
+        "price": 26706.79,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "Mini PC Windows 11 Intel Core i9 8950HK 16GB DDR4 512GB 1TB ",
+        "price": 3965.28,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Mini",
+        "gaming": true
+      },
+      {
+        "title": "GPD Micro PC 2 Mini Portable Laptop Computer Notebook Intel ",
+        "price": 17314.04,
+        "cluster": "Haut de gamme",
+        "brand": "Gpd",
+        "gaming": false
+      },
+      {
+        "title": "Hp EliteBook 1040 G3 Intel Core i5-6300U/8 Go/256 SSD/14\" Fu",
+        "price": 2350.0,
+        "cluster": "Entrée de gamme",
+        "brand": "HP",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo ThinkBook 16+ Laptop AMD Ryzen AI 7H 350/H 260 Radeon",
+        "price": 17616.69,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Ordinateur portable TUF Gaming F16, NVIDIA RTX 5070 GDD",
+        "price": 31629.51,
+        "cluster": "Premium",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "msi Thin 15 Gaming Laptop 15,6 po FHD 144Hz Intel 8-core i5-",
+        "price": 16819.0,
+        "cluster": "Haut de gamme",
+        "brand": "MSI",
+        "gaming": true
+      },
+      {
+        "title": "【Russia Stock】REDMI Book Pro 16 2025 Intel Arc Graphics Ultr",
+        "price": 29422.51,
+        "cluster": "Premium",
+        "brand": "【Russia",
+        "gaming": false
+      },
+      {
+        "title": "2026 Acer Nitro Gaming Laptop 16 Inch 2.5K 240Hz IPS Screen ",
+        "price": 20005.38,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "URAO Android 15 Tablet 10.1 Inch 20GB RAM 64GB ROM 5-core Du",
+        "price": 2398.22,
+        "cluster": "Entrée de gamme",
+        "brand": "Urao",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo ThinkPad T480 i5-8250U -16Go 256Go SSD 14″- Remis a n",
+        "price": 3800.0,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Vivobook 16 Ordinateur portable professionnel, écran WU",
+        "price": 14803.69,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "acer Chromebook Plus 514 I PC Portable 14\" LCD| Intel Core 3",
+        "price": 3069.0,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo Chromebook IdeaPad Slim 3 - Écran Full HD 14'' (1920 ",
+        "price": 4755.96,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "ABIR VC205 Cordless Handheld Vacuum Cleaner,27000PA,Touch Sc",
+        "price": 4789.58,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Abir",
+        "gaming": false
+      },
+      {
+        "title": "23.8 Inch Industrial Open Frame Monitor 1920x1080 Capacitive",
+        "price": 1829.3,
+        "cluster": "Entrée de gamme",
+        "brand": "23.8",
+        "gaming": false
+      },
+      {
+        "title": "Samsung Galaxy Book6 Pro 16\", Copilot+ PC, PC Portable avec ",
+        "price": 20899.89,
+        "cluster": "Haut de gamme",
+        "brand": "Samsung",
+        "gaming": false
+      },
+      {
+        "title": "acer Aspire Go 15 Slim Ordinateur portable | Écran Full HD d",
+        "price": 7213.36,
+        "cluster": "Milieu de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "Portable 2 in 1 Laptop Computer Intel N4020 11.6 Inch Touch ",
+        "price": 1995.66,
+        "cluster": "Entrée de gamme",
+        "brand": "Portable",
+        "gaming": false
+      },
+      {
+        "title": "GLF-S2 Dual Screen Laptop Intel i3 1215U 10.9+10.95 Inch Tou",
+        "price": 6428.84,
+        "cluster": "Milieu de gamme",
+        "brand": "Glf-S2",
+        "gaming": false
+      },
+      {
+        "title": "Top 15.6 Inch AMD Ryzen R7 5700U Gaming Laptop MAX 32GB DDR4",
+        "price": 7746.15,
+        "cluster": "Milieu de gamme",
+        "brand": "Top",
+        "gaming": true
+      },
+      {
+        "title": "ARZOPA 17.3inch 1080P FHD Portable Monitor IPS Screen Extern",
+        "price": 1905.86,
+        "cluster": "Entrée de gamme",
+        "brand": "Arzopa",
+        "gaming": false
+      },
+      {
+        "title": "GLF-S1 laptop 16+16 inch Big Dual Screen Intel i5-12450H lap",
+        "price": 13880.45,
+        "cluster": "Haut de gamme",
+        "brand": "Glf-S1",
+        "gaming": false
+      },
+      {
+        "title": "HP Envy OmniBook X Flip 2-en-1 2025 Ordinateur portable 16\" ",
+        "price": 9136.93,
+        "cluster": "Milieu de gamme",
+        "brand": "HP",
+        "gaming": false
+      },
+      {
+        "title": "Oushedi Gaming Laptop Computer Intel Core i9-13900H NVIDIA R",
+        "price": 19160.63,
+        "cluster": "Haut de gamme",
+        "brand": "Oushedi",
+        "gaming": true
+      },
+      {
+        "title": "UPERFECT 15.7\" 4K UHD Touchscreen Portable Monitor 100%sRGB ",
+        "price": 2993.29,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Uperfect",
+        "gaming": false
+      },
+      {
+        "title": "Samsung Galaxy Book5 Pro 16\", Copilot+ PC, Ordinateur Portab",
+        "price": 18689.0,
+        "cluster": "Haut de gamme",
+        "brand": "Samsung",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Vivobook 15X N3504YA-L1113W OLED 15.6 Pouces FHD PC Por",
+        "price": 9119.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo IdeaPad Flex 5 82XX0003GE -14\" WUXGA Touch, AMD Ryzen",
+        "price": 8463.73,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Xiaomi Laptop REDMI Book 14 /REDMI Book 16 2025 R5-7535H/R7-",
+        "price": 11250.33,
+        "cluster": "Milieu de gamme",
+        "brand": "Xiaomi",
+        "gaming": true
+      },
+      {
+        "title": "acer Ordinateur portable Aspire 5 | Écran tactile Full HD IP",
+        "price": 9539.53,
+        "cluster": "Milieu de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "ASUS TUF Gaming A16 Ordinateur portable 16\" FHD+ 165Hz 7ms 1",
+        "price": 15919.64,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "Portable Mini PC Intel i7 4510U i3 6100U Windows 11 PC Gamer",
+        "price": 3240.41,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Portable",
+        "gaming": true
+      },
+      {
+        "title": "ASUS ProArt P16 16.0 Pouces 3K (AMD Ryzen™ AI 9 HX 370 up to",
+        "price": 36299.89,
+        "cluster": "Premium",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "Dell Latitude 7450 Intel Core Ultra 7 165U Ordinateur Portab",
+        "price": 28269.23,
+        "cluster": "Premium",
+        "brand": "Dell",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Vivobook 18 18 Pouces WUXGA PC Portable (AMD Ryzen 7 26",
+        "price": 10999.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "Mini PC Intel Core i9 8950HK i3 6100U Windows 11 Pro Compute",
+        "price": 3240.4,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Mini",
+        "gaming": true
+      },
+      {
+        "title": "ASUS Vivobook 18 18 Pouces WUXGA PC Portable (AMD Ryzen 7 26",
+        "price": 10999.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "Microsoft Surface Pro (Chargeur Non Inclus) | Copilot + PC |",
+        "price": 13507.34,
+        "cluster": "Haut de gamme",
+        "brand": "Microsoft",
+        "gaming": false
+      },
+      {
+        "title": "Acer Swift 3 Intel Evo Thin & Light Laptop 14\" Full HD IPS I",
+        "price": 13361.7,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "NEW S3 Computer 15.6 Inch Intel Core i9-12900H/i7-8750H Por ",
+        "price": 6721.06,
+        "cluster": "Milieu de gamme",
+        "brand": "New",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo IdeaPad Flex 5 82XX0003GE -14\" WUXGA Touch, AMD Ryzen",
+        "price": 8463.73,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Asus Vivobook 16 Flip 16 pouces WUXGA OLED PC Portable Conve",
+        "price": 14299.89,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "YSJMNPC 12th Gen Mini Laptop Intel N150 Quad Core 8 Inch Scr",
+        "price": 6365.76,
+        "cluster": "Milieu de gamme",
+        "brand": "Ysjmnpc",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo YOGA Book 9i Laptop 13th Generation Core i7-1355U 16G",
+        "price": 34591.37,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "ultra-thin Laptop Intel Core i3 6th Processor 32GB RAM 1TB 2",
+        "price": 2885.67,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Ultra-Thin",
+        "gaming": true
+      },
+      {
+        "title": "acer Nitro V 16 AI Ordinateur portable de jeu 16\" WUXGA IPS ",
+        "price": 23964.38,
+        "cluster": "Premium",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "REDMI Book Pro 14 2025 Ultra5-225H/Ultra7-255H 16GB/32GB +1T",
+        "price": 24516.68,
+        "cluster": "Premium",
+        "brand": "Redmi",
+        "gaming": false
+      },
+      {
+        "title": "【2025 New】Xiaomi Laptop REDMI Book Pro 16 2025 Ultra5-225H U",
+        "price": 15585.91,
+        "cluster": "Haut de gamme",
+        "brand": "Xiaomi",
+        "gaming": false
+      },
+      {
+        "title": "XIAOMI Redmi G Pro 2024 Gaming Laptop NVIDIA Geforce RTX 406",
+        "price": 27172.21,
+        "cluster": "Premium",
+        "brand": "Xiaomi",
+        "gaming": true
+      },
+      {
+        "title": "acer Nitro V Ordinateur portable de jeu 15,6\" FHD 165 Hz | P",
+        "price": 12351.9,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "ThinkPad X1 Carbon Gen 9 20XW004CUS Ultrabook",
+        "price": 20329.98,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "ASUS TUF Gaming A16 Ordinateur portable | 16\" WUXGA 165 Hz 1",
+        "price": 22218.46,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo IdeaPad Ordinateur portable professionnel, écran tact",
+        "price": 9348.24,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo IdeaPad-3-82KT Ordinateur portable 14\" FHD 1920 x 108",
+        "price": 8866.22,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "New 2025 GPD WIN Mini AI 9 HX 370 7 Inch 120Hz Handheld Game",
+        "price": 28053.12,
+        "cluster": "Premium",
+        "brand": "Gpd",
+        "gaming": true
+      },
+      {
+        "title": "Samsung SSD 990 Pro NVMe M.2 Pcle 4.0, SSD Interne, Capacité",
+        "price": 3406.7,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Samsung",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo IdeaPad Slim 3 14IRH10 - Ordinateur Portable 14'' WUX",
+        "price": 8799.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "2026 Brand New Intel Core i9-8950HK Windows 11 Pro 16GB RAM ",
+        "price": 3240.54,
+        "cluster": "Milieu de gamme bas",
+        "brand": "2026",
+        "gaming": true
+      },
+      {
+        "title": "2025New GPD MicroPC2 Intel Core i3-N300 7-inch Industry Lapt",
+        "price": 17094.87,
+        "cluster": "Haut de gamme",
+        "brand": "Gpd",
+        "gaming": false
+      },
+      {
+        "title": "F12 Laptop Gaming Air-cooled Cooler with Cellphone Holder RG",
+        "price": 5225.29,
+        "cluster": "Milieu de gamme bas",
+        "brand": "F12",
+        "gaming": true
+      },
+      {
+        "title": "OFFTEK 8Go Mémoire RAM de Remplacement pour IBM-Lenovo IdeaP",
+        "price": 1570.58,
+        "cluster": "Entrée de gamme",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo Legion Y9000P 16inch Gaming Esports Laptop 32G 2T SSD",
+        "price": 24490.24,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "acer Nitro V Ordinateur portable de jeu Intel i5-13420H 16 G",
+        "price": 13317.92,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "2022 HUAWEI MateBook 16s Laptop i5-12500H/ i7-12700H/ i9-129",
+        "price": 17457.22,
+        "cluster": "Haut de gamme",
+        "brand": "Huawei",
+        "gaming": false
+      },
+      {
+        "title": "Dell 15 Laptop DC15255 – 15.6\" FHD 120Hz, AMD Ryzen 7 7730U,",
+        "price": 8349.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Dell",
+        "gaming": false
+      },
+      {
+        "title": "MSI Katana 17 HX B14WGK-084FR Dragon Station : Intel Core i7",
+        "price": 20889.0,
+        "cluster": "Haut de gamme",
+        "brand": "MSI",
+        "gaming": true
+      },
+      {
+        "title": "acer Nitro V 15 I PC Portable Gaming 15.6'' FHD LCD 165Hz I ",
+        "price": 10989.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "EGLOBAL Mini PC Gamer Intel i7 13700H i9 12900H RTX 4060 305",
+        "price": 10966.15,
+        "cluster": "Milieu de gamme",
+        "brand": "Eglobal",
+        "gaming": true
+      },
+      {
+        "title": "WERPOWER Acer Swift 3 Thin & Light Laptop, 14\" Full HD IPS, ",
+        "price": 9657.23,
+        "cluster": "Milieu de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo ThinkPad E16 Écran tactile FHD+ 16\", AMD Ryzen 7 7735",
+        "price": 16111.26,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Jabra Evolve2 65 Casque PC Sans Fil - Casque Audio Anti-Brui",
+        "price": 1799.05,
+        "cluster": "Entrée de gamme",
+        "brand": "Microsoft",
+        "gaming": false
+      },
+      {
+        "title": "AMD Mini-ITX NAS Gaming Motherboard, Ryzen 9 7945HX ES / 784",
+        "price": 3056.91,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Amd",
+        "gaming": true
+      },
+      {
+        "title": "ROG Falchion Ace HFX ZywOo Edition 65% Analog Gaming Keyboar",
+        "price": 6135.16,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "Xiaomi REDMI Book Pro 14 2025 Ultra5-225H/Ultra7-255H 32GB +",
+        "price": 24205.86,
+        "cluster": "Premium",
+        "brand": "Xiaomi",
+        "gaming": false
+      },
+      {
+        "title": "14 Inch Laptop PC 6GB LPDDR4 RAM 128GB SSD ROM 1080p FHD IPS",
+        "price": 5747.5,
+        "cluster": "Milieu de gamme",
+        "brand": "14",
+        "gaming": false
+      },
+      {
+        "title": "2026 Portable i9 Computer Windows 11 Pro Intel Core i9-8950H",
+        "price": 3965.25,
+        "cluster": "Milieu de gamme bas",
+        "brand": "2026",
+        "gaming": true
+      },
+      {
+        "title": "Sibolan 15.6 Inch Three Screen Portable Monitor 60Hz 1080P 1",
+        "price": 9014.99,
+        "cluster": "Milieu de gamme",
+        "brand": "Sibolan",
+        "gaming": false
+      },
+      {
+        "title": "Hp Pc Portable EliteBook 840 G8 I5-1145g7 11éme Génération R",
+        "price": 4150.0,
+        "cluster": "Milieu de gamme bas",
+        "brand": "HP",
+        "gaming": false
+      },
+      {
+        "title": "BYONE 13.5 Inch Dual Screen Touch Laptop 2.5k UHD 9000mAH DD",
+        "price": 7820.09,
+        "cluster": "Milieu de gamme",
+        "brand": "Byone",
+        "gaming": false
+      },
+      {
+        "title": "GPD WIN Mini AMD AI 9 HX 370 7 Inch Handheld GamePad Tablet ",
+        "price": 21442.37,
+        "cluster": "Haut de gamme",
+        "brand": "Gpd",
+        "gaming": true
+      },
+      {
+        "title": "Factory Price 15.6 Inch 1000cd/m² VESA Mount Industrial Touc",
+        "price": 1945.77,
+        "cluster": "Entrée de gamme",
+        "brand": "Factory",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo IdeaPad Flex 5 82XX0003GE -14\" WUXGA Touch, AMD Ryzen",
+        "price": 8463.73,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Ordinateur portable TUF Gaming A16 2025, 16\" 1920 x 120",
+        "price": 17897.33,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "Sibolan 15.6 Inch Three Screen Portable Monitor 60Hz 1080P 1",
+        "price": 9014.99,
+        "cluster": "Milieu de gamme",
+        "brand": "Sibolan",
+        "gaming": false
+      },
+      {
+        "title": "2025 Acer Extraordinary Go Pro Laptop 14 Inch 2.8K 120Hz IPS",
+        "price": 14856.46,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo 2025 XiaoXin Pro 16 GT AI 7H 350/AI 9H 365 32G+1T 16-",
+        "price": 21624.28,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "2026 New Lenovo Thinkbook 16+ Laptop 16\" 3.2K 165Hz R7 H255/",
+        "price": 20038.99,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Honor Laptop X14 Ultra HD 2025 14-inch 13th Gen Core i5 1342",
+        "price": 10519.92,
+        "cluster": "Milieu de gamme",
+        "brand": "Honor",
+        "gaming": false
+      },
+      {
+        "title": "LG Gram 16Z90RU-G.AA55F - PC Portable 16\" 1199g, écran DCI-P",
+        "price": 11659.89,
+        "cluster": "Haut de gamme",
+        "brand": "LG",
+        "gaming": false
+      },
+      {
+        "title": "acer Chromebook Plus 514 I PC Portable 14\" LCD| Intel Core 3",
+        "price": 3069.0,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "Touch Screen Laptop Computer Windows 11 Office Study Noteboo",
+        "price": 9458.37,
+        "cluster": "Milieu de gamme",
+        "brand": "Touch",
+        "gaming": false
+      },
+      {
+        "title": "TURZX 9.2 Inch USB Secondary Screen for Computer Chassis 192",
+        "price": 1871.61,
+        "cluster": "Entrée de gamme",
+        "brand": "Turzx",
+        "gaming": false
+      },
+      {
+        "title": "S6 laptop gamer Intel Core i9-13900HK RTX4050 6G 16.1 Inch 4",
+        "price": 10081.59,
+        "cluster": "Milieu de gamme",
+        "brand": "S6",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo IdeaPad 1 Ordinateur Portable, écran HD de 14 po (136",
+        "price": 3374.03,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "P8 PRO mini Laptop 10.5‘’ Intel N150 32GB DDR4 computer 2TB ",
+        "price": 7305.5,
+        "cluster": "Milieu de gamme",
+        "brand": "P8",
+        "gaming": true
+      },
+      {
+        "title": "ASUS Ordinateur portable de jeu ROG Strix 18 (2025), 18\" ROG",
+        "price": 30870.18,
+        "cluster": "Premium",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "HONOR Laptop MagicBook Art 14 OLED Touchscreen Intel Ultra 5",
+        "price": 15070.03,
+        "cluster": "Haut de gamme",
+        "brand": "Honor",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Zenbook 14 UM3406KA-QDO74W 14 Pouces 1920x1200 60Hz OLE",
+        "price": 9899.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "2026 Intel Core i9 8950HK i3 6100 Mini PC Windows 11 16GB RA",
+        "price": 3241.74,
+        "cluster": "Milieu de gamme bas",
+        "brand": "2026",
+        "gaming": true
+      },
+      {
+        "title": "acer Chromebook 315 CB315-4H-C7R0, Ordinateur Portable 15,6'",
+        "price": 2189.0,
+        "cluster": "Entrée de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "WD_Black P10 Game Drive 5 to, Disque Dur Externe Portable, U",
+        "price": 2034.89,
+        "cluster": "Entrée de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "2025 NEW Honor MagicBook Pro 14 Laptop 14.6-inch U5-125H 16G",
+        "price": 12545.02,
+        "cluster": "Haut de gamme",
+        "brand": "2025",
+        "gaming": false
+      },
+      {
+        "title": "Imprimante à Transfert Thermique Portable A4, Connexion sans",
+        "price": 4996.86,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Imprimante",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Vivobook S16 AI PC portable 16\" 2,8 K OLED 120 Hz (600 ",
+        "price": 18734.43,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "New HONOR 1kg Laptop MagicBook Art 14 2024 14.6\"Inch 3.1K 12",
+        "price": 15838.46,
+        "cluster": "Haut de gamme",
+        "brand": "New",
+        "gaming": false
+      },
+      {
+        "title": "TexHoo ZHR Gaming Mini PC AMD Ryzen 7 7840HS 8 Core 16 Threa",
+        "price": 7166.7,
+        "cluster": "Milieu de gamme",
+        "brand": "Texhoo",
+        "gaming": true
+      },
+      {
+        "title": "KLQDZMS Multifunctional Luggage Bag Front Opening Laptop Boa",
+        "price": 1895.88,
+        "cluster": "Entrée de gamme",
+        "brand": "Klqdzms",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo Legion 5i, Ordinateur portable de jeu 16 po 165 Hz, G",
+        "price": 34628.0,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo IdeaPad Ordinateur portable 15,6\" Full HD 1080p Écran",
+        "price": 10625.67,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "11.6-inch laptop, 4GB of RAM, 64GB of internal storage, supp",
+        "price": 6022.25,
+        "cluster": "Milieu de gamme",
+        "brand": "11.6-Inch",
+        "gaming": false
+      },
+      {
+        "title": "2025 NEW Original GPD Pocket 4 Laptop AMD AI 9 HX 370 32GB D",
+        "price": 29046.67,
+        "cluster": "Premium",
+        "brand": "Gpd",
+        "gaming": true
+      },
+      {
+        "title": "UPERFECT 18.5'' Portable Monitor 120hz Second Laptop Screen ",
+        "price": 2660.71,
+        "cluster": "Entrée de gamme",
+        "brand": "Uperfect",
+        "gaming": true
+      },
+      {
+        "title": "2024 Acer Nitro Dragon Gaming Laptop 16 Inch 2.5K 165Hz IPS ",
+        "price": 17533.2,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "2026 Windows 11 Mini pc Intel Core i9 8950HK MINI PC Pocket ",
+        "price": 3965.43,
+        "cluster": "Milieu de gamme bas",
+        "brand": "2026",
+        "gaming": true
+      },
+      {
+        "title": "2025 New GPD MicroPC 2 7Inches Mini Industry Laptop Intel® C",
+        "price": 17240.98,
+        "cluster": "Haut de gamme",
+        "brand": "Gpd",
+        "gaming": false
+      },
+      {
+        "title": "New 10.95-inch 2-in-1 touchscreen mini Laptop Intel Core i5-",
+        "price": 9100.21,
+        "cluster": "Milieu de gamme",
+        "brand": "New",
+        "gaming": false
+      },
+      {
+        "title": "MSI Katana 17 HX B14WGK-084FR Dragon Station : Intel Core i7",
+        "price": 20889.0,
+        "cluster": "Haut de gamme",
+        "brand": "MSI",
+        "gaming": true
+      },
+      {
+        "title": "Lexibook LT10DE LAPTAB 10, Ordinateur Portable avec écran Ta",
+        "price": 2199.89,
+        "cluster": "Entrée de gamme",
+        "brand": "Lexibook",
+        "gaming": false
+      },
+      {
+        "title": "Jumper X3 AIR metal shell Laptop 13.3-inch 8GB RAM 128G SSD ",
+        "price": 7982.64,
+        "cluster": "Milieu de gamme",
+        "brand": "Jumper",
+        "gaming": false
+      },
+      {
+        "title": "Acer Écran Portable | 15,6 po FHD IPS Touch | Prise en Charg",
+        "price": 1594.45,
+        "cluster": "Entrée de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "【World Premiere】REDMI Book Pro 16 2025 Ultra5-225H/Ultra7-25",
+        "price": 24380.18,
+        "cluster": "Premium",
+        "brand": "【World",
+        "gaming": false
+      },
+      {
+        "title": "Molosuper 14 inch Cheap Notebook Windows 10 Student Laptop p",
+        "price": 4220.82,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Molosuper",
+        "gaming": false
+      },
+      {
+        "title": "Jabra Evolve2 65 Casque PC Sans Fil - Casque Audio Anti-Brui",
+        "price": 1799.05,
+        "cluster": "Entrée de gamme",
+        "brand": "Microsoft",
+        "gaming": false
+      },
+      {
+        "title": "2026 Portable i9 Computer Windows 11 Pro Intel Core i9-8950H",
+        "price": 3965.25,
+        "cluster": "Milieu de gamme bas",
+        "brand": "2026",
+        "gaming": true
+      },
+      {
+        "title": "MSI Thin 15 B13UC-3218FR : Intel Core i7 13620H - 32GB DDR4 ",
+        "price": 13863.19,
+        "cluster": "Haut de gamme",
+        "brand": "MSI",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo 2026 ThinkBook 16+ Ultra 7 356H RTX5060 32G+1T 16-Inc",
+        "price": 42371.9,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "Dell 16 Premium PC Portable DA16250 - Écran OLED Tactile 4K ",
+        "price": 31889.0,
+        "cluster": "Premium",
+        "brand": "Dell",
+        "gaming": true
+      },
+      {
+        "title": "Molosuper 14 inch Cheap Notebook Windows 10 Student Laptop p",
+        "price": 4220.82,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Molosuper",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Vivobook 14 S1404FA-NK326W 14 Pouces FHD PC Portable (P",
+        "price": 7139.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo ThinkPad T16 Gen 1 Ordinateur portable professionnel,",
+        "price": 30005.47,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Ordinateur portable TUF Gaming A16 : AMD Ryzen 7 7445HS",
+        "price": 18249.33,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "LG Gram 16Z90RU-G.AA55F - PC Portable 16\" 1199g, écran DCI-P",
+        "price": 11659.89,
+        "cluster": "Haut de gamme",
+        "brand": "LG",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo Ideapad Ordinateur portable à écran tactile 15,6\" pou",
+        "price": 5445.99,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "ASUS ROG Strix G18 G814 Ordinateur portable de jeu | 18\" 256",
+        "price": 36363.8,
+        "cluster": "Premium",
+        "brand": "Dell",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo LOQ 15IRX10 - Ordinateur Portable Gaming 15.6'' FHD (",
+        "price": 16476.9,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "KOORUI 27'' Ecran PC Gaming Incurvé 1500R, Moniteur PC Dalle",
+        "price": 1671.89,
+        "cluster": "Entrée de gamme",
+        "brand": "Koorui",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo Legion 5 Ordinateur portable de jeu / 15,1\" WQXGA 165",
+        "price": 24035.0,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "OFFTEK 32Go Mémoire RAM de Remplacement pour HP-Compaq Omen ",
+        "price": 3566.97,
+        "cluster": "Milieu de gamme bas",
+        "brand": "HP",
+        "gaming": true
+      },
+      {
+        "title": "Topton Mini Computer Gamer Intel Ultra 9 285H ES 7 255H ES 5",
+        "price": 4404.02,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Topton",
+        "gaming": true
+      },
+      {
+        "title": "BenQ Moniteur de 27\" (QHD), Bronze, 27\" IPS HDR 2560 x 1440",
+        "price": 3838.89,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Benq",
+        "gaming": false
+      },
+      {
+        "title": "ASUS ROG Strix G16 Ordinateur portable de jeu, AMD Ryzen 9-9",
+        "price": 42328.77,
+        "cluster": "Premium",
+        "brand": "Dell",
+        "gaming": true
+      },
+      {
+        "title": "2020 MacBook Pro i5 13 inch 8G/16G RAM,256GB/512GB/1TB SSD T",
+        "price": 15852.94,
+        "cluster": "Haut de gamme",
+        "brand": "Apple",
+        "gaming": false
+      },
+      {
+        "title": "Dell 15 Laptop DC15255 – 15.6\" FHD 120Hz, AMD Ryzen 7 7730U,",
+        "price": 8349.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Dell",
+        "gaming": false
+      },
+      {
+        "title": "GPD 2026 WIN Max 2 Notebook 32GB RAM 2TB SSD Hard Disk AMD R",
+        "price": 70076.43,
+        "cluster": "Premium",
+        "brand": "Gpd",
+        "gaming": true
+      },
+      {
+        "title": "acer Nitro V 15 I PC Portable Gaming 15.6'' FHD LCD 165Hz I ",
+        "price": 10989.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "ASUS - Console Portable ROG Ally Version Z1 extrême / 16Go /",
+        "price": 10448.13,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "16\" Gaming Laptop intel Core i7-6700HQ GTX 1060 6GB Notebook",
+        "price": 4974.48,
+        "cluster": "Milieu de gamme bas",
+        "brand": "16\"",
+        "gaming": true
+      },
+      {
+        "title": "HUAWEI MatePad Pro 12.2\" PaperMatte Tablettes, 2.8K Écran Ta",
+        "price": 6039.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Huawei",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Vivobook Ordinateur portable FHD 14\" 10 cœurs Intel Cor",
+        "price": 8014.38,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo Ordinateur portable ThinkPad X1 Nano Gen 2, 13\" 2K (2",
+        "price": 27873.12,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "ASUS ROG Scar 18 G835LW-SA138W 18 Pouces 2.5K 240Hz PC Porta",
+        "price": 50599.89,
+        "cluster": "Premium",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "GPD WIN MAX 2 Mini Laptop AMD AI 9 HX 370 32GB RAM 2TB SSD L",
+        "price": 27760.9,
+        "cluster": "Premium",
+        "brand": "Gpd",
+        "gaming": false
+      },
+      {
+        "title": "Gawfolk Écran d'ordinateur de jeu incurvé ultra large 34 pou",
+        "price": 3272.5,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Gawfolk",
+        "gaming": false
+      },
+      {
+        "title": "Cheap 14 inch Portable Laptop School 4GB RAM 64GB Windows 10",
+        "price": 1586.55,
+        "cluster": "Entrée de gamme",
+        "brand": "Cheap",
+        "gaming": true
+      },
+      {
+        "title": "ASUS Vivobook S16 S5606WA-MX091W 16.0 Pouces 3.2K (3200 x 20",
+        "price": 16499.89,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "10.1-inch Android 15 tablet, supports Google Play, quad-core",
+        "price": 2911.88,
+        "cluster": "Milieu de gamme bas",
+        "brand": "10.1-Inch",
+        "gaming": false
+      },
+      {
+        "title": "WD_BLACK SN770M NVMe SSD 2 To (Jusqu'à 5 150 Mo/s de lecture",
+        "price": 4459.95,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "ASUS Vivobook 14 14\" FHD Laptop, Intel Core i3-1315, 8GB RAM",
+        "price": 6489.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "Samsung Galaxy Book4, Ordinateur Portable 15.6'', Intel Core",
+        "price": 8789.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Samsung",
+        "gaming": false
+      },
+      {
+        "title": "Xiaomi laptop RedmiBook Pro 16 2024 Core Ultra 5-125H/Ultra ",
+        "price": 17433.69,
+        "cluster": "Haut de gamme",
+        "brand": "Xiaomi",
+        "gaming": false
+      },
+      {
+        "title": "Dell 15 Laptop DC15255 – 15.6\" FHD 120Hz, AMD Ryzen 7 7730U,",
+        "price": 8349.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Dell",
+        "gaming": false
+      },
+      {
+        "title": "REDMI Book Pro 14 2025 Ultra5-225H/Ultra7-255H 16GB/32GB +1T",
+        "price": 24516.68,
+        "cluster": "Premium",
+        "brand": "Redmi",
+        "gaming": false
+      },
+      {
+        "title": "2022 HUAWEI MateBook X Laptop i5-1130G7/i7-1160G7 16GB512GB/",
+        "price": 19762.84,
+        "cluster": "Haut de gamme",
+        "brand": "Huawei",
+        "gaming": false
+      },
+      {
+        "title": "GIGABYTE Aero X16 Ordinateur Portable Gaming – 16“, 165Hz WQ",
+        "price": 21113.95,
+        "cluster": "Haut de gamme",
+        "brand": "Gigabyte",
+        "gaming": true
+      },
+      {
+        "title": "Brand New Intel Core i9-8950HK 16GB RAM 1/2TB SSD FHD Blueto",
+        "price": 3240.56,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Brand",
+        "gaming": true
+      },
+      {
+        "title": "KOORUI Écran PC Gaming Incurvé 31,5 Pouces, Ultrawide QHD(25",
+        "price": 2089.89,
+        "cluster": "Entrée de gamme",
+        "brand": "Koorui",
+        "gaming": true
+      },
+      {
+        "title": "MINI PC Windows 11 Pro Core i9 8950HK/i3 6100 Gaming office ",
+        "price": 3240.4,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Mini",
+        "gaming": true
+      },
+      {
+        "title": "New 7-inch Screen Mini Laptop GPD MicroPC 2 Intel® Core™ i3-",
+        "price": 11335.35,
+        "cluster": "Milieu de gamme",
+        "brand": "Gpd",
+        "gaming": false
+      },
+      {
+        "title": "acer Nitro V 15 I PC Portable Gaming 15.6'' FHD LCD 165Hz I ",
+        "price": 10989.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo Ideapad 3 Ordinateur portable 15,6 pouces FHD pour la",
+        "price": 6023.38,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "PUSKILL DDR4 Memoria Ram Notebook 32GB 16GB 8GB 4GB 3200 266",
+        "price": 4245.9,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Puskill",
+        "gaming": false
+      },
+      {
+        "title": "SIMPLETEK - Disque SSD interne M.2 NVMe PCIe Gen 3.0 x4 1 To",
+        "price": 2266.0,
+        "cluster": "Entrée de gamme",
+        "brand": "Simpletek",
+        "gaming": false
+      },
+      {
+        "title": "2025 MSI Stealth 18 HX AI Gaming Laptop 18 Inch 4K 120Hz Min",
+        "price": 56471.52,
+        "cluster": "Premium",
+        "brand": "MSI",
+        "gaming": true
+      },
+      {
+        "title": "Dual Screen Notebook Intel N100 32GB DDR4 2TB SSD 10.9*2 Inc",
+        "price": 7743.83,
+        "cluster": "Milieu de gamme",
+        "brand": "Dual",
+        "gaming": false
+      },
+      {
+        "title": "2025 Honor MagicBook Pro 16 Laptop Ultra5 225H/Ultra9 285H 2",
+        "price": 15037.1,
+        "cluster": "Haut de gamme",
+        "brand": "2025",
+        "gaming": true
+      },
+      {
+        "title": "Mini PC Computer Windows 11 Pro Core i9 8950HK RAM 16GB 512G",
+        "price": 3240.44,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Mini",
+        "gaming": true
+      },
+      {
+        "title": "2025 Xiaomi REDMI Book 14 Laptop 14 Inch FHD 60Hz Screen Net",
+        "price": 9989.54,
+        "cluster": "Milieu de gamme",
+        "brand": "Xiaomi",
+        "gaming": false
+      },
+      {
+        "title": "2022 HUAWEI MateBook E Tablet Mini Pc 12.6 Inch OLED Full Sc",
+        "price": 15191.06,
+        "cluster": "Haut de gamme",
+        "brand": "Huawei",
+        "gaming": false
+      },
+      {
+        "title": "Xiaomi Redmi Book Pro 16 Laptop Intel Ultra 7 255H/Ultra 5 2",
+        "price": 14351.09,
+        "cluster": "Haut de gamme",
+        "brand": "Xiaomi",
+        "gaming": false
+      },
+      {
+        "title": "LEGION R9000P 2025 R9 8945HX 32G 1TB RTX5060 8G 16inch 2.5K ",
+        "price": 28988.22,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "Portable Mini PC Intel Core i9 8950HK i3 6100 Windows 11 Poc",
+        "price": 3240.4,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Portable",
+        "gaming": false
+      },
+      {
+        "title": "NEW S3 Computer 15.6 Inch Intel Core i9-12900H/i7-8750H Por ",
+        "price": 6721.06,
+        "cluster": "Milieu de gamme",
+        "brand": "New",
+        "gaming": false
+      },
+      {
+        "title": "New Gamer Mini PC OCuLink AMD Ryzen AI 9 HX 370 AI 7 H 350 E",
+        "price": 3834.09,
+        "cluster": "Milieu de gamme bas",
+        "brand": "New",
+        "gaming": true
+      },
+      {
+        "title": "15.6 Inch AMD Ryzen R7 4700U/R5 4500U MAX 36GB DDR4 M.2 2TB ",
+        "price": 8900.64,
+        "cluster": "Milieu de gamme",
+        "brand": "15.6",
+        "gaming": true
+      },
+      {
+        "title": "GLF-S1 laptop 16+16 inch Big Dual Screen Windows 11 57WH cam",
+        "price": 13880.45,
+        "cluster": "Haut de gamme",
+        "brand": "Glf-S1",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo Thinkbook 16+ Ultra X7 358H 32G 1TB SSD 16inch 3.2K 1",
+        "price": 30647.48,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo Legion Y9000X Laptop Gaming Laptop Intel Core Ultra 9",
+        "price": 51527.54,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "Dual Screen Laptop 15.6'' IPS + 7'' Touch Screen Laptop Inte",
+        "price": 5844.4,
+        "cluster": "Milieu de gamme",
+        "brand": "Dual",
+        "gaming": false
+      },
+      {
+        "title": "CHUWI MiniBook X N150 Laptop 10.51 Inch 16GB /12GB RAM 512GB",
+        "price": 15438.65,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Dell 16 PC Portable DC16255 AMD Ryzen 7 250, 16\" 2K (1920x12",
+        "price": 10659.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Dell",
+        "gaming": false
+      },
+      {
+        "title": "MSI Stealth 18 HX AI Gaming Laptop - 18\" 4K Mini-LED, Intel ",
+        "price": 37507.58,
+        "cluster": "Premium",
+        "brand": "MSI",
+        "gaming": true
+      },
+      {
+        "title": "Cheap 14 inch Portable Laptop School 4GB RAM 64GB Windows 10",
+        "price": 1586.55,
+        "cluster": "Entrée de gamme",
+        "brand": "Cheap",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo IdeaPad Slim 3 16ABR8 - Ordinateur Portable 16'' WUXG",
+        "price": 8799.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "ASUS TUF F16 Ordinateur portable de jeu RTX 5070 – Intel Cor",
+        "price": 42990.31,
+        "cluster": "Premium",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "Portable Mini Gaming PC Intel Core i9 8950HK 6100U Windows 1",
+        "price": 3240.4,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Portable",
+        "gaming": true
+      },
+      {
+        "title": "Xiaomi Laptop REDMI Book 16 2025 2.5K 120Hz Screen New Intel",
+        "price": 13145.52,
+        "cluster": "Haut de gamme",
+        "brand": "Xiaomi",
+        "gaming": false
+      },
+      {
+        "title": "10.95-inch 2-in-1 Laptop, 12th Gen Intel Core i5-1250P, Touc",
+        "price": 8522.6,
+        "cluster": "Milieu de gamme",
+        "brand": "10.95-Inch",
+        "gaming": false
+      },
+      {
+        "title": "Alienware 16 Aurora PC Portable Gaming AC16250 16\" WQXGA écr",
+        "price": 13189.0,
+        "cluster": "Haut de gamme",
+        "brand": "Alienware",
+        "gaming": true
+      },
+      {
+        "title": "ASUS ROG STRIX-G16-G614PR-RV080WEAN 16 Pouces FHD Plus 165Hz",
+        "price": 20779.0,
+        "cluster": "Haut de gamme",
+        "brand": "Dell",
+        "gaming": true
+      },
+      {
+        "title": "Dell 15 Laptop DC15255 – 15.6\" FHD 120Hz, AMD Ryzen 7 7730U,",
+        "price": 8349.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Dell",
+        "gaming": false
+      },
+      {
+        "title": "2026 New Lenovo Xiaoxin Pro 16 GT laptops 16\"2.8K 120Hz Ultr",
+        "price": 28450.54,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Acer Nitro V 15 ANV15-51-99H6 Notebook Gaming, processeur In",
+        "price": 20405.0,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "Windows 11 i9 Mini PC Intel Core i9 8950HK i3-6100 16GB RAM ",
+        "price": 3240.57,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Windows",
+        "gaming": true
+      },
+      {
+        "title": "Acer Nitro 60 N60-181-UR26 Ordinateur de bureau de jeu | Pro",
+        "price": 40506.51,
+        "cluster": "Premium",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "ACEMAGIC M5 Mini PC Intel Core i5-14500HX (14C/20T, up to 4.",
+        "price": 12052.6,
+        "cluster": "Haut de gamme",
+        "brand": "Acemagic",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo Ordinateur portable professionnel ThinkPad E16 2025, ",
+        "price": 19763.04,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Dell 15 Laptop DC15255 – 15.6\" FHD 120Hz, AMD Ryzen 7 7730U,",
+        "price": 8349.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Dell",
+        "gaming": false
+      },
+      {
+        "title": "UPERFECT UStation Z 14 Tri Screen Laptop Monitor Extender Tr",
+        "price": 7184.28,
+        "cluster": "Milieu de gamme",
+        "brand": "HP",
+        "gaming": false
+      },
+      {
+        "title": "SIMPLETEK - Écran LCD tactile Compatible avec Microsoft Surf",
+        "price": 2387.0,
+        "cluster": "Entrée de gamme",
+        "brand": "Microsoft",
+        "gaming": false
+      },
+      {
+        "title": "2026 15.6 Inch Business Laptop Computer, Intel 12th Gen CPU,",
+        "price": 5188.72,
+        "cluster": "Milieu de gamme bas",
+        "brand": "2026",
+        "gaming": false
+      },
+      {
+        "title": "2026 Portable i9 Mini PC Computer Windows 11 Pro 16GB RAM 1T",
+        "price": 3240.5,
+        "cluster": "Milieu de gamme bas",
+        "brand": "2026",
+        "gaming": true
+      },
+      {
+        "title": "LENOVO ThinkBook 14+ 2026 Intel Core Ultra X7 358H 32GB LPCA",
+        "price": 29096.52,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo ThinkBook 14+ 2025 Ultra 9 285H 32GB+1TB 14.5inch 3K ",
+        "price": 23971.87,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "10.5Inch Touch Screen Laptop Intel N150 16GB DDR4 1TB SSD Po",
+        "price": 6407.95,
+        "cluster": "Milieu de gamme",
+        "brand": "10.5Inch",
+        "gaming": false
+      },
+      {
+        "title": "acer Aspire 17 I PC Portable 17.3\" FHD LCD 60Hz I Intel Core",
+        "price": 7469.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "Tuiklol DeinPhone 1951/1868 Coque rigide avec repose-poignet",
+        "price": 2111.56,
+        "cluster": "Entrée de gamme",
+        "brand": "Microsoft",
+        "gaming": false
+      },
+      {
+        "title": "Portable MINI PC Core i9 8950HK Core i7 4510U Windows 11 16G",
+        "price": 4018.78,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Portable",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo Laptop Lenovo V15 2026 15.6“ Slim office and gaming l",
+        "price": 15090.24,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "Xiaomi Laptop REDMI Book 14 /REDMI Book 16 2025 R5-7535H/R7-",
+        "price": 11250.33,
+        "cluster": "Milieu de gamme",
+        "brand": "Xiaomi",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo Legion R7000P Laptop 15.6 Inch E-sports Gaming R7 680",
+        "price": 27816.21,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "ASUS Zenbook 14 UM3406KA-QDO74W 14 Pouces 1920x1200 60Hz OLE",
+        "price": 9899.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "UX482EG Laptop Motherboard For ASUS ZenBook UX482E UX4100E U",
+        "price": 2773.97,
+        "cluster": "Entrée de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo LEGION R7000 2025 R7 H 255 RTX5050 16+512GB 15.3inch ",
+        "price": 19057.16,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "2024 HUAWEI MateBook X Pro Laptop Inter Core Ultra9 185H/Ult",
+        "price": 37391.01,
+        "cluster": "Premium",
+        "brand": "Huawei",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo Ordinateur portable professionnel V15 G3 IAP 2023, éc",
+        "price": 15375.03,
+        "cluster": "Haut de gamme",
+        "brand": "Dell",
+        "gaming": false
+      },
+      {
+        "title": "Intel Core i9 8950HK i3 6100U Mini Computer PC Windows 11 16",
+        "price": 3240.4,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Intel",
+        "gaming": true
+      },
+      {
+        "title": "Intel Core i3-1215U 10.1-inch 2-in-1 Laptop with 2K Touchscr",
+        "price": 10956.17,
+        "cluster": "Milieu de gamme",
+        "brand": "Intel",
+        "gaming": false
+      },
+      {
+        "title": "ASUS ROG STRIX-G16-G614PR-RV080WEAN 16 Pouces FHD Plus 165Hz",
+        "price": 20779.0,
+        "cluster": "Haut de gamme",
+        "brand": "Dell",
+        "gaming": true
+      },
+      {
+        "title": "Pad15 Tablets 10.1 Inch Android 14 Tablet, 12GB+512GB Octa-C",
+        "price": 3564.82,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Pad15",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo IdeaPad Flex 5 82XX0003GE -14\" WUXGA Touch, AMD Ryzen",
+        "price": 8463.73,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo IdeaPad Flex 5 82XX0003GE -14\" WUXGA Touch, AMD Ryzen",
+        "price": 8463.73,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "New 2025 version! GPD Pocket 4 8.8-inch AMD AI 9 HX 370 64GB",
+        "price": 24766.14,
+        "cluster": "Premium",
+        "brand": "Gpd",
+        "gaming": true
+      },
+      {
+        "title": "Dell 15 Laptop DC15255 – 15.6\" FHD 120Hz, AMD Ryzen 7 7730U,",
+        "price": 8349.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Dell",
+        "gaming": false
+      },
+      {
+        "title": "acer Nitro V 15 I PC Portable Gaming 15.6\" FHD I NVIDIA GeFo",
+        "price": 11539.0,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "ZSUS 2160*1440 14-inch 2K Portable Monitor 60HZ For Laptop X",
+        "price": 2781.47,
+        "cluster": "Entrée de gamme",
+        "brand": "Zsus",
+        "gaming": false
+      },
+      {
+        "title": "acer Nitro V Ordinateur portable de jeu FHD 15,6 po, Intel C",
+        "price": 14299.56,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "Allwiner A133 7 inch Android 12 with A133P/2GB+32GB Netbook,",
+        "price": 3997.57,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Allwiner",
+        "gaming": false
+      },
+      {
+        "title": "GPD WIN MINI AI 9 HX 370 7'' 1920*1080 64GB RAM 2TB 120Hz Ha",
+        "price": 26299.8,
+        "cluster": "Premium",
+        "brand": "Gpd",
+        "gaming": true
+      },
+      {
+        "title": "OFFTEK 32Go Mémoire RAM de Remplacement pour HP-Compaq Omen ",
+        "price": 3566.97,
+        "cluster": "Milieu de gamme bas",
+        "brand": "HP",
+        "gaming": true
+      },
+      {
+        "title": "Écran de rechange 13,3\" pour MacBook Pro Retina A1706 A1708 ",
+        "price": 2942.06,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Apple",
+        "gaming": false
+      },
+      {
+        "title": "2022 HUAWEI MateBook 14s 14.2 Inch Touchscreen 2.5K 90Hz Lap",
+        "price": 16880.09,
+        "cluster": "Haut de gamme",
+        "brand": "Huawei",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo IdeaPad Ordinateur portable FHD 15,6\" pour les entrep",
+        "price": 7171.67,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Blackview Laptop AceBook 6, Laptops Computer for Business St",
+        "price": 6140.35,
+        "cluster": "Milieu de gamme",
+        "brand": "Blackview",
+        "gaming": false
+      },
+      {
+        "title": "acer Ordinateur portable Chromebook 315, écran HD antireflet",
+        "price": 4154.15,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "Intel 6500Y IPS 15.6 Inch Laptop 8GB DDR4 RAM 256GB 512GB SS",
+        "price": 3586.9,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Intel",
+        "gaming": false
+      },
+      {
+        "title": "ASUS ROG Zephyrus G15 Ordinateur portable de jeu 15,6\" QHD 2",
+        "price": 34281.94,
+        "cluster": "Premium",
+        "brand": "Dell",
+        "gaming": true
+      },
+      {
+        "title": "ASUS Vivobook 18 18 Pouces WUXGA PC Portable (AMD Ryzen 7 26",
+        "price": 10999.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "Xiaomi Redmi Book 14 2025 Laptop Inte Core 5-210H Intel Grap",
+        "price": 11130.79,
+        "cluster": "Milieu de gamme",
+        "brand": "Xiaomi",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo Yoga Slim 7 14IMH9 - Ordinateur Portable 14'' WUXGA (",
+        "price": 10999.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Xiaman Laptop Computer Windows 11 Pro Intel Atom A3950 Quad-",
+        "price": 7481.94,
+        "cluster": "Milieu de gamme",
+        "brand": "Xiaman",
+        "gaming": false
+      },
+      {
+        "title": "Acer Pc Portable Aspire Go 15 - i5-13420 / 16Go / 512Go Wind",
+        "price": 6490.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "2025 New Acer Nitro 7 Gaming Laptop 16 Inch 2.5K 240Hz Scree",
+        "price": 22584.22,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "ASUS Ordinateur portable de jeu ROG Strix G16 - Win 11 Pro G",
+        "price": 53416.88,
+        "cluster": "Premium",
+        "brand": "Dell",
+        "gaming": true
+      },
+      {
+        "title": "Logicom - Tab XXL 14 - Tablette 14\" Android 15 - Octa-Core 1",
+        "price": 2189.0,
+        "cluster": "Entrée de gamme",
+        "brand": "Logicom",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Ordinateur portable de jeu ROG Strix G18 (2025), écran ",
+        "price": 25547.61,
+        "cluster": "Premium",
+        "brand": "Dell",
+        "gaming": true
+      },
+      {
+        "title": "ASUS Vivobook S 16 AI Copilot+ PC portable : AMD Ryzen AI 9 ",
+        "price": 16521.89,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "16Inch Gaming Laptop Computer Notebook RTX4050 6G Intel Core",
+        "price": 16489.97,
+        "cluster": "Haut de gamme",
+        "brand": "16Inch",
+        "gaming": true
+      },
+      {
+        "title": "HONOR Laptop MagicBook Art 14 OLED Touchscreen Intel Ultra 5",
+        "price": 15070.03,
+        "cluster": "Haut de gamme",
+        "brand": "Honor",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo ThinkPad E15 Ordinateur portable domestique et profes",
+        "price": 17977.96,
+        "cluster": "Haut de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "acer Chromebook Plus 514 I PC Portable 14\" LCD| Intel Core 3",
+        "price": 3069.0,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "OFFTEK 32Go Mémoire RAM de Remplacement pour Microstar (MSI)",
+        "price": 3565.54,
+        "cluster": "Milieu de gamme bas",
+        "brand": "MSI",
+        "gaming": false
+      },
+      {
+        "title": "Oushedi Gaming Laptop Computer Intel Core i9-13900H NVIDIA R",
+        "price": 19160.63,
+        "cluster": "Haut de gamme",
+        "brand": "Oushedi",
+        "gaming": true
+      },
+      {
+        "title": "Lenovo Ordinateurs portables d'études étudiants de travail à",
+        "price": 6490.11,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "Asus Zenbook 14 UM3406GA 14 pouces WUXGA OLED (AMD, 32Go LPD",
+        "price": 14299.89,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "AMD Ryzen™ 5 7430U 16Inch IPS Screen Laptop 2*DDR4 MAX 32GB ",
+        "price": 9619.3,
+        "cluster": "Milieu de gamme",
+        "brand": "Amd",
+        "gaming": false
+      },
+      {
+        "title": "16\" Gaming Laptop intel Core i7-6700HQ GTX 1060 6GB Notebook",
+        "price": 4974.48,
+        "cluster": "Milieu de gamme bas",
+        "brand": "16\"",
+        "gaming": true
+      },
+      {
+        "title": "ultra-thin Laptop Intel Core i3 6th Processor 32GB RAM 1TB 2",
+        "price": 2885.67,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Ultra-Thin",
+        "gaming": true
+      },
+      {
+        "title": "Xiaomi Laptop REDMI Book 16 2025 2.5K 120Hz Screen New Intel",
+        "price": 13145.52,
+        "cluster": "Haut de gamme",
+        "brand": "Xiaomi",
+        "gaming": false
+      },
+      {
+        "title": "12.5\" Portable Laptop Thinkpad X230 I5 I7 8G 16G With SSD Bu",
+        "price": 2953.58,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "Acer Nitro 5 AN515-58-725A Ordinateur portable de jeu | Inte",
+        "price": 13883.32,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": true
+      },
+      {
+        "title": "ASUS ROG STRIX-G16-G614PR-RV080WEAN 16 Pouces FHD Plus 165Hz",
+        "price": 20779.0,
+        "cluster": "Haut de gamme",
+        "brand": "Dell",
+        "gaming": true
+      },
+      {
+        "title": "Xiaomi REDMI Book 14 2026 Ultra5-125H 32GB+1TB 14inch 2.8K 1",
+        "price": 23608.66,
+        "cluster": "Premium",
+        "brand": "Xiaomi",
+        "gaming": false
+      },
+      {
+        "title": "acer Ordinateur portable Aspire 3 Premium avec clavier rétro",
+        "price": 7421.48,
+        "cluster": "Milieu de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "ASUS ROG Falchion Ace HFX - Clavier Gaming analogique 65% (É",
+        "price": 1749.0,
+        "cluster": "Entrée de gamme",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "Jabra Evolve2 65 Casque PC Sans Fil - Casque Audio Anti-Brui",
+        "price": 1799.05,
+        "cluster": "Entrée de gamme",
+        "brand": "Microsoft",
+        "gaming": false
+      },
+      {
+        "title": "VCHANCE 13.3 Inch 4K OLED Portable Monitor AMOLED 100% DCI-P",
+        "price": 3391.21,
+        "cluster": "Milieu de gamme bas",
+        "brand": "Apple",
+        "gaming": true
+      },
+      {
+        "title": "14 Inch Windows 10 Computer Laptop PC 12GB LPDDR4 RAM 256GB ",
+        "price": 5108.89,
+        "cluster": "Milieu de gamme bas",
+        "brand": "14",
+        "gaming": false
+      },
+      {
+        "title": "Xiaomi REDMI Book 16 2025 C5-220H 16+512GB/32G+1TB 16inch 2.",
+        "price": 27970.37,
+        "cluster": "Premium",
+        "brand": "Xiaomi",
+        "gaming": false
+      },
+      {
+        "title": "2024 Acer Extraordinary Go Youth Laptop 16 Inch 60Hz FHD IPS",
+        "price": 12116.9,
+        "cluster": "Haut de gamme",
+        "brand": "Acer",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Vivobook 14 S1405VA-LY276W 14 Pouces WUXGA PC Portable ",
+        "price": 11539.0,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Vivobook Go 15 S1504FA-NJ179W 15.6 FHD Pc Portable (AMD",
+        "price": 6049.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo Ordinateur portable IdeaPad 3, 14\" 1920 x 1080 IPS, A",
+        "price": 8448.77,
+        "cluster": "Milieu de gamme",
+        "brand": "Lenovo",
+        "gaming": false
+      },
+      {
+        "title": "16\" FHD Portable Touch monitor External Display IPS 1200P Sc",
+        "price": 3979.98,
+        "cluster": "Milieu de gamme bas",
+        "brand": "16\"",
+        "gaming": false
+      },
+      {
+        "title": "ASUS Vivobook Pro 16X N7600QE-L2102W PC Portable 16 4K OLED ",
+        "price": 21999.89,
+        "cluster": "Haut de gamme",
+        "brand": "Asus",
+        "gaming": true
+      },
+      {
+        "title": "11th Gen Upgraded Version MINI Gaming PC Intel Core i7-11800",
+        "price": 7034.7,
+        "cluster": "Milieu de gamme",
+        "brand": "11Th",
+        "gaming": true
+      },
+      {
+        "title": "ASUS Zenbook 14 UM3406KA-QDO74W 14 Pouces 1920x1200 60Hz OLE",
+        "price": 9899.89,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "MSI Katana 17 HX B14WGK-014FR Dragon Station : Intel Core I7",
+        "price": 26424.75,
+        "cluster": "Premium",
+        "brand": "MSI",
+        "gaming": true
+      },
+      {
+        "title": "ASUS Vivobook 16 N1604XA-MB042W 16 Pouces WUXGA Pc Portable ",
+        "price": 10989.0,
+        "cluster": "Milieu de gamme",
+        "brand": "Asus",
+        "gaming": false
+      },
+      {
+        "title": "Lenovo LEGION Y9000P 2025 Ultra 9 275HX RTX 5060/RTX 5070 8G",
+        "price": 37913.05,
+        "cluster": "Premium",
+        "brand": "Lenovo",
+        "gaming": true
+      },
+      {
+        "title": "REDMI Book Pro 14 2025 Ultra5-225H/Ultra7-255H 16GB/32GB +1T",
+        "price": 24516.68,
+        "cluster": "Premium",
+        "brand": "Redmi",
+        "gaming": false
+      }
+    ],
+    "pca_scatter": [],
+    "brand_bar": [
+      {
+        "brand_detected": "Lenovo",
+        "count": 5347,
+        "mean": 18009.65,
+        "median": 15438.65
+      },
+      {
+        "brand_detected": "Asus",
+        "count": 3012,
+        "mean": 12836.11,
+        "median": 10999.89
+      },
+      {
+        "brand_detected": "Acer",
+        "count": 2324,
+        "mean": 10416.29,
+        "median": 8525.33
+      },
+      {
+        "brand_detected": "Dell",
+        "count": 1856,
+        "mean": 19721.6,
+        "median": 12309.0
+      },
+      {
+        "brand_detected": "Xiaomi",
+        "count": 1198,
+        "mean": 16049.91,
+        "median": 14662.91
+      },
+      {
+        "brand_detected": "Gpd",
+        "count": 1175,
+        "mean": 24245.8,
+        "median": 20619.04
+      },
+      {
+        "brand_detected": "MSI",
+        "count": 889,
+        "mean": 20370.75,
+        "median": 15389.0
+      },
+      {
+        "brand_detected": "2026",
+        "count": 835,
+        "mean": 5979.04,
+        "median": 3399.03
+      },
+      {
+        "brand_detected": "HP",
+        "count": 684,
+        "mean": 5828.17,
+        "median": 3566.97
+      },
+      {
+        "brand_detected": "New",
+        "count": 571,
+        "mean": 8683.17,
+        "median": 6721.06
+      }
+    ],
+    "radar_clusters": [],
+    "anomalies": [
+      {
+        "title": "Lenovo ThinkPad P15 Station de travail avec écran tactile 4K UHD OLED Intel Xeon",
+        "price": 88084.04,
+        "brand_detected": "Lenovo",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 190% au-dessus de la médiane du cluster",
+        "source": "Amazon",
+        "score": -0.7626
+      },
+      {
+        "title": "Lenovo ThinkPad P15 Station de travail avec écran tactile 4K UHD OLED Intel Xeon",
+        "price": 88084.04,
+        "brand_detected": "Lenovo",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 190% au-dessus de la médiane du cluster",
+        "source": "Amazon",
+        "score": -0.7626
+      },
+      {
+        "title": "Hot One XPlayer Super X AMD Ryzen AI Max+39 128GB RAM, AMOLED 60/120HZ display G",
+        "price": 55814.02,
+        "brand_detected": "Hot",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.7544
+      },
+      {
+        "title": "Hot One XPlayer Super X AMD Ryzen AI Max+39 128GB RAM, AMOLED 60/120HZ display G",
+        "price": 55814.02,
+        "brand_detected": "Hot",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.7544
+      },
+      {
+        "title": "Lenovo IdeaPad Ordinateur portable 14 pouces 2025 36 Go de RAM, mémoire 1,6 To (",
+        "price": 11938.74,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Haut de gamme",
+        "cluster_median": 15929.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.7288
+      },
+      {
+        "title": "Lenovo IdeaPad Ordinateur portable 14 pouces 2025 36 Go de RAM, mémoire 1,6 To (",
+        "price": 11938.74,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Haut de gamme",
+        "cluster_median": 15929.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.7288
+      },
+      {
+        "title": "Lenovo IdeaPad Ordinateur portable 14 pouces 2025 36 Go de RAM, mémoire 1,6 To (",
+        "price": 11938.74,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Haut de gamme",
+        "cluster_median": 15929.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.7288
+      },
+      {
+        "title": "Lenovo IdeaPad Ordinateur portable 14 pouces 2025 36 Go de RAM, mémoire 1,6 To (",
+        "price": 11938.74,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Haut de gamme",
+        "cluster_median": 15929.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.7288
+      },
+      {
+        "title": "Lenovo IdeaPad Ordinateur portable 14 pouces 2025 36 Go de RAM, mémoire 1,6 To (",
+        "price": 11938.74,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Haut de gamme",
+        "cluster_median": 15929.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.7288
+      },
+      {
+        "title": "Lenovo IdeaPad Ordinateur portable 14 pouces 2025 36 Go de RAM, mémoire 1,6 To (",
+        "price": 11938.74,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Haut de gamme",
+        "cluster_median": 15929.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.7288
+      },
+      {
+        "title": "Lenovo SSD Drive HDD 2.5 Hard Disk SSD 4TB 2TB 128G 240G 1TB 500GB 120GB HD SATA",
+        "price": 2739.68,
+        "brand_detected": "Lenovo",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.724
+      },
+      {
+        "title": "ASUS Ordinateur portable ROG Strix G18 18\" 240 Hz 10 To SSD 96 Go DDR5 RAM Win 1",
+        "price": 58390.75,
+        "brand_detected": "Dell",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.717
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "2025 MSI Titan 18 HX AI Gaming Laptop 18 Inch 4K Mini LED 120Hz UHD+ Screen Note",
+        "price": 93368.67,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 207% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7154
+      },
+      {
+        "title": "ASUS ROG Zephyrus G16 AI Ordinateur portable de jeu 16\" 240 Hz WQXGA OLED Displa",
+        "price": 61308.72,
+        "brand_detected": "Dell",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 102% au-dessus de la médiane du cluster",
+        "source": "Amazon",
+        "score": -0.7125
+      },
+      {
+        "title": "ASUS ROG Zephyrus G16 AI Ordinateur portable de jeu 16\" 240 Hz WQXGA OLED Displa",
+        "price": 61308.72,
+        "brand_detected": "Dell",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 102% au-dessus de la médiane du cluster",
+        "source": "Amazon",
+        "score": -0.7125
+      },
+      {
+        "title": "2025 MSI Titan 18 HX Dragon Edition Norse Myth Gaming Laptop 18 Inch UHD 4K Mini",
+        "price": 112769.16,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 271% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7094
+      },
+      {
+        "title": "Lenovo ThinkPad P17 Gen 2 Station de travail Ordinateur portable (Intel i9-11950",
+        "price": 62642.14,
+        "brand_detected": "Lenovo",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 106% au-dessus de la médiane du cluster",
+        "source": "Amazon",
+        "score": -0.7082
+      },
+      {
+        "title": "Lenovo ThinkPad P17 Gen 2 Station de travail Ordinateur portable (Intel i9-11950",
+        "price": 62642.14,
+        "brand_detected": "Lenovo",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 106% au-dessus de la médiane du cluster",
+        "source": "Amazon",
+        "score": -0.7082
+      },
+      {
+        "title": "For GPD WIN 5 Mini Game Machine PC AMD Ryzen AI Max 395 Processor 7-inch 120Hz 3",
+        "price": 91466.61,
+        "brand_detected": "Gpd",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 201% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7073
+      },
+      {
+        "title": "Lenovo ThinkPad P15 Station de travail Ordinateur portable (Intel i9-10885H 8 cœ",
+        "price": 59733.08,
+        "brand_detected": "Lenovo",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.7065
+      },
+      {
+        "title": "For GPD WIN 5 Mini Game Machine PC AMD Ryzen AI Max 395 Processor 7-inch 120Hz 3",
+        "price": 75565.65,
+        "brand_detected": "Gpd",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 149% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7063
+      },
+      {
+        "title": "For GPD WIN 5 Mini Game Machine PC AMD Ryzen AI Max 395 Processor 7-inch 120Hz 3",
+        "price": 75565.65,
+        "brand_detected": "Gpd",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 149% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7063
+      },
+      {
+        "title": "ASUS ROG Strix G18 Ordinateur portable 18\" 240 Hz WQXGA Écran (AMD Ryzen 9 8940H",
+        "price": 70816.46,
+        "brand_detected": "Dell",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 133% au-dessus de la médiane du cluster",
+        "source": "Amazon",
+        "score": -0.7057
+      },
+      {
+        "title": "ASUS ROG Strix G18 Ordinateur portable 18\" 240 Hz WQXGA Écran (AMD Ryzen 9 8940H",
+        "price": 70816.46,
+        "brand_detected": "Dell",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 133% au-dessus de la médiane du cluster",
+        "source": "Amazon",
+        "score": -0.7057
+      },
+      {
+        "title": "ASUS ROG Strix G18 Ordinateur portable 18\" 240 Hz WQXGA Écran (AMD Ryzen 9 8940H",
+        "price": 70816.46,
+        "brand_detected": "Dell",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 133% au-dessus de la médiane du cluster",
+        "source": "Amazon",
+        "score": -0.7057
+      },
+      {
+        "title": "ASUS - Ordinateur portable Vivobook, écran FHD de 14\", processeur Intel 10e géné",
+        "price": 3415.61,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.705
+      },
+      {
+        "title": "ASUS - Ordinateur portable Vivobook, écran FHD de 14\", processeur Intel 10e géné",
+        "price": 3415.61,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.705
+      },
+      {
+        "title": "GMKtec EVO-X2 AI Mini PC AMD Ryzen Al Max+ 395 Win11 Pro 128GB LPDDR5X 8000MHz 2",
+        "price": 61480.03,
+        "brand_detected": "Gmktec",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 102% au-dessus de la médiane du cluster",
+        "source": "AliExpress",
+        "score": -0.7041
+      },
+      {
+        "title": "Lenovo IdeaPad 3i 15,6\" FHD Chromebook, processeur Intel Celeron N4500, 4 Go de ",
+        "price": 2245.21,
+        "brand_detected": "Lenovo",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.7032
+      },
+      {
+        "title": "ASRock B550M Pro4 Motherboard Socket AM4 AMD B550 support Ryzen 5 5600 4500 3200",
+        "price": 1848.88,
+        "brand_detected": "Asrock",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.7026
+      },
+      {
+        "title": "ASUS - Ordinateur portable Vivobook, écran FHD de 14\", processeur Intel 10e géné",
+        "price": 3893.23,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.7022
+      },
+      {
+        "title": "Lenovo Ordinateur portable Ideapad 3i, écran FHD de 15,6 po, processeur Core i3-",
+        "price": 4812.61,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.7001
+      },
+      {
+        "title": "Acer Chromebook 2024 311 Ordinateur portable étudiant Business, processeur Intel",
+        "price": 2970.11,
+        "brand_detected": "Acer",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6998
+      },
+      {
+        "title": "2-in-1 Windows PC 10.1 Inch Tablet PC Intel Intel Celeron N4120 8G RAM 128G SSD ",
+        "price": 1870.93,
+        "brand_detected": "2-In-1",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6994
+      },
+      {
+        "title": "2-in-1 Windows PC 10.1 Inch Tablet PC Intel Intel Celeron N4120 8G RAM 128G SSD ",
+        "price": 1870.93,
+        "brand_detected": "2-In-1",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6994
+      },
+      {
+        "title": "Lenovo Chromebook 15 IdeaPad 3i (15,6 po FHD, 4 Go de RAM, 192 Go de stockage (6",
+        "price": 2781.24,
+        "brand_detected": "Lenovo",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6983
+      },
+      {
+        "title": "Lenovo Chromebook 15 IdeaPad 3i (15,6 po FHD, 4 Go de RAM, 192 Go de stockage (6",
+        "price": 2781.24,
+        "brand_detected": "Lenovo",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6983
+      },
+      {
+        "title": "Lenovo Chromebook 15 IdeaPad 3i (15,6 po FHD, 4 Go de RAM, 192 Go de stockage (6",
+        "price": 2781.24,
+        "brand_detected": "Lenovo",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6983
+      },
+      {
+        "title": "Lenovo Legion Ordinateur portable de jeu 16\", écran WQXGA 165 Hz, GeForce RTX 40",
+        "price": 53098.65,
+        "brand_detected": "Lenovo",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6969
+      },
+      {
+        "title": "Lenovo Legion Ordinateur portable de jeu 16\", écran WQXGA 165 Hz, GeForce RTX 40",
+        "price": 53098.65,
+        "brand_detected": "Lenovo",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6969
+      },
+      {
+        "title": "acer Chromebook 315, ordinateur portable IPS 15,6\" FHD (1920 x 1080), Intel Cele",
+        "price": 3351.15,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6961
+      },
+      {
+        "title": "Acer Chromebook 315 Ordinateur portable pour étudiant en affaires 2024, écran HD",
+        "price": 3473.47,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6952
+      },
+      {
+        "title": "acer Chromebook 315 Ordinateur portable FHD 15,6\" pour la maison et les étudiant",
+        "price": 3896.75,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.695
+      },
+      {
+        "title": "acer Chromebook 315 Ordinateur portable FHD 15,6\" pour la maison et les étudiant",
+        "price": 3896.75,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.695
+      },
+      {
+        "title": "Lenovo LOQ 15ARP9 Ordinateur portable de jeu 2024, 15,6 po FHD IPS 144 Hz, AMD R",
+        "price": 36832.4,
+        "brand_detected": "Lenovo",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6943
+      },
+      {
+        "title": "acer Ordinateur portable Aspire 3, écran FHD de 14 po, Intel Core i3-N305, carte",
+        "price": 5885.99,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.694
+      },
+      {
+        "title": "ASUS ROG Strix Scar 18 (2025) Ordinateur portable de jeu, 18\" ROG Nebula HDR 16:",
+        "price": 96686.37,
+        "brand_detected": "Asus",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 218% au-dessus de la médiane du cluster",
+        "source": "Amazon",
+        "score": -0.6939
+      },
+      {
+        "title": "ASUS ROG Strix Scar 18 (2025) Ordinateur portable de jeu, 18\" ROG Nebula HDR 16:",
+        "price": 96686.37,
+        "brand_detected": "Asus",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "trop_haut",
+        "reason": "Prix 218% au-dessus de la médiane du cluster",
+        "source": "Amazon",
+        "score": -0.6939
+      },
+      {
+        "title": "Lenovo 300e G4 Chromebook à écran tactile 2 en 1 de 11,6 po, processeur MediaTek",
+        "price": 4168.34,
+        "brand_detected": "Dell",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6938
+      },
+      {
+        "title": "ASUS Ordinateur portable 14\" pour les entreprises et les étudiants, écran FHD de",
+        "price": 4169.77,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6935
+      },
+      {
+        "title": "ASUS Ordinateur portable de jeu 2025 | ROG Strix G16 | AMD 16 cœurs Ryzen 9 8940",
+        "price": 55126.17,
+        "brand_detected": "Dell",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6931
+      },
+      {
+        "title": "Acer Ordinateur portable Chromebook 311 pour étudiant 2025, processeur Intel N45",
+        "price": 4396.59,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6931
+      },
+      {
+        "title": "Lenovo Ordinateur portable IdeaPad 3 14\", processeur Intel Core i3-1005G1, 4 Go ",
+        "price": 4462.7,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6925
+      },
+      {
+        "title": "Acer Ordinateur Portable Aspire Go 15 AI Ready | Écran FHD IPS de 15,6 po | AMD ",
+        "price": 6181.34,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6921
+      },
+      {
+        "title": "Acer Ordinateur Portable Aspire Go 15 AI Ready | Écran FHD IPS de 15,6 po | AMD ",
+        "price": 6181.34,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6921
+      },
+      {
+        "title": "Windows 11 Laptop 10.1inch Notebook Computer Intel Celeron N4020 Learning Laptop",
+        "price": 2255.1,
+        "brand_detected": "Windows",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.692
+      },
+      {
+        "title": "Windows 11 Laptop 10.1inch Notebook Computer Intel Celeron N4020 Learning Laptop",
+        "price": 2255.1,
+        "brand_detected": "Windows",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.692
+      },
+      {
+        "title": "Windows 11 Laptop 10.1inch Notebook Computer Intel Celeron N4020 Learning Laptop",
+        "price": 2255.1,
+        "brand_detected": "Windows",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.692
+      },
+      {
+        "title": "CF-20/8 Go de RAM/240 Go de disque dur SSD / WiFi/4G LTE/Panasonic TOUGHBOOK/ord",
+        "price": 30789.0,
+        "brand_detected": "Cf-20/8",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.692
+      },
+      {
+        "title": "Lenovo Ordinateur portable Ideapad 3i 2022, écran tactile Full HD 1080p de 15,6 ",
+        "price": 7486.27,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6919
+      },
+      {
+        "title": "Lenovo IdeaPad Flex 5i Chromebook Plus Ordinateur portable 2 en 1, écran tactile",
+        "price": 7384.08,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6919
+      },
+      {
+        "title": "Lenovo IdeaPad Flex 5i Chromebook Plus Ordinateur portable 2 en 1, écran tactile",
+        "price": 7384.08,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6919
+      },
+      {
+        "title": "acer Aspire 5 A515-56-363A, écran IPS Full HD de 15,6\", processeur Intel Core i3",
+        "price": 7009.09,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6911
+      },
+      {
+        "title": "Lenovo 256TB SSD High-speed SSD USB 3.0 Enclosure Mobile Hard Drive Cases for SS",
+        "price": 1965.47,
+        "brand_detected": "Lenovo",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6899
+      },
+      {
+        "title": "Lenovo Ideapad Ordinateur portable 2024 Premium, écran HD de 14 pouces, léger, I",
+        "price": 3807.43,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6898
+      },
+      {
+        "title": "New 10.1 inch Notebook Computer Windows 11 Laptop Intel Celeron N4020 Learning L",
+        "price": 2354.88,
+        "brand_detected": "New",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6895
+      },
+      {
+        "title": "Lenovo IdeaPad 1 Ordinateur portable professionnel – Écran HD de 14 po, Intel Ce",
+        "price": 3844.61,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.689
+      },
+      {
+        "title": "Lenovo Ordinateur portable / 17,3\" 1920 x 1080 165 Hz / 14 cœurs Intel i7-13650H",
+        "price": 42013.95,
+        "brand_detected": "Lenovo",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6888
+      },
+      {
+        "title": "H55N Mini PC Intel Celeron N5095 Quad-Core 8G RAM 128G SSD 5.5\" FHD Touch Displa",
+        "price": 4707.66,
+        "brand_detected": "H55N",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6887
+      },
+      {
+        "title": "acer Chromebook 315 Ordinateur portable pour entreprise, écran HD de 15,6\", Inte",
+        "price": 3594.69,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6886
+      },
+      {
+        "title": "ZSUS i5 i7 Mini PC Intel Celeron Desktop Gaming Computer 8GB 16GB 128GB 256GB DD",
+        "price": 4356.68,
+        "brand_detected": "Zsus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6885
+      },
+      {
+        "title": "ZSUS i5 i7 Mini PC Intel Celeron Desktop Gaming Computer 8GB 16GB 128GB 256GB DD",
+        "price": 4356.68,
+        "brand_detected": "Zsus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6885
+      },
+      {
+        "title": "ZSUS i5 i7 Mini PC Intel Celeron Desktop Gaming Computer 8GB 16GB 128GB 256GB DD",
+        "price": 4356.68,
+        "brand_detected": "Zsus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6885
+      },
+      {
+        "title": "ZSUS i5 i7 Mini PC Intel Celeron Desktop Gaming Computer 8GB 16GB 128GB 256GB DD",
+        "price": 4356.68,
+        "brand_detected": "Zsus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6885
+      },
+      {
+        "title": "ZSUS i5 i7 Mini PC Intel Celeron Desktop Gaming Computer 8GB 16GB 128GB 256GB DD",
+        "price": 4356.68,
+        "brand_detected": "Zsus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6885
+      },
+      {
+        "title": "Acer Chromebook 315 avec Gemini-AI Chrome OS | Écran HD 15,6'' | 4 Go de RAM | S",
+        "price": 4031.5,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6878
+      },
+      {
+        "title": "Lenovo Ideapad 1 Ordinateur portable professionnel, écran HD 15,6\" (1366 x 768) ",
+        "price": 7291.9,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6877
+      },
+      {
+        "title": "Acer Chromebook 315 avec système d'exploitation Gemini AI chromé | affichage HD ",
+        "price": 4184.07,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6873
+      },
+      {
+        "title": "Lenovo Ideapad 1 ordinateur portable, 15,6\" HD (1366 x 768) anti-reflet, Intel C",
+        "price": 6084.98,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6868
+      },
+      {
+        "title": "Lenovo IdeaPad 1 Ordinateur portable 14\" FHD IPS, processeur Intel Celeron N4020",
+        "price": 5562.7,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6867
+      },
+      {
+        "title": "Lenovo IdeaPad 1 Ordinateur portable 14\" FHD IPS, processeur Intel Celeron N4020",
+        "price": 5562.7,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6867
+      },
+      {
+        "title": "Lenovo IdeaPad 1 Ordinateur portable 14\" FHD IPS, processeur Intel Celeron N4020",
+        "price": 5562.7,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6867
+      },
+      {
+        "title": "ASUS PRIME B450M-A Motherboard Support AMD Ryzen 5 5600G 3600X 5700X 5800X3DCPU ",
+        "price": 2236.84,
+        "brand_detected": "Asus",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6865
+      },
+      {
+        "title": "ASUS ProArt PX13 13.3\" OLED 60Hz PC Portable (AMD Ryzen AI Max+ 395 Processor ju",
+        "price": 38499.89,
+        "brand_detected": "Asus",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.686
+      },
+      {
+        "title": "ASUS ProArt PX13 13.3\" OLED 60Hz PC Portable (AMD Ryzen AI Max+ 395 Processor ju",
+        "price": 38499.89,
+        "brand_detected": "Asus",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.686
+      },
+      {
+        "title": "ASUS ProArt PX13 13.3\" OLED 60Hz PC Portable (AMD Ryzen AI Max+ 395 Processor ju",
+        "price": 38499.89,
+        "brand_detected": "Asus",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.686
+      },
+      {
+        "title": "ASUS Chromebook CX14 Ordinateur portable (écran tactile FHD de 14\", Intel Celero",
+        "price": 5379.77,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.686
+      },
+      {
+        "title": "ASUS Chromebook CX14 Ordinateur portable (écran tactile FHD de 14\", Intel Celero",
+        "price": 5379.77,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.686
+      },
+      {
+        "title": "acer Aspire Go Ordinateur portable à écran tactile FHD de 15,6\", AMD Ryzen 5 752",
+        "price": 11435.05,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6853
+      },
+      {
+        "title": "ASUS Ordinateur portable ROG Strix G 16\" WUXGA IPS 16 cœurs AMD Ryzen 9 9955HX N",
+        "price": 44033.99,
+        "brand_detected": "Asus",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6852
+      },
+      {
+        "title": "Lenovo Chromebook | Ordinateur portable FHD 15,6\" | 4 Go de RAM | 64 Go SSD & 64",
+        "price": 3483.04,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6849
+      },
+      {
+        "title": "LGA 1151 Asus ROG STRIX Z390-F GAMING Motherboard DDR4 Intel 8th 9th-Gen i9 i7 i",
+        "price": 1621.82,
+        "brand_detected": "Asus",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6847
+      },
+      {
+        "title": "LGA 1151 Asus ROG STRIX Z390-F GAMING Motherboard DDR4 Intel 8th 9th-Gen i9 i7 i",
+        "price": 1621.82,
+        "brand_detected": "Asus",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6847
+      },
+      {
+        "title": "LGA 1151 Asus ROG STRIX Z390-F GAMING Motherboard DDR4 Intel 8th 9th-Gen i9 i7 i",
+        "price": 1621.82,
+        "brand_detected": "Asus",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6847
+      },
+      {
+        "title": "Original CN Lenovo Xiaoxin Pad 11 2025 Tab 128GB 256GB ROM MTK Dimensity 6300 11",
+        "price": 5627.63,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6836
+      },
+      {
+        "title": "ASUS Chromebook Google AI Stylet pour ordinateur portable – Écran FHD de 14 po –",
+        "price": 5106.2,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6834
+      },
+      {
+        "title": "Asus Chromebook Plus CX34 CX3402CBA-DH388-GR Chromebook 14\" Full HD Intel Core i",
+        "price": 6828.25,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6832
+      },
+      {
+        "title": "SIMPLETEK - Disque dur externe 14 To USB 3.2 Gen 1 | Avec alimentation externe |",
+        "price": 4774.0,
+        "brand_detected": "Simpletek",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.683
+      },
+      {
+        "title": "Global ROM Lenovo Xiaoxin Pad 11 2025 Tab 128GB 256GB Dimensity 6300 11\" 2.5K Sc",
+        "price": 6167.1,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6824
+      },
+      {
+        "title": "ASUS Ordinateur portable 15,6\" FHD - Intel Celeron N4020-4 Go de mémoire - 128 G",
+        "price": 3690.94,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6822
+      },
+      {
+        "title": "b450 AM4 placa mãe B450 Pro4 R2.0 motherboard CPU Support Ryzen 5 5600 7 5700X 5",
+        "price": 2810.59,
+        "brand_detected": "B450",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6819
+      },
+      {
+        "title": "ASUS PRIME B450M-A IAM4 Motherboard Support Ryzen 5 5600 5600X 3600 2600 DDR4 12",
+        "price": 2636.27,
+        "brand_detected": "Asus",
+        "price_category": "entrée_de_gamme",
+        "cluster": "Entrée de gamme",
+        "cluster_median": 2162.43,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6818
+      },
+      {
+        "title": "B450 Motherboard ASROCK B450M PRO4 support AM4 Ryzen 5 5600X 5 5500 7 5700X 7 37",
+        "price": 3004.47,
+        "brand_detected": "B450",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "AliExpress",
+        "score": -0.6814
+      },
+      {
+        "title": "MSI Raider 18 HX AI A2XWIG-270FR : Intel Core Ultra 9 285HX - 64GB DDR5 - SSD 4T",
+        "price": 57224.75,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6814
+      },
+      {
+        "title": "MSI Raider 18 HX AI A2XWIG-270FR : Intel Core Ultra 9 285HX - 64GB DDR5 - SSD 4T",
+        "price": 57224.75,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6814
+      },
+      {
+        "title": "MSI Raider 18 HX AI A2XWIG-270FR : Intel Core Ultra 9 285HX - 64GB DDR5 - SSD 4T",
+        "price": 57224.75,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6814
+      },
+      {
+        "title": "MSI Raider 18 HX AI A2XWIG-270FR : Intel Core Ultra 9 285HX - 64GB DDR5 - SSD 4T",
+        "price": 57224.75,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6814
+      },
+      {
+        "title": "MSI Raider 18 HX AI A2XWIG-270FR : Intel Core Ultra 9 285HX - 64GB DDR5 - SSD 4T",
+        "price": 57224.75,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6814
+      },
+      {
+        "title": "MSI Raider 18 HX AI A2XWIG-270FR : Intel Core Ultra 9 285HX - 64GB DDR5 - SSD 4T",
+        "price": 57224.75,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6814
+      },
+      {
+        "title": "MSI Raider 18 HX AI A2XWIG-270FR : Intel Core Ultra 9 285HX - 64GB DDR5 - SSD 4T",
+        "price": 57224.75,
+        "brand_detected": "MSI",
+        "price_category": "premium",
+        "cluster": "Premium",
+        "cluster_median": 30367.16,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6814
+      },
+      {
+        "title": "ASUS Ordinateur portable VivoBook 14\" FHD 2022, AMD Athlon Gold 3150U, 8 Go de R",
+        "price": 5715.93,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6812
+      },
+      {
+        "title": "Lenovo Ideapad Ordinateur portable 15,6\" | Processeur AMD | Copilote et Windows ",
+        "price": 6128.76,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme",
+        "cluster_median": 8349.0,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6811
+      },
+      {
+        "title": "Lenovo Ideapad 1 Ordinateur portable HD 15,6\" | Processeur AMD Athlon Silver 712",
+        "price": 3854.29,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.681
+      },
+      {
+        "title": "Lenovo Ideapad 1 Ordinateur portable HD 15,6\" | Processeur AMD Athlon Silver 712",
+        "price": 3854.29,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.681
+      },
+      {
+        "title": "ASUS L510 Ordinateur portable 15,6\" FHD pour étudiant – Intel Celeron N4020 jusq",
+        "price": 3971.55,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.681
+      },
+      {
+        "title": "Lenovo Ideapad 1 Ordinateur portable HD 15,6\" | Processeur AMD Athlon Silver 712",
+        "price": 3855.39,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.681
+      },
+      {
+        "title": "acer Chromebook 314 Ordinateur portable 14\" 8 Go 128 Go Intel Pentium Silver N60",
+        "price": 3511.31,
+        "brand_detected": "Acer",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6809
+      },
+      {
+        "title": "ASUS Laptop L410MA-PS04 L410MA-PS04 Ordinateur portable ultra fin, écran FHD de ",
+        "price": 4012.8,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6808
+      },
+      {
+        "title": "Lenovo Ideapad 1i, ordinateur portable 14\", Intel Pentium N5030, 4 Go de RAM, 12",
+        "price": 3624.5,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6807
+      },
+      {
+        "title": "Lenovo Ideapad 1i, ordinateur portable 14\", Intel Pentium N5030, 4 Go de RAM, 12",
+        "price": 3624.5,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6807
+      },
+      {
+        "title": "ASUS Ordinateur portable Vivobook go 15 L510, 15,6\" FHD, processeur Intel Celero",
+        "price": 4425.19,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6807
+      },
+      {
+        "title": "ASUS Ordinateur portable Vivobook go 15 L510, 15,6\" FHD, processeur Intel Celero",
+        "price": 4425.19,
+        "brand_detected": "Asus",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6807
+      },
+      {
+        "title": "Lenovo IdeaPad 1i - (2023) - Ordinateur portable quotidien - Windows 11-15,6\" FH",
+        "price": 4829.55,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6806
+      },
+      {
+        "title": "Lenovo IdeaPad 1i - (2023) - Ordinateur portable quotidien - Windows 11-15,6\" FH",
+        "price": 4829.55,
+        "brand_detected": "Lenovo",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6806
+      },
+      {
+        "title": "WD 16To My Book - Disque dur externe de bureau avec logiciels de gestion du disq",
+        "price": 4309.47,
+        "brand_detected": "Wd",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6801
+      },
+      {
+        "title": "WD 16To My Book - Disque dur externe de bureau avec logiciels de gestion du disq",
+        "price": 4309.47,
+        "brand_detected": "Wd",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6801
+      },
+      {
+        "title": "WD 16To My Book - Disque dur externe de bureau avec logiciels de gestion du disq",
+        "price": 4309.47,
+        "brand_detected": "Wd",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6801
+      },
+      {
+        "title": "WD 16To My Book - Disque dur externe de bureau avec logiciels de gestion du disq",
+        "price": 4309.47,
+        "brand_detected": "Wd",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6801
+      },
+      {
+        "title": "WD 16To My Book - Disque dur externe de bureau avec logiciels de gestion du disq",
+        "price": 4309.47,
+        "brand_detected": "Wd",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6801
+      },
+      {
+        "title": "WD 16To My Book - Disque dur externe de bureau avec logiciels de gestion du disq",
+        "price": 4309.47,
+        "brand_detected": "Wd",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6801
+      },
+      {
+        "title": "WD 16To My Book - Disque dur externe de bureau avec logiciels de gestion du disq",
+        "price": 4309.47,
+        "brand_detected": "Wd",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6801
+      },
+      {
+        "title": "WD 16To My Book - Disque dur externe de bureau avec logiciels de gestion du disq",
+        "price": 4309.47,
+        "brand_detected": "Wd",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6801
+      },
+      {
+        "title": "WD 16To My Book - Disque dur externe de bureau avec logiciels de gestion du disq",
+        "price": 4309.47,
+        "brand_detected": "Wd",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6801
+      },
+      {
+        "title": "WD 16To My Book - Disque dur externe de bureau avec logiciels de gestion du disq",
+        "price": 4309.47,
+        "brand_detected": "Wd",
+        "price_category": "milieu_de_gamme_bas",
+        "cluster": "Milieu de gamme bas",
+        "cluster_median": 3586.9,
+        "anomaly_type": "suspect",
+        "reason": "Combinaison prix/specs inhabituelle",
+        "source": "Amazon",
+        "score": -0.6801
+      }
+    ],
+    "anomaly_summary": [
+      {
+        "methode": "IQR",
+        "anomalies": 321,
+        "pourcentage": 1.15
+      },
+      {
+        "methode": "Z-score",
+        "anomalies": 0,
+        "pourcentage": 0.0
+      },
+      {
+        "methode": "Isolation Forest",
+        "anomalies": 1398,
+        "pourcentage": 5.0
+      },
+      {
+        "methode": "LOF",
+        "anomalies": 1397,
+        "pourcentage": 5.0
+      },
+      {
+        "methode": "Contextuel",
+        "anomalies": 89,
+        "pourcentage": 0.32
+      }
+    ],
+    "association_rules": [
+      {
+        "antecedent": "cluster=Entrée de gamme",
+        "consequent": "is_gaming=is_gaming=Non, price_category=entrée_de_gamme",
+        "support": 0.0966,
+        "confidence": 0.7992,
+        "lift": 7.6335
+      },
+      {
+        "antecedent": "is_gaming=is_gaming=Non, price_category=entrée_de_gamme",
+        "consequent": "cluster=Entrée de gamme",
+        "support": 0.0966,
+        "confidence": 0.9231,
+        "lift": 7.6335
+      },
+      {
+        "antecedent": "has_gpu=has_gpu=Non, price_category=entrée_de_gamme",
+        "consequent": "cluster=Entrée de gamme",
+        "support": 0.1207,
+        "confidence": 0.9119,
+        "lift": 7.5408
+      },
+      {
+        "antecedent": "cluster=Entrée de gamme",
+        "consequent": "has_gpu=has_gpu=Non, price_category=entrée_de_gamme",
+        "support": 0.1207,
+        "confidence": 0.9982,
+        "lift": 7.5408
+      },
+      {
+        "antecedent": "price_category=entrée_de_gamme",
+        "consequent": "cluster=Entrée de gamme, is_gaming=is_gaming=Non",
+        "support": 0.0966,
+        "confidence": 0.7285,
+        "lift": 7.5379
+      },
+      {
+        "antecedent": "cluster=Entrée de gamme, is_gaming=is_gaming=Non",
+        "consequent": "price_category=entrée_de_gamme",
+        "support": 0.0966,
+        "confidence": 1.0,
+        "lift": 7.5379
+      },
+      {
+        "antecedent": "cluster=Entrée de gamme, has_gpu=has_gpu=Non",
+        "consequent": "price_category=entrée_de_gamme",
+        "support": 0.1207,
+        "confidence": 1.0,
+        "lift": 7.5379
+      },
+      {
+        "antecedent": "price_category=entrée_de_gamme",
+        "consequent": "cluster=Entrée de gamme, has_gpu=has_gpu=Non",
+        "support": 0.1207,
+        "confidence": 0.9099,
+        "lift": 7.5379
+      },
+      {
+        "antecedent": "price_category=entrée_de_gamme",
+        "consequent": "cluster=Entrée de gamme",
+        "support": 0.1209,
+        "confidence": 0.9116,
+        "lift": 7.5379
+      },
+      {
+        "antecedent": "cluster=Entrée de gamme",
+        "consequent": "price_category=entrée_de_gamme",
+        "support": 0.1209,
+        "confidence": 1.0,
+        "lift": 7.5379
+      },
+      {
+        "antecedent": "is_gaming=is_gaming=Oui, price_category=premium",
+        "consequent": "cluster=Premium",
+        "support": 0.1014,
+        "confidence": 0.96,
+        "lift": 6.3274
+      },
+      {
+        "antecedent": "cluster=Premium",
+        "consequent": "is_gaming=is_gaming=Oui, price_category=premium",
+        "support": 0.1014,
+        "confidence": 0.6683,
+        "lift": 6.3274
+      },
+      {
+        "antecedent": "price_category=premium",
+        "consequent": "cluster=Premium, is_gaming=is_gaming=Oui",
+        "support": 0.1014,
+        "confidence": 0.6357,
+        "lift": 6.2686
+      },
+      {
+        "antecedent": "cluster=Premium, has_gpu=has_gpu=Non",
+        "consequent": "price_category=premium",
+        "support": 0.0843,
+        "confidence": 1.0,
+        "lift": 6.2686
+      },
+      {
+        "antecedent": "price_category=premium",
+        "consequent": "cluster=Premium",
+        "support": 0.1517,
+        "confidence": 0.9511,
+        "lift": 6.2686
+      },
+      {
+        "antecedent": "cluster=Premium",
+        "consequent": "price_category=premium",
+        "support": 0.1517,
+        "confidence": 1.0,
+        "lift": 6.2686
+      },
+      {
+        "antecedent": "cluster=Premium, is_gaming=is_gaming=Oui",
+        "consequent": "price_category=premium",
+        "support": 0.1014,
+        "confidence": 1.0,
+        "lift": 6.2686
+      },
+      {
+        "antecedent": "has_gpu=has_gpu=Non, price_category=premium",
+        "consequent": "cluster=Premium",
+        "support": 0.0843,
+        "confidence": 0.942,
+        "lift": 6.2086
+      },
+      {
+        "antecedent": "is_gaming=is_gaming=Oui, price_category=milieu_de_gamme_bas",
+        "consequent": "cluster=Milieu de gamme bas",
+        "support": 0.0968,
+        "confidence": 0.8872,
+        "lift": 4.415
+      },
+      {
+        "antecedent": "price_category=haut_de_gamme",
+        "consequent": "cluster=Haut de gamme, is_gaming=is_gaming=Non",
+        "support": 0.1599,
+        "confidence": 0.6828,
+        "lift": 3.9644
+      },
+      {
+        "antecedent": "cluster=Haut de gamme, is_gaming=is_gaming=Non",
+        "consequent": "price_category=haut_de_gamme",
+        "support": 0.1599,
+        "confidence": 0.9283,
+        "lift": 3.9644
+      },
+      {
+        "antecedent": "cluster=Haut de gamme, has_gpu=has_gpu=Non",
+        "consequent": "price_category=haut_de_gamme",
+        "support": 0.1843,
+        "confidence": 0.9195,
+        "lift": 3.9267
+      },
+      {
+        "antecedent": "price_category=haut_de_gamme",
+        "consequent": "cluster=Haut de gamme, has_gpu=has_gpu=Non",
+        "support": 0.1843,
+        "confidence": 0.7872,
+        "lift": 3.9267
+      },
+      {
+        "antecedent": "cluster=Haut de gamme",
+        "consequent": "has_gpu=has_gpu=Non, price_category=haut_de_gamme",
+        "support": 0.1843,
+        "confidence": 0.7235,
+        "lift": 3.9245
+      },
+      {
+        "antecedent": "is_gaming=is_gaming=Non, price_category=haut_de_gamme",
+        "consequent": "cluster=Haut de gamme",
+        "support": 0.1599,
+        "confidence": 1.0,
+        "lift": 3.9245
+      },
+      {
+        "antecedent": "cluster=Haut de gamme",
+        "consequent": "price_category=haut_de_gamme",
+        "support": 0.2342,
+        "confidence": 0.919,
+        "lift": 3.9245
+      },
+      {
+        "antecedent": "cluster=Haut de gamme",
+        "consequent": "is_gaming=is_gaming=Non, price_category=haut_de_gamme",
+        "support": 0.1599,
+        "confidence": 0.6275,
+        "lift": 3.9245
+      },
+      {
+        "antecedent": "price_category=haut_de_gamme",
+        "consequent": "cluster=Haut de gamme",
+        "support": 0.2342,
+        "confidence": 1.0,
+        "lift": 3.9245
+      },
+      {
+        "antecedent": "has_gpu=has_gpu=Non, price_category=haut_de_gamme",
+        "consequent": "cluster=Haut de gamme",
+        "support": 0.1843,
+        "confidence": 1.0,
+        "lift": 3.9245
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme bas, is_gaming=is_gaming=Oui",
+        "consequent": "price_category=milieu_de_gamme_bas",
+        "support": 0.0968,
+        "confidence": 0.9633,
+        "lift": 3.7031
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme bas",
+        "consequent": "has_gpu=has_gpu=Non, price_category=milieu_de_gamme_bas",
+        "support": 0.1877,
+        "confidence": 0.9341,
+        "lift": 3.6253
+      },
+      {
+        "antecedent": "has_gpu=has_gpu=Non, price_category=milieu_de_gamme_bas",
+        "consequent": "cluster=Milieu de gamme bas",
+        "support": 0.1877,
+        "confidence": 0.7285,
+        "lift": 3.6253
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme bas",
+        "consequent": "price_category=milieu_de_gamme_bas",
+        "support": 0.1892,
+        "confidence": 0.9416,
+        "lift": 3.6196
+      },
+      {
+        "antecedent": "price_category=milieu_de_gamme_bas",
+        "consequent": "cluster=Milieu de gamme bas",
+        "support": 0.1892,
+        "confidence": 0.7273,
+        "lift": 3.6196
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme bas, has_gpu=has_gpu=Non",
+        "consequent": "price_category=milieu_de_gamme_bas",
+        "support": 0.1877,
+        "confidence": 0.9415,
+        "lift": 3.6193
+      },
+      {
+        "antecedent": "price_category=milieu_de_gamme_bas",
+        "consequent": "cluster=Milieu de gamme bas, has_gpu=has_gpu=Non",
+        "support": 0.1877,
+        "confidence": 0.7216,
+        "lift": 3.6193
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme bas, is_gaming=is_gaming=Non",
+        "consequent": "price_category=milieu_de_gamme_bas",
+        "support": 0.0925,
+        "confidence": 0.9199,
+        "lift": 3.5363
+      },
+      {
+        "antecedent": "is_gaming=is_gaming=Non, price_category=milieu_de_gamme",
+        "consequent": "cluster=Milieu de gamme",
+        "support": 0.1556,
+        "confidence": 0.9467,
+        "lift": 3.4858
+      },
+      {
+        "antecedent": "has_gpu=has_gpu=Non, price_category=milieu_de_gamme",
+        "consequent": "cluster=Milieu de gamme",
+        "support": 0.1796,
+        "confidence": 0.9426,
+        "lift": 3.4706
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme",
+        "consequent": "has_gpu=has_gpu=Non, price_category=milieu_de_gamme",
+        "support": 0.1796,
+        "confidence": 0.6614,
+        "lift": 3.4706
+      },
+      {
+        "antecedent": "price_category=milieu_de_gamme",
+        "consequent": "cluster=Milieu de gamme",
+        "support": 0.2007,
+        "confidence": 0.9399,
+        "lift": 3.4606
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme",
+        "consequent": "price_category=milieu_de_gamme",
+        "support": 0.2007,
+        "confidence": 0.7388,
+        "lift": 3.4606
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme, is_gaming=is_gaming=Non",
+        "consequent": "price_category=milieu_de_gamme",
+        "support": 0.1556,
+        "confidence": 0.7264,
+        "lift": 3.4023
+      },
+      {
+        "antecedent": "price_category=milieu_de_gamme",
+        "consequent": "cluster=Milieu de gamme, is_gaming=is_gaming=Non",
+        "support": 0.1556,
+        "confidence": 0.7289,
+        "lift": 3.4023
+      },
+      {
+        "antecedent": "price_category=milieu_de_gamme",
+        "consequent": "cluster=Milieu de gamme, has_gpu=has_gpu=Non",
+        "support": 0.1796,
+        "confidence": 0.8413,
+        "lift": 3.3709
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme, has_gpu=has_gpu=Non",
+        "consequent": "price_category=milieu_de_gamme",
+        "support": 0.1796,
+        "confidence": 0.7197,
+        "lift": 3.3709
+      },
+      {
+        "antecedent": "is_gaming=is_gaming=Non, price_category=milieu_de_gamme_bas",
+        "consequent": "cluster=Milieu de gamme bas",
+        "support": 0.0925,
+        "confidence": 0.612,
+        "lift": 3.0455
+      },
+      {
+        "antecedent": "has_gpu=has_gpu=Oui",
+        "consequent": "is_gaming=is_gaming=Oui",
+        "support": 0.145,
+        "confidence": 0.9963,
+        "lift": 2.7218
+      },
+      {
+        "antecedent": "cluster=Premium",
+        "consequent": "is_gaming=is_gaming=Oui",
+        "support": 0.1014,
+        "confidence": 0.6683,
+        "lift": 1.8258
+      },
+      {
+        "antecedent": "cluster=Premium, price_category=premium",
+        "consequent": "is_gaming=is_gaming=Oui",
+        "support": 0.1014,
+        "confidence": 0.6683,
+        "lift": 1.8258
+      },
+      {
+        "antecedent": "price_category=premium",
+        "consequent": "is_gaming=is_gaming=Oui",
+        "support": 0.1056,
+        "confidence": 0.6621,
+        "lift": 1.8088
+      },
+      {
+        "antecedent": "brand_detected=Lenovo, has_gpu=has_gpu=Non",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.1384,
+        "confidence": 0.8892,
+        "lift": 1.4026
+      },
+      {
+        "antecedent": "has_gpu=has_gpu=Non, price_category=haut_de_gamme",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.1597,
+        "confidence": 0.8661,
+        "lift": 1.3662
+      },
+      {
+        "antecedent": "has_gpu=has_gpu=Non, price_category=milieu_de_gamme",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.1644,
+        "confidence": 0.8624,
+        "lift": 1.3604
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme, has_gpu=has_gpu=Non",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.2142,
+        "confidence": 0.8583,
+        "lift": 1.3538
+      },
+      {
+        "antecedent": "cluster=Haut de gamme, has_gpu=has_gpu=Non",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.172,
+        "confidence": 0.8578,
+        "lift": 1.3531
+      },
+      {
+        "antecedent": "cluster=Entrée de gamme, has_gpu=has_gpu=Non",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.0966,
+        "confidence": 0.8003,
+        "lift": 1.2624
+      },
+      {
+        "antecedent": "cluster=Entrée de gamme",
+        "consequent": "has_gpu=has_gpu=Non, is_gaming=is_gaming=Non",
+        "support": 0.0966,
+        "confidence": 0.7989,
+        "lift": 1.2612
+      },
+      {
+        "antecedent": "cluster=Entrée de gamme",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.0966,
+        "confidence": 0.7992,
+        "lift": 1.2606
+      },
+      {
+        "antecedent": "cluster=Entrée de gamme, price_category=entrée_de_gamme",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.0966,
+        "confidence": 0.7992,
+        "lift": 1.2606
+      },
+      {
+        "antecedent": "has_gpu=has_gpu=Non, price_category=entrée_de_gamme",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.1047,
+        "confidence": 0.7906,
+        "lift": 1.2471
+      },
+      {
+        "antecedent": "price_category=entrée_de_gamme",
+        "consequent": "has_gpu=has_gpu=Non, is_gaming=is_gaming=Non",
+        "support": 0.1047,
+        "confidence": 0.7889,
+        "lift": 1.2455
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme",
+        "consequent": "has_gpu=has_gpu=Non, is_gaming=is_gaming=Non",
+        "support": 0.2142,
+        "confidence": 0.7888,
+        "lift": 1.2452
+      },
+      {
+        "antecedent": "price_category=entrée_de_gamme",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.1047,
+        "confidence": 0.7892,
+        "lift": 1.2448
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.2142,
+        "confidence": 0.7889,
+        "lift": 1.2444
+      },
+      {
+        "antecedent": "cluster=Milieu de gamme, price_category=milieu_de_gamme",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.1556,
+        "confidence": 0.7756,
+        "lift": 1.2234
+      },
+      {
+        "antecedent": "price_category=milieu_de_gamme",
+        "consequent": "has_gpu=has_gpu=Non, is_gaming=is_gaming=Non",
+        "support": 0.1644,
+        "confidence": 0.7698,
+        "lift": 1.2153
+      },
+      {
+        "antecedent": "price_category=milieu_de_gamme",
+        "consequent": "is_gaming=is_gaming=Non",
+        "support": 0.1644,
+        "confidence": 0.77,
+        "lift": 1.2146
+      }
+    ]
+  },
+  "accessories": {
+    "stats_by_category": [
+      {
+        "category": "cooling_pad",
+        "count": 5314,
+        "mean": 490.22,
+        "median": 132.94,
+        "min": 1.92,
+        "max": 27876.45,
+        "q1": 62.23,
+        "q3": 351.86
+      },
+      {
+        "category": "laptop_stand",
+        "count": 5649,
+        "mean": 423.56,
+        "median": 211.43,
+        "min": 1.19,
+        "max": 26228.07,
+        "q1": 87.96,
+        "q3": 452.1
+      },
+      {
+        "category": "mouse",
+        "count": 15773,
+        "mean": 515.36,
+        "median": 251.66,
+        "min": 1.49,
+        "max": 34420.21,
+        "q1": 120.64,
+        "q3": 501.38
+      },
+      {
+        "category": "sac_laptop",
+        "count": 5439,
+        "mean": 465.0,
+        "median": 317.63,
+        "min": 1.19,
+        "max": 20889.0,
+        "q1": 179.0,
+        "q3": 531.3
+      },
+      {
+        "category": "usb_flash_drive",
+        "count": 13700,
+        "mean": 400.07,
+        "median": 108.53,
+        "min": 1.18,
+        "max": 32999.45,
+        "q1": 35.11,
+        "q3": 353.54
+      }
+    ],
+    "boxplot_categories": [
+      {
+        "category": "cooling_pad",
+        "count": 5314,
+        "mean": 490.22,
+        "median": 132.94,
+        "min": 1.92,
+        "max": 27876.45,
+        "q1": 62.23,
+        "q3": 351.86
+      },
+      {
+        "category": "laptop_stand",
+        "count": 5649,
+        "mean": 423.56,
+        "median": 211.43,
+        "min": 1.19,
+        "max": 26228.07,
+        "q1": 87.96,
+        "q3": 452.1
+      },
+      {
+        "category": "mouse",
+        "count": 15773,
+        "mean": 515.36,
+        "median": 251.66,
+        "min": 1.49,
+        "max": 34420.21,
+        "q1": 120.64,
+        "q3": 501.38
+      },
+      {
+        "category": "sac_laptop",
+        "count": 5439,
+        "mean": 465.0,
+        "median": 317.63,
+        "min": 1.19,
+        "max": 20889.0,
+        "q1": 179.0,
+        "q3": 531.3
+      },
+      {
+        "category": "usb_flash_drive",
+        "count": 13700,
+        "mean": 400.07,
+        "median": 108.53,
+        "min": 1.18,
+        "max": 32999.45,
+        "q1": 35.11,
+        "q3": 353.54
+      }
+    ],
+    "association_rules": [
+      {
+        "antecedent": "accessory_category=mouse, source=AliExpress",
+        "consequent": "is_gaming_str=gaming=Oui",
+        "support": 0.0914,
+        "confidence": 0.6198,
+        "lift": 3.2868
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Oui",
+        "consequent": "accessory_category=mouse, price_range=haut",
+        "support": 0.1018,
+        "confidence": 0.5397,
+        "lift": 2.7068
+      },
+      {
+        "antecedent": "accessory_category=mouse, price_range=haut",
+        "consequent": "is_gaming_str=gaming=Oui",
+        "support": 0.1018,
+        "confidence": 0.5104,
+        "lift": 2.7068
+      },
+      {
+        "antecedent": "price_range=bas",
+        "consequent": "accessory_category=usb_flash_drive, source=AliExpress",
+        "support": 0.092,
+        "confidence": 0.567,
+        "lift": 2.665
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Oui, source=Amazon",
+        "consequent": "accessory_category=mouse",
+        "support": 0.0613,
+        "confidence": 0.8848,
+        "lift": 2.5733
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Oui, price_range=haut",
+        "consequent": "accessory_category=mouse",
+        "support": 0.1018,
+        "confidence": 0.8382,
+        "lift": 2.4379
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Oui",
+        "consequent": "accessory_category=mouse",
+        "support": 0.1577,
+        "confidence": 0.8364,
+        "lift": 2.4327
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Oui, source=AliExpress",
+        "consequent": "accessory_category=mouse",
+        "support": 0.0914,
+        "confidence": 0.8025,
+        "lift": 2.3339
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Non, price_range=bas",
+        "consequent": "accessory_category=usb_flash_drive",
+        "support": 0.0923,
+        "confidence": 0.6343,
+        "lift": 2.124
+      },
+      {
+        "antecedent": "price_range=bas, source=AliExpress",
+        "consequent": "accessory_category=usb_flash_drive",
+        "support": 0.092,
+        "confidence": 0.585,
+        "lift": 1.9589
+      },
+      {
+        "antecedent": "price_range=bas",
+        "consequent": "accessory_category=usb_flash_drive, is_gaming_str=gaming=Non",
+        "support": 0.0923,
+        "confidence": 0.5687,
+        "lift": 1.9297
+      },
+      {
+        "antecedent": "price_range=bas",
+        "consequent": "is_gaming_str=gaming=Non, source=AliExpress",
+        "support": 0.1406,
+        "confidence": 0.8667,
+        "lift": 1.9284
+      },
+      {
+        "antecedent": "price_range=bas",
+        "consequent": "accessory_category=usb_flash_drive",
+        "support": 0.0927,
+        "confidence": 0.5713,
+        "lift": 1.913
+      },
+      {
+        "antecedent": "accessory_category=sac_laptop, source=Amazon",
+        "consequent": "price_range=haut",
+        "support": 0.0541,
+        "confidence": 0.9196,
+        "lift": 1.8303
+      },
+      {
+        "antecedent": "accessory_category=sac_laptop",
+        "consequent": "is_gaming_str=gaming=Non, price_range=haut",
+        "support": 0.0811,
+        "confidence": 0.6843,
+        "lift": 1.7959
+      },
+      {
+        "antecedent": "price_range=moyen, source=Amazon",
+        "consequent": "accessory_category=mouse",
+        "support": 0.0538,
+        "confidence": 0.6116,
+        "lift": 1.7788
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive, price_range=bas",
+        "consequent": "source=AliExpress",
+        "support": 0.092,
+        "confidence": 0.9925,
+        "lift": 1.7618
+      },
+      {
+        "antecedent": "accessory_category=sac_laptop, price_range=haut",
+        "consequent": "source=Amazon",
+        "support": 0.0541,
+        "confidence": 0.6465,
+        "lift": 1.7286
+      },
+      {
+        "antecedent": "price_range=bas",
+        "consequent": "source=AliExpress",
+        "support": 0.1572,
+        "confidence": 0.9692,
+        "lift": 1.7206
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Non, price_range=bas",
+        "consequent": "source=AliExpress",
+        "support": 0.1406,
+        "confidence": 0.9666,
+        "lift": 1.7159
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Oui, source=Amazon",
+        "consequent": "price_range=haut",
+        "support": 0.0559,
+        "confidence": 0.8079,
+        "lift": 1.6081
+      },
+      {
+        "antecedent": "source=Amazon",
+        "consequent": "is_gaming_str=gaming=Non, price_range=haut",
+        "support": 0.2275,
+        "confidence": 0.6082,
+        "lift": 1.5961
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Non, price_range=haut",
+        "consequent": "source=Amazon",
+        "support": 0.2275,
+        "confidence": 0.597,
+        "lift": 1.5961
+      },
+      {
+        "antecedent": "accessory_category=mouse, is_gaming_str=gaming=Non",
+        "consequent": "source=Amazon",
+        "support": 0.1111,
+        "confidence": 0.597,
+        "lift": 1.5961
+      },
+      {
+        "antecedent": "accessory_category=mouse, price_range=haut",
+        "consequent": "source=Amazon",
+        "support": 0.1179,
+        "confidence": 0.5912,
+        "lift": 1.5806
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive",
+        "consequent": "is_gaming_str=gaming=Non, source=AliExpress",
+        "support": 0.2096,
+        "confidence": 0.7018,
+        "lift": 1.5616
+      },
+      {
+        "antecedent": "source=Amazon",
+        "consequent": "price_range=haut",
+        "support": 0.2834,
+        "confidence": 0.7577,
+        "lift": 1.5081
+      },
+      {
+        "antecedent": "price_range=haut",
+        "consequent": "source=Amazon",
+        "support": 0.2834,
+        "confidence": 0.5641,
+        "lift": 1.5081
+      },
+      {
+        "antecedent": "accessory_category=cooling_pad",
+        "consequent": "is_gaming_str=gaming=Non, source=AliExpress",
+        "support": 0.0778,
+        "confidence": 0.6712,
+        "lift": 1.4935
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Non, source=Amazon",
+        "consequent": "price_range=haut",
+        "support": 0.2275,
+        "confidence": 0.7463,
+        "lift": 1.4854
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive, source=Amazon",
+        "consequent": "price_range=haut",
+        "support": 0.0551,
+        "confidence": 0.7215,
+        "lift": 1.4359
+      },
+      {
+        "antecedent": "accessory_category=sac_laptop",
+        "consequent": "price_range=haut",
+        "support": 0.0837,
+        "confidence": 0.7058,
+        "lift": 1.4048
+      },
+      {
+        "antecedent": "accessory_category=sac_laptop, is_gaming_str=gaming=Non",
+        "consequent": "price_range=haut",
+        "support": 0.0811,
+        "confidence": 0.7044,
+        "lift": 1.402
+      },
+      {
+        "antecedent": "accessory_category=cooling_pad",
+        "consequent": "source=AliExpress",
+        "support": 0.0892,
+        "confidence": 0.7699,
+        "lift": 1.3667
+      },
+      {
+        "antecedent": "accessory_category=mouse, source=Amazon",
+        "consequent": "price_range=haut",
+        "support": 0.1179,
+        "confidence": 0.6838,
+        "lift": 1.361
+      },
+      {
+        "antecedent": "accessory_category=cooling_pad, is_gaming_str=gaming=Non",
+        "consequent": "source=AliExpress",
+        "support": 0.0778,
+        "confidence": 0.7658,
+        "lift": 1.3594
+      },
+      {
+        "antecedent": "accessory_category=mouse",
+        "consequent": "source=Amazon",
+        "support": 0.1724,
+        "confidence": 0.5013,
+        "lift": 1.3403
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive, price_range=haut",
+        "consequent": "source=Amazon",
+        "support": 0.0551,
+        "confidence": 0.5,
+        "lift": 1.3368
+      },
+      {
+        "antecedent": "accessory_category=mouse, is_gaming_str=gaming=Oui",
+        "consequent": "price_range=haut",
+        "support": 0.1018,
+        "confidence": 0.6452,
+        "lift": 1.2842
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Oui",
+        "consequent": "price_range=haut",
+        "support": 0.1214,
+        "confidence": 0.6438,
+        "lift": 1.2814
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive, price_range=moyen",
+        "consequent": "source=AliExpress",
+        "support": 0.0683,
+        "confidence": 0.7127,
+        "lift": 1.2652
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive",
+        "consequent": "source=AliExpress",
+        "support": 0.2128,
+        "confidence": 0.7124,
+        "lift": 1.2647
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive, is_gaming_str=gaming=Non",
+        "consequent": "source=AliExpress",
+        "support": 0.2096,
+        "confidence": 0.7111,
+        "lift": 1.2624
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive, price_range=bas",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.0923,
+        "confidence": 0.9955,
+        "lift": 1.2269
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive, price_range=moyen",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.0952,
+        "confidence": 0.9943,
+        "lift": 1.2254
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive, source=Amazon",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.0756,
+        "confidence": 0.9903,
+        "lift": 1.2204
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.2947,
+        "confidence": 0.9869,
+        "lift": 1.2163
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive, source=AliExpress",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.2096,
+        "confidence": 0.9851,
+        "lift": 1.2141
+      },
+      {
+        "antecedent": "accessory_category=usb_flash_drive, price_range=haut",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.1073,
+        "confidence": 0.9733,
+        "lift": 1.1995
+      },
+      {
+        "antecedent": "accessory_category=sac_laptop",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.1152,
+        "confidence": 0.9715,
+        "lift": 1.1973
+      },
+      {
+        "antecedent": "accessory_category=sac_laptop, price_range=haut",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.0811,
+        "confidence": 0.9695,
+        "lift": 1.1948
+      },
+      {
+        "antecedent": "accessory_category=sac_laptop, source=Amazon",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.0566,
+        "confidence": 0.9626,
+        "lift": 1.1863
+      },
+      {
+        "antecedent": "price_range=moyen",
+        "consequent": "is_gaming_str=gaming=Non, source=AliExpress",
+        "support": 0.1763,
+        "confidence": 0.5256,
+        "lift": 1.1694
+      },
+      {
+        "antecedent": "accessory_category=mouse",
+        "consequent": "price_range=haut",
+        "support": 0.1994,
+        "confidence": 0.5799,
+        "lift": 1.1541
+      },
+      {
+        "antecedent": "accessory_category=laptop_stand",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.1139,
+        "confidence": 0.9248,
+        "lift": 1.1397
+      },
+      {
+        "antecedent": "accessory_category=laptop_stand",
+        "consequent": "is_gaming_str=gaming=Non, source=AliExpress",
+        "support": 0.0624,
+        "confidence": 0.507,
+        "lift": 1.1281
+      },
+      {
+        "antecedent": "source=Jumia",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.0572,
+        "confidence": 0.913,
+        "lift": 1.1252
+      },
+      {
+        "antecedent": "price_range=moyen",
+        "consequent": "source=AliExpress",
+        "support": 0.2105,
+        "confidence": 0.6277,
+        "lift": 1.1143
+      },
+      {
+        "antecedent": "accessory_category=laptop_stand, source=AliExpress",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.0624,
+        "confidence": 0.9009,
+        "lift": 1.1103
+      },
+      {
+        "antecedent": "accessory_category=laptop_stand, price_range=haut",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.0571,
+        "confidence": 0.8991,
+        "lift": 1.1081
+      },
+      {
+        "antecedent": "price_range=bas",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.1454,
+        "confidence": 0.8967,
+        "lift": 1.105
+      },
+      {
+        "antecedent": "price_range=bas, source=AliExpress",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.1406,
+        "confidence": 0.8942,
+        "lift": 1.102
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Oui, source=AliExpress",
+        "consequent": "price_range=haut",
+        "support": 0.063,
+        "confidence": 0.5532,
+        "lift": 1.1011
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Non, price_range=moyen",
+        "consequent": "source=AliExpress",
+        "support": 0.1763,
+        "confidence": 0.6185,
+        "lift": 1.098
+      },
+      {
+        "antecedent": "accessory_category=cooling_pad",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.1015,
+        "confidence": 0.8766,
+        "lift": 1.0802
+      },
+      {
+        "antecedent": "accessory_category=cooling_pad, source=AliExpress",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.0778,
+        "confidence": 0.8719,
+        "lift": 1.0745
+      },
+      {
+        "antecedent": "is_gaming_str=gaming=Oui",
+        "consequent": "source=AliExpress",
+        "support": 0.1139,
+        "confidence": 0.6039,
+        "lift": 1.0721
+      },
+      {
+        "antecedent": "price_range=moyen",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.285,
+        "confidence": 0.8497,
+        "lift": 1.0472
+      },
+      {
+        "antecedent": "price_range=moyen, source=Amazon",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.0747,
+        "confidence": 0.8491,
+        "lift": 1.0465
+      },
+      {
+        "antecedent": "accessory_category=mouse, is_gaming_str=gaming=Non",
+        "consequent": "price_range=haut",
+        "support": 0.0976,
+        "confidence": 0.5245,
+        "lift": 1.0439
+      },
+      {
+        "antecedent": "price_range=moyen, source=AliExpress",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.1763,
+        "confidence": 0.8373,
+        "lift": 1.0319
+      },
+      {
+        "antecedent": "accessory_category=mouse, is_gaming_str=gaming=Oui",
+        "consequent": "source=AliExpress",
+        "support": 0.0914,
+        "confidence": 0.5794,
+        "lift": 1.0286
+      },
+      {
+        "antecedent": "accessory_category=laptop_stand",
+        "consequent": "price_range=haut",
+        "support": 0.0635,
+        "confidence": 0.516,
+        "lift": 1.027
+      },
+      {
+        "antecedent": "source=Amazon",
+        "consequent": "is_gaming_str=gaming=Non",
+        "support": 0.3048,
+        "confidence": 0.8149,
+        "lift": 1.0043
+      }
+    ]
+  },
+  "cross_association": [
+    {
+      "antecedent": "acc_price_range=bas",
+      "consequent": "acc_accessory_category=usb_flash_drive",
+      "support": 0.1,
+      "confidence": 0.5941,
+      "lift": 1.9846
+    },
+    {
+      "antecedent": "acc_price_range=bas, laptop_is_gaming=False",
+      "consequent": "acc_accessory_category=usb_flash_drive",
+      "support": 0.0647,
+      "confidence": 0.5791,
+      "lift": 1.9346
+    },
+    {
+      "antecedent": "laptop_price_category=premium",
+      "consequent": "laptop_is_gaming=True",
+      "support": 0.0983,
+      "confidence": 0.6371,
+      "lift": 1.7633
+    },
+    {
+      "antecedent": "acc_price_range=haut, laptop_price_category=premium",
+      "consequent": "laptop_is_gaming=True",
+      "support": 0.0507,
+      "confidence": 0.6154,
+      "lift": 1.7031
+    },
+    {
+      "antecedent": "acc_accessory_category=sac_laptop",
+      "consequent": "acc_price_range=haut, laptop_is_gaming=False",
+      "support": 0.0587,
+      "confidence": 0.4571,
+      "lift": 1.4286
+    },
+    {
+      "antecedent": "acc_accessory_category=sac_laptop",
+      "consequent": "acc_price_range=haut",
+      "support": 0.089,
+      "confidence": 0.6935,
+      "lift": 1.3787
+    },
+    {
+      "antecedent": "acc_accessory_category=sac_laptop, laptop_is_gaming=False",
+      "consequent": "acc_price_range=haut",
+      "support": 0.0587,
+      "confidence": 0.6822,
+      "lift": 1.3562
+    },
+    {
+      "antecedent": "laptop_price_category=entrée_de_gamme",
+      "consequent": "acc_price_range=haut, laptop_is_gaming=False",
+      "support": 0.0587,
+      "confidence": 0.4303,
+      "lift": 1.3447
+    },
+    {
+      "antecedent": "acc_price_range=haut, laptop_price_category=milieu_de_gamme_bas",
+      "consequent": "acc_accessory_category=mouse",
+      "support": 0.0553,
+      "confidence": 0.4415,
+      "lift": 1.296
+    },
+    {
+      "antecedent": "acc_price_range=haut, laptop_price_category=milieu_de_gamme_bas",
+      "consequent": "laptop_is_gaming=True",
+      "support": 0.0583,
+      "confidence": 0.4654,
+      "lift": 1.2881
+    },
+    {
+      "antecedent": "acc_accessory_category=mouse, laptop_price_category=milieu_de_gamme",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.0587,
+      "confidence": 0.8073,
+      "lift": 1.2641
+    },
+    {
+      "antecedent": "acc_accessory_category=mouse, laptop_price_category=milieu_de_gamme_bas",
+      "consequent": "acc_price_range=haut",
+      "support": 0.0553,
+      "confidence": 0.6336,
+      "lift": 1.2596
+    },
+    {
+      "antecedent": "acc_price_range=haut, laptop_price_category=milieu_de_gamme",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.0893,
+      "confidence": 0.8024,
+      "lift": 1.2564
+    },
+    {
+      "antecedent": "laptop_price_category=milieu_de_gamme",
+      "consequent": "acc_price_range=haut, laptop_is_gaming=False",
+      "support": 0.0893,
+      "confidence": 0.4012,
+      "lift": 1.2537
+    },
+    {
+      "antecedent": "laptop_price_category=milieu_de_gamme",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.1777,
+      "confidence": 0.7979,
+      "lift": 1.2493
+    },
+    {
+      "antecedent": "acc_price_range=haut, laptop_price_category=entrée_de_gamme",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.0587,
+      "confidence": 0.7964,
+      "lift": 1.2469
+    },
+    {
+      "antecedent": "acc_accessory_category=usb_flash_drive, laptop_price_category=milieu_de_gamme",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.0547,
+      "confidence": 0.7961,
+      "lift": 1.2465
+    },
+    {
+      "antecedent": "laptop_price_category=entrée_de_gamme",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.108,
+      "confidence": 0.7922,
+      "lift": 1.2404
+    },
+    {
+      "antecedent": "laptop_price_category=milieu_de_gamme_bas",
+      "consequent": "laptop_is_gaming=True",
+      "support": 0.112,
+      "confidence": 0.4421,
+      "lift": 1.2235
+    },
+    {
+      "antecedent": "acc_price_range=moyen, laptop_price_category=milieu_de_gamme",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.0563,
+      "confidence": 0.7788,
+      "lift": 1.2194
+    },
+    {
+      "antecedent": "acc_accessory_category=mouse, laptop_is_gaming=False",
+      "consequent": "acc_price_range=haut",
+      "support": 0.1273,
+      "confidence": 0.5886,
+      "lift": 1.1702
+    },
+    {
+      "antecedent": "acc_accessory_category=mouse",
+      "consequent": "acc_price_range=haut",
+      "support": 0.1997,
+      "confidence": 0.5861,
+      "lift": 1.1652
+    },
+    {
+      "antecedent": "acc_accessory_category=mouse, laptop_is_gaming=True",
+      "consequent": "acc_price_range=haut",
+      "support": 0.0723,
+      "confidence": 0.5818,
+      "lift": 1.1566
+    },
+    {
+      "antecedent": "laptop_brand_detected=Lenovo",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.133,
+      "confidence": 0.7228,
+      "lift": 1.1318
+    },
+    {
+      "antecedent": "acc_price_range=haut, laptop_brand_detected=Lenovo",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.068,
+      "confidence": 0.7059,
+      "lift": 1.1052
+    },
+    {
+      "antecedent": "laptop_is_gaming=False, laptop_price_category=entrée_de_gamme",
+      "consequent": "acc_price_range=haut",
+      "support": 0.0587,
+      "confidence": 0.5432,
+      "lift": 1.0799
+    },
+    {
+      "antecedent": "laptop_brand_detected=Asus",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.0767,
+      "confidence": 0.6886,
+      "lift": 1.0782
+    },
+    {
+      "antecedent": "laptop_price_category=entrée_de_gamme",
+      "consequent": "acc_price_range=haut",
+      "support": 0.0737,
+      "confidence": 0.5403,
+      "lift": 1.0742
+    },
+    {
+      "antecedent": "laptop_price_category=premium",
+      "consequent": "acc_price_range=haut",
+      "support": 0.0823,
+      "confidence": 0.5335,
+      "lift": 1.0606
+    },
+    {
+      "antecedent": "acc_accessory_category=mouse, laptop_price_category=haut_de_gamme",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.0543,
+      "confidence": 0.6763,
+      "lift": 1.059
+    },
+    {
+      "antecedent": "acc_accessory_category=sac_laptop",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.086,
+      "confidence": 0.6701,
+      "lift": 1.0493
+    },
+    {
+      "antecedent": "laptop_price_category=haut_de_gamme",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.1557,
+      "confidence": 0.6671,
+      "lift": 1.0446
+    },
+    {
+      "antecedent": "laptop_brand_detected=Lenovo",
+      "consequent": "acc_price_range=haut",
+      "support": 0.0963,
+      "confidence": 0.5236,
+      "lift": 1.0409
+    },
+    {
+      "antecedent": "acc_price_range=haut, laptop_price_category=haut_de_gamme",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.0733,
+      "confidence": 0.6647,
+      "lift": 1.0407
+    },
+    {
+      "antecedent": "acc_price_range=bas",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.1117,
+      "confidence": 0.6634,
+      "lift": 1.0387
+    },
+    {
+      "antecedent": "laptop_is_gaming=True, laptop_price_category=milieu_de_gamme_bas",
+      "consequent": "acc_price_range=haut",
+      "support": 0.0583,
+      "confidence": 0.5208,
+      "lift": 1.0355
+    },
+    {
+      "antecedent": "acc_accessory_category=sac_laptop, acc_price_range=haut",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.0587,
+      "confidence": 0.6592,
+      "lift": 1.0321
+    },
+    {
+      "antecedent": "laptop_is_gaming=True, laptop_price_category=premium",
+      "consequent": "acc_price_range=haut",
+      "support": 0.0507,
+      "confidence": 0.5153,
+      "lift": 1.0244
+    },
+    {
+      "antecedent": "acc_price_range=moyen, laptop_price_category=haut_de_gamme",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.0557,
+      "confidence": 0.6523,
+      "lift": 1.0214
+    },
+    {
+      "antecedent": "laptop_brand_detected=Lenovo, laptop_is_gaming=False",
+      "consequent": "acc_price_range=haut",
+      "support": 0.068,
+      "confidence": 0.5113,
+      "lift": 1.0165
+    },
+    {
+      "antecedent": "acc_accessory_category=usb_flash_drive, acc_price_range=bas",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.0647,
+      "confidence": 0.6467,
+      "lift": 1.0125
+    },
+    {
+      "antecedent": "laptop_brand_detected=Asus",
+      "consequent": "acc_price_range=haut",
+      "support": 0.0567,
+      "confidence": 0.509,
+      "lift": 1.0119
+    },
+    {
+      "antecedent": "acc_accessory_category=usb_flash_drive, acc_price_range=moyen",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.058,
+      "confidence": 0.6444,
+      "lift": 1.009
+    },
+    {
+      "antecedent": "acc_accessory_category=cooling_pad",
+      "consequent": "laptop_is_gaming=False",
+      "support": 0.071,
+      "confidence": 0.6435,
+      "lift": 1.0076
+    },
+    {
+      "antecedent": "laptop_is_gaming=True",
+      "consequent": "acc_price_range=haut",
+      "support": 0.183,
+      "confidence": 0.5065,
+      "lift": 1.0069
+    }
+  ]
+}

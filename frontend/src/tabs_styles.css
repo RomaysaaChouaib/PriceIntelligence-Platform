@@ -1,0 +1,130 @@
+/* ══ STYLES COMPLÉMENTAIRES — onglets Data Mining ══════════════════════════ */
+
+/* ── Structure commune ──────────────────────────────────────────────────────── */
+.pip-tab-inner       { display: flex; flex-direction: column; gap: 24px; }
+.pip-tab-header      { display: flex; justify-content: space-between; align-items: flex-start; }
+.pip-tab-title       { font-size: 20px; font-weight: 600; color: #0f172a; margin-bottom: 4px; }
+.pip-tab-subtitle    { font-size: 13px; color: #64748b; }
+.pip-section         { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e8edf5; }
+.pip-section-title   { font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+.pip-loading         { text-align: center; padding: 60px; color: #64748b; font-size: 14px; }
+.pip-error           { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 14px 18px; border-radius: 8px; font-size: 14px; }
+.pip-empty           { text-align: center; color: #94a3b8; padding: 40px; font-size: 14px; }
+
+/* ── Boutons ────────────────────────────────────────────────────────────────── */
+.pip-btn             { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
+.pip-btn:disabled    { opacity: 0.5; cursor: not-allowed; }
+.pip-btn-primary     { background: #3b82f6; color: #fff; }
+.pip-btn-primary:hover:not(:disabled) { background: #2563eb; }
+.pip-btn-outline     { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+.pip-btn-outline:hover:not(:disabled) { background: #f9fafb; }
+
+/* ── Tableau ────────────────────────────────────────────────────────────────── */
+.pip-table-wrapper   { overflow-x: auto; }
+.pip-table           { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pip-table th        { background: #f8fafc; padding: 10px 14px; text-align: left; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; }
+.pip-table td        { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #374151; }
+.pip-table tr:hover td { background: #f8fafc; }
+.pip-row-even td     { background: #fafafa; }
+
+/* ── Formulaires ────────────────────────────────────────────────────────────── */
+.pip-select          { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; background: #fff; color: #374151; cursor: pointer; }
+.pip-input-small     { width: 70px; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; }
+.pip-search-input    { flex: 1; padding: 8px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; }
+.pip-controls-row    { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.pip-control-label   { font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 8px; }
+
+/* ── Stats grid ─────────────────────────────────────────────────────────────── */
+.pip-stats-grid      { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.pip-stat-item       { background: #f8fafc; border-radius: 8px; padding: 14px; border: 1px solid #e8edf5; }
+.pip-stat-item-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.pip-stat-item-value { font-size: 18px; font-weight: 700; color: #0f172a; }
+.pip-stat-unit       { font-size: 12px; font-weight: 400; color: #64748b; }
+
+/* ── Distribution ───────────────────────────────────────────────────────────── */
+.pip-distribution    { display: flex; flex-direction: column; gap: 8px; }
+.pip-dist-row        { display: flex; align-items: center; gap: 12px; }
+.pip-dist-label      { font-size: 12px; color: #64748b; width: 180px; flex-shrink: 0; }
+.pip-dist-bar-bg     { flex: 1; height: 20px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+.pip-dist-bar-fill   { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+.pip-dist-count      { font-size: 12px; color: #374151; font-weight: 600; width: 40px; text-align: right; }
+
+/* ── Mini bar (dans tableaux) ───────────────────────────────────────────────── */
+.pip-mini-bar-bg     { width: 80px; height: 8px; background: #e8edf5; border-radius: 4px; overflow: hidden; }
+.pip-mini-bar-fill   { height: 100%; background: #3b82f6; border-radius: 4px; }
+
+/* ── Gaming compare ─────────────────────────────────────────────────────────── */
+.pip-gaming-compare  { display: flex; gap: 16px; }
+.pip-gaming-card     { flex: 1; padding: 20px; border-radius: 10px; border: 2px solid; }
+.pip-gaming-card.gaming   { border-color: #8b5cf6; background: #f5f3ff; }
+.pip-gaming-card.standard { border-color: #3b82f6; background: #eff6ff; }
+.pip-gc-label        { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 6px; }
+.pip-gc-count        { font-size: 24px; font-weight: 700; color: #0f172a; }
+.pip-gc-price        { font-size: 16px; color: #374151; margin-top: 4px; }
+.pip-gc-price span   { font-size: 12px; color: #94a3b8; }
+.pip-pvalue          { font-size: 13px; color: #64748b; margin-top: 12px; padding: 10px 14px; background: #f8fafc; border-radius: 8px; }
+
+/* ── Clustering ─────────────────────────────────────────────────────────────── */
+.pip-algo-info       { display: flex; gap: 10px; flex-wrap: wrap; }
+.pip-badge           { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.pip-badge-blue      { background: #dbeafe; color: #1d4ed8; }
+.pip-badge-green     { background: #dcfce7; color: #15803d; }
+.pip-badge-purple    { background: #f3e8ff; color: #7c3aed; }
+.pip-cluster-badge   { display: inline-block; padding-left: 8px; font-size: 13px; }
+
+.pip-scatter-wrapper { overflow: hidden; border-radius: 8px; background: #f8fafc; padding: 12px; }
+.pip-scatter-legend  { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.pip-legend-item     { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; }
+.pip-legend-dot      { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Anomalies ──────────────────────────────────────────────────────────────── */
+.pip-methods-grid    { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.pip-method-card     { padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e8edf5; text-align: center; }
+.pip-method-name     { font-size: 12px; color: #64748b; margin-bottom: 6px; }
+.pip-method-count    { font-size: 26px; font-weight: 700; }
+.pip-method-pct      { font-size: 11px; color: #94a3b8; }
+.pip-methods-note    { font-size: 12px; color: #94a3b8; padding: 10px; background: #f8fafc; border-radius: 8px; }
+
+.pip-filter-row      { display: flex; gap: 8px; flex-wrap: wrap; }
+.pip-filter-btn      { padding: 6px 14px; border-radius: 20px; border: 1px solid #e2e8f0; background: #fff; font-size: 12px; cursor: pointer; color: #64748b; transition: all 0.15s; }
+.pip-filter-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+
+.pip-anomaly-row td  { vertical-align: middle; }
+.pip-anomaly-title   { max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pip-alert           { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+.pip-alert-low       { background: #fef3c7; color: #b45309; }
+.pip-alert-high      { background: #fee2e2; color: #dc2626; }
+
+/* ── Association ────────────────────────────────────────────────────────────── */
+.pip-info-box        { background: #eff6ff; border-color: #bfdbfe; }
+.pip-info-box p      { font-size: 13px; color: #1e40af; line-height: 1.6; }
+.pip-info-box em     { font-style: normal; font-weight: 600; }
+.pip-legend-row      { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 10px; font-size: 12px; color: #3b82f6; }
+.pip-param-badge     { display: inline-block; margin-left: 8px; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+
+.pip-conf-bar-bg     { display: flex; align-items: center; gap: 6px; width: 120px; height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden; position: relative; }
+.pip-conf-bar-fill   { height: 100%; border-radius: 4px; }
+.pip-conf-label      { font-size: 11px; color: #374151; font-weight: 600; position: absolute; right: 4px; }
+.pip-lift-badge      { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 12px; border: 1px solid; }
+.pip-rule-ant        { font-size: 12px; color: #475569; }
+.pip-rule-cons       { font-size: 12px; color: #1d4ed8; font-weight: 600; }
+.pip-more-note       { font-size: 12px; color: #94a3b8; margin-top: 10px; text-align: center; }
+
+/* ── Produits / Scraping ────────────────────────────────────────────────────── */
+.pip-search-zone     { display: flex; flex-direction: column; gap: 12px; background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e8edf5; }
+.pip-search-row      { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.pip-search-input-wrap { flex: 1; min-width: 200px; position: relative; display: flex; align-items: center; }
+.pip-search-icon     { position: absolute; left: 12px; color: #94a3b8; }
+.pip-search-field    { width: 100%; padding: 10px 14px 10px 38px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.15s; }
+.pip-search-field:focus { border-color: #3b82f6; }
+
+.pip-progress-zone   { display: flex; flex-direction: column; gap: 6px; }
+.pip-progress-bar-bg { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+.pip-progress-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); border-radius: 3px; }
+.pip-progress-label  { font-size: 12px; color: #64748b; }
+
+.pip-product-grid    { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.pip-pagination      { display: flex; align-items: center; gap: 12px; justify-content: center; padding: 12px 0; }
+.pip-page-btn        { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; cursor: pointer; display: flex; align-items: center; }
+.pip-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.pip-page-info       { font-size: 13px; color: #64748b; }

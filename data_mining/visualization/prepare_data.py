@@ -7,6 +7,7 @@ Génère des structures JSON prêtes à l'emploi.
 import pandas as pd
 import numpy as np
 import json
+from sklearn.decomposition import PCA
 
 
 def prepare_price_distribution(df: pd.DataFrame, bins: int = 10) -> list[dict]:
@@ -87,9 +88,8 @@ def prepare_anomalies(df: pd.DataFrame, method: str = "iforest") -> list[dict]:
     if col not in df.columns:
         return []
 
-    anom = df[df[col] == True][["title", "price", "brand_detected"]
-                                 if "brand_detected" in df.columns
-                                 else ["title", "price"]].copy()
+    cols = ["title", "price", "brand_detected"] if "brand_detected" in df.columns else ["title", "price"]
+    anom = df[df[col] == True][cols].copy()
     anom = anom.sort_values("price").head(100)
     return anom.replace({np.nan: None}).to_dict(orient="records")
 
@@ -100,6 +100,36 @@ def prepare_association_rules(rules: pd.DataFrame, top_n: int = 20) -> list[dict
         return []
     top = rules.head(top_n)
     return top.to_dict(orient="records")
+
+
+def prepare_pca_scatter(df: pd.DataFrame) -> list[dict]:
+    """
+    Réduit les features en 2D via PCA pour visualiser les clusters.
+    Requis par le cahier des charges (réduction de dimension).
+    Retourne [{x, y, cluster, title, price}].
+    """
+    if "cluster" not in df.columns:
+        return []
+
+    features = [c for c in ["log_price", "ram_gb", "storage_gb", "cpu_score"] if c in df.columns]
+    if len(features) < 2:
+        return []
+
+    X = df[features].fillna(df[features].median())
+    pca = PCA(n_components=2)
+    coords = pca.fit_transform(X)
+
+    result = []
+    for i, (_, row) in enumerate(df.iterrows()):
+        result.append({
+            "x":       round(float(coords[i, 0]), 4),
+            "y":       round(float(coords[i, 1]), 4),
+            "cluster": str(row.get("cluster", "")),
+            "title":   str(row.get("title", ""))[:50],
+            "price":   float(row["price"]),
+            "brand":   str(row.get("brand_detected", "")),
+        })
+    return result
 
 
 def prepare_all_for_frontend(df: pd.DataFrame, results: dict) -> dict:
@@ -115,6 +145,7 @@ def prepare_all_for_frontend(df: pd.DataFrame, results: dict) -> dict:
         "brand_stats":       prepare_brand_stats(df),
         "cluster_scatter":   prepare_cluster_data(df),
         "cluster_summary":   prepare_cluster_summary(df),
+        "pca_scatter":       prepare_pca_scatter(df),
         "anomalies":         prepare_anomalies(df),
         "association_rules": prepare_association_rules(results.get("rules", pd.DataFrame())),
     }

@@ -1,42 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../App';
-import { 
-  Search, Bell, ShoppingBag, TrendingUp, Package, 
-  Menu, X, AlertTriangle, Link2, RefreshCw, 
-  ChevronRight, BarChart2, LogOut, Activity, Clock, Database
+import {
+  Search, Bell, ShoppingBag, TrendingUp, Package,
+  Menu, X, AlertTriangle, Link2, RefreshCw,
+  ChevronRight, BarChart2, LogOut, Activity, Clock,
+  Database, History
 } from 'lucide-react';
 
+import { getStats } from '../services/api';
+
+// Onglets
+import ProductsTab    from './tabs/ProductsTab';
+import StatsTab       from './tabs/StatsTab';
+import ClusteringTab  from './tabs/ClusteringTab';
+import AnomaliesTab   from './tabs/AnomaliesTab';
+import AssociationTab from './tabs/AssociationTab';
+
 const TABS = [
-  { id: "products",    label: "Produits",     icon: ShoppingBag},
-  { id: "stats",       label: "Statistiques", icon: TrendingUp},
-  { id: "clustering",  label: "Clustering",   icon: BarChart2},
-  { id: "anomalies",   label: "Anomalies",    icon: AlertTriangle},
-  { id: "association", label: "Association",  icon: Link2},
+  { id: 'products',    label: 'Produits',      icon: ShoppingBag  },
+  { id: 'stats',       label: 'Statistiques',  icon: TrendingUp   },
+  { id: 'clustering',  label: 'Clustering',    icon: BarChart2    },
+  { id: 'anomalies',   label: 'Anomalies',     icon: AlertTriangle},
+  { id: 'association', label: 'Association',   icon: Link2        },
 ];
 
 function Dashboard() {
-  const [tab, setTab] = useState("products");
+  const [tab, setTab]               = useState('products');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [scraperActive] = useState(true);
-  const { user, logout } = useAuth();
-  
-  const onLogout = () => {
-    logout();
-  };
+  const { user, logout }            = useAuth();
 
-  const quickStats = [
-    { title: "Produits trackés",    value: "1 234",   icon: Package,       color: "#3b82f6" },
-    { title: "Prix moyen",          value: "3 450 MAD", icon: TrendingUp,  color: "#f97316" },
-    { title: "Marques analysées",   value: "42",       icon: ShoppingBag,  color: "#10b981" },
-    { title: "Anomalies détectées", value: "18",       icon: AlertTriangle, color: "#8b5cf6" },
-  ];
+  // Quick stats chargées depuis l'API
+  const [quickStats, setQuickStats] = useState([
+    { title: 'Produits trackés',    value: '—',   icon: Package,        color: '#3b82f6' },
+    { title: 'Prix médian',         value: '—',   icon: TrendingUp,     color: '#f97316' },
+    { title: 'Marques analysées',   value: '—',   icon: ShoppingBag,    color: '#10b981' },
+    { title: 'Anomalies détectées', value: '—',   icon: AlertTriangle,  color: '#8b5cf6' },
+  ]);
 
-  const currentTabLabel = TABS.find(t => t.id === tab)?.label || "";
+  useEffect(() => {
+    getStats()
+      .then(d => {
+        const s = d.stats || {};
+        const brands = d.by_brand?.length || '—';
+        setQuickStats([
+          { title: 'Produits trackés',    value: s.count?.toLocaleString('fr-FR') || '—', icon: Package,       color: '#3b82f6' },
+          { title: 'Prix médian',         value: s.median ? `${s.median.toLocaleString('fr-FR')} MAD` : '—',   icon: TrendingUp,    color: '#f97316' },
+          { title: 'Marques analysées',   value: String(brands),                          icon: ShoppingBag,   color: '#10b981' },
+          { title: 'Anomalies détectées', value: '—',                                     icon: AlertTriangle, color: '#8b5cf6' },
+        ]);
+      })
+      .catch(() => {}); // silencieux si l'API n'est pas encore dispo
+  }, []);
+
+  const currentTabLabel = TABS.find(t => t.id === tab)?.label || '';
 
   return (
     <div className="pip-layout">
+
       {/* ═══════ SIDEBAR ═══════ */}
-      <aside className={`pip-sidebar ${sidebarOpen ? "open" : "closed"}`}>
+      <aside className={`pip-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="pip-sidebar-logo">
           <div className="pip-logo-icon">
             <ShoppingBag size={22} color="#fff" />
@@ -53,12 +75,12 @@ function Dashboard() {
 
         <nav className="pip-nav">
           {sidebarOpen && <div className="pip-nav-section-label">Navigation</div>}
-          {TABS.map((item) => (
+          {TABS.map(item => (
             <button
               key={item.id}
               onClick={() => setTab(item.id)}
-              className={`pip-nav-item ${tab === item.id ? "active" : ""}`}
-              title={!sidebarOpen ? item.label : ""}
+              className={`pip-nav-item ${tab === item.id ? 'active' : ''}`}
+              title={!sidebarOpen ? item.label : ''}
             >
               <item.icon className="pip-nav-icon" size={18} />
               {sidebarOpen && <span className="pip-nav-label">{item.label}</span>}
@@ -70,27 +92,19 @@ function Dashboard() {
           <div className="pip-sidebar-footer">
             <div className="pip-nav-section-label">
               <Activity size={14} />
-              <span>Statut du système</span>
+              <span>Statut système</span>
             </div>
             <div className="pip-system-status">
               <div className="pip-status-item">
-                <div className={`pip-status-dot ${scraperActive ? 'active' : 'inactive'}`}></div>
-                <span className="pip-status-label">Scraper</span>
-                <span className={`pip-status-value ${scraperActive ? 'active' : ''}`}>
-                  {scraperActive ? 'Actif' : 'Inactif'}
-                </span>
-              </div>
-              <div className="pip-status-divider"></div>
-              <div className="pip-status-item">
-                <Clock size={14} className="pip-status-icon" />
-                <span className="pip-status-label">Dernier scrape</span>
-                <span className="pip-status-time">Il y a 2h</span>
+                <div className="pip-status-dot active"></div>
+                <span className="pip-status-label">API Django</span>
+                <span className="pip-status-value active">Actif</span>
               </div>
               <div className="pip-status-divider"></div>
               <div className="pip-status-item">
                 <Database size={14} className="pip-status-icon" />
-                <span className="pip-status-label">Produits en DB</span>
-                <span className="pip-status-value">1,234</span>
+                <span className="pip-status-label">Base MySQL</span>
+                <span className="pip-status-value active">Connectée</span>
               </div>
             </div>
           </div>
@@ -107,64 +121,70 @@ function Dashboard() {
               <span className="pip-breadcrumb-current">{currentTabLabel}</span>
             </div>
           </div>
-          
+
           <div className="pip-header-right">
-            <button className="pip-header-icon-btn" title="Actualiser">
+            <button
+              className="pip-header-icon-btn"
+              title="Actualiser"
+              onClick={() => window.location.reload()}
+            >
               <RefreshCw size={17} />
             </button>
-            <button className="pip-header-icon-btn pip-bell" title="Notifications">
-              <Bell size={17} />
-              <span className="pip-notif-dot"></span>
-            </button>
-            
+
             {user && (
               <div className="pip-user-menu">
                 <span className="pip-username">
-                  👋 {user?.first_name || user?.username || "Admin"}
+                  👋 {user?.first_name || user?.username || 'Admin'}
                 </span>
-                <button onClick={onLogout} className="pip-logout-btn" title="Déconnexion">
+                <button onClick={logout} className="pip-logout-btn" title="Déconnexion">
                   <LogOut size={16} />
                 </button>
               </div>
             )}
-            
+
             <div className="pip-avatar">
-              {(user?.first_name?.[0] || user?.username?.[0] || "A").toUpperCase()}
+              {(user?.first_name?.[0] || user?.username?.[0] || 'A').toUpperCase()}
             </div>
           </div>
         </header>
 
         <main className="pip-content">
-          {tab === "products" && (
-            <div className="pip-welcome-banner">
-              <div className="pip-welcome-text">
-                <h1>Bonjour 👋 {user?.first_name ? `, ${user.first_name}` : ''}</h1>
-                <p>Bienvenue sur <strong>Price Intelligence Platform</strong></p>
-              </div>
-            </div>
-          )}
 
-          {tab === "products" && (
-            <div className="pip-quick-stats">
-              {quickStats.map((stat, i) => (
-                <div key={i} className="pip-quick-stat-card">
-                  <div>
-                    <p className="pip-qs-label">{stat.title}</p>
-                    <h3 className="pip-qs-value">{stat.value}</h3>
-                  </div>
-                  <div className="pip-qs-icon" style={{ background: stat.color + "18", color: stat.color }}>
-                    <stat.icon size={22} />
-                  </div>
+          {/* ── Quick stats (onglet produits seulement) ── */}
+          {tab === 'products' && (
+            <>
+              <div className="pip-welcome-banner">
+                <div className="pip-welcome-text">
+                  <h1>Bonjour 👋{user?.first_name ? ` ${user.first_name}` : ''}</h1>
+                  <p>Bienvenue sur <strong>Price Intelligence Platform</strong></p>
                 </div>
-              ))}
-            </div>
+              </div>
+
+              <div className="pip-quick-stats">
+                {quickStats.map((stat, i) => (
+                  <div key={i} className="pip-quick-stat-card">
+                    <div>
+                      <p className="pip-qs-label">{stat.title}</p>
+                      <h3 className="pip-qs-value">{stat.value}</h3>
+                    </div>
+                    <div className="pip-qs-icon" style={{ background: stat.color + '18', color: stat.color }}>
+                      <stat.icon size={22} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
 
+          {/* ── Contenu des onglets (branché sur les vrais composants) ── */}
           <div className="pip-tab-content">
-            <p style={{ textAlign: 'center', color: '#64748b', padding: '40px' }}>
-              Sélectionnez un onglet dans le menu pour commencer
-            </p>
+            {tab === 'products'    && <ProductsTab    />}
+            {tab === 'stats'       && <StatsTab       />}
+            {tab === 'clustering'  && <ClusteringTab  />}
+            {tab === 'anomalies'   && <AnomaliesTab   />}
+            {tab === 'association' && <AssociationTab />}
           </div>
+
         </main>
       </div>
     </div>
