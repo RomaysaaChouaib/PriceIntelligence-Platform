@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getClustering, getPCA } from '../../services/api';
-import { BarChart2, Settings } from 'lucide-react';
-import RadarChart     from '../charts/RadarChart';
+import { BarChart2, Settings, RefreshCw } from 'lucide-react';
+import RadarChart      from '../charts/RadarChart';
 import PCAScatterChart from '../charts/PCAScatterChart';
 
 const CLUSTER_COLORS = {
@@ -17,7 +17,7 @@ function getColor(cluster) {
   return CLUSTER_COLORS[cluster] || '#64748b';
 }
 
-// ── Scatter plot simplifié (SVG) ─────────────────────────────────────────────
+// ── Scatter plot SVG ─────────────────────────────────────────────────────────
 function ScatterPlot({ data }) {
   if (!data || data.length === 0) return null;
 
@@ -25,7 +25,6 @@ function ScatterPlot({ data }) {
   const prices = data.map(d => d.price);
   const minP = Math.min(...prices), maxP = Math.max(...prices);
 
-  // Distribuer les points sur l'axe Y par index pour lisibilité
   const clusters = [...new Set(data.map(d => d.cluster))];
   const clusterIndex = {};
   clusters.forEach((c, i) => { clusterIndex[c] = i; });
@@ -41,36 +40,43 @@ function ScatterPlot({ data }) {
   return (
     <div className="pip-scatter-wrapper">
       <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
-        {/* Axes */}
+        <defs>
+          {clusters.map(c => (
+            <radialGradient key={c} id={`grd-${c.replace(/\s/g, '')}`} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor={getColor(c)} stopOpacity="0.9" />
+              <stop offset="100%" stopColor={getColor(c)} stopOpacity="0.3" />
+            </radialGradient>
+          ))}
+        </defs>
         <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="#e2e8f0" strokeWidth="1" />
-        <text x={PAD} y={H - 10} fontSize="10" fill="#94a3b8">
-          {Math.round(minP).toLocaleString()} MAD
-        </text>
-        <text x={W - PAD} y={H - 10} fontSize="10" fill="#94a3b8" textAnchor="end">
-          {Math.round(maxP).toLocaleString()} MAD
-        </text>
-        <text x={W / 2} y={H - 4} fontSize="10" fill="#94a3b8" textAnchor="middle">Prix (MAD)</text>
+        {[0.25, 0.5, 0.75].map(t => (
+          <line key={t} x1={PAD + t * (W - PAD * 2)} y1={PAD} x2={PAD + t * (W - PAD * 2)} y2={H - PAD}
+            stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4 4" />
+        ))}
+        <text x={PAD} y={H - 10} fontSize="10" fill="#94a3b8">{Math.round(minP).toLocaleString()} MAD</text>
+        <text x={W - PAD} y={H - 10} fontSize="10" fill="#94a3b8" textAnchor="end">{Math.round(maxP).toLocaleString()} MAD</text>
+        <text x={W / 2} y={H - 2} fontSize="10" fill="#94a3b8" textAnchor="middle">Prix (MAD)</text>
 
-        {/* Points */}
         {sample.map((d, i) => (
           <circle
             key={i}
             cx={toX(d.price)}
             cy={toY(d.cluster, i)}
-            r="4"
-            fill={getColor(d.cluster)}
-            fillOpacity="0.7"
+            r="5"
+            fill={`url(#grd-${d.cluster.replace(/\s/g, '')})`}
+            stroke={getColor(d.cluster)}
+            strokeWidth="0.5"
+            strokeOpacity="0.4"
           >
             <title>{d.title} — {d.price?.toLocaleString()} MAD ({d.cluster})</title>
           </circle>
         ))}
       </svg>
 
-      {/* Légende */}
       <div className="pip-scatter-legend">
         {clusters.map((c, i) => (
           <div key={i} className="pip-legend-item">
-            <span className="pip-legend-dot" style={{ background: getColor(c) }} />
+            <span className="pip-legend-dot" style={{ background: getColor(c), boxShadow: `0 0 6px ${getColor(c)}60` }} />
             <span>{c}</span>
           </div>
         ))}
@@ -80,13 +86,13 @@ function ScatterPlot({ data }) {
 }
 
 export default function ClusteringTab() {
-  const [data, setData]         = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState(null);
-  const [algo, setAlgo]         = useState('kmeans');
-  const [eps, setEps]           = useState(2.0);
+  const [data, setData]             = useState(null);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
+  const [algo, setAlgo]             = useState('kmeans');
+  const [eps, setEps]               = useState(2.0);
   const [minSamples, setMinSamples] = useState(30);
-  const [pcaData, setPcaData]   = useState(null);
+  const [pcaData, setPcaData]       = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -95,7 +101,6 @@ export default function ClusteringTab() {
       .then(setData)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
-    // PCA en parallèle
     getPCA()
       .then(d => setPcaData(d.pca_scatter || []))
       .catch(() => setPcaData([]));
@@ -106,10 +111,14 @@ export default function ClusteringTab() {
   return (
     <div className="pip-tab-inner">
 
+      {/* ── En-tête ── */}
       <div className="pip-tab-header">
         <div>
           <h2 className="pip-tab-title">Clustering des offres</h2>
-          <p className="pip-tab-subtitle">Segmentation par gamme de prix</p>
+          <p className="pip-tab-subtitle">Segmentation intelligente par gamme de prix</p>
+        </div>
+        <div className="pip-header-icon pip-header-icon--purple">
+          <BarChart2 size={20} />
         </div>
       </div>
 
@@ -150,12 +159,13 @@ export default function ClusteringTab() {
           </>
         )}
 
-        <button className="pip-btn pip-btn-primary" onClick={load}>
-          <Settings size={14} /> Relancer
+        <button className="pip-btn pip-btn-primary" onClick={load} disabled={loading}>
+          <RefreshCw size={14} className={loading ? 'pip-spin' : ''} />
+          {loading ? 'En cours…' : 'Relancer'}
         </button>
       </div>
 
-      {loading && <div className="pip-loading">Clustering en cours…</div>}
+      {loading && <div className="pip-loading"><span className="pip-spinner" />Clustering en cours…</div>}
       {error   && <div className="pip-error">Erreur : {error}</div>}
 
       {data && !loading && (
@@ -167,34 +177,40 @@ export default function ClusteringTab() {
             {data.n_clusters && <span className="pip-badge pip-badge-purple">{data.n_clusters} clusters</span>}
           </div>
 
-          {/* ── Tableau récapitulatif ── */}
+          {/* ── Résumé clusters ── */}
           {data.summary && data.summary.length > 0 && (
             <div className="pip-section">
               <h3 className="pip-section-title"><BarChart2 size={16} /> Résumé par cluster</h3>
-              <div className="pip-table-wrapper">
-                <table className="pip-table">
-                  <thead>
-                    <tr>
-                      <th>Cluster</th><th>Nb</th><th>Min</th><th>Médiane</th><th>Max</th><th>Moy</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.summary.map((s, i) => (
-                      <tr key={i}>
-                        <td>
-                          <span className="pip-cluster-badge" style={{ borderLeft: `3px solid ${getColor(s.cluster)}` }}>
-                            {s.cluster}
+              <div className="pip-cluster-cards">
+                {data.summary.map((s, i) => (
+                  <div key={i} className="pip-cluster-card" style={{ '--ccolor': getColor(s.cluster) }}>
+                    <div className="pip-cluster-card-bar" style={{ background: getColor(s.cluster) }} />
+                    <div className="pip-cluster-card-body">
+                      <p className="pip-cluster-name">{s.cluster}</p>
+                      <p className="pip-cluster-count">{s.count} produits</p>
+                      <div className="pip-cluster-prices">
+                        <div className="pip-cluster-price-item">
+                          <span className="pip-cprice-label">Médiane</span>
+                          <span className="pip-cprice-val" style={{ color: getColor(s.cluster) }}>
+                            {s.median?.toLocaleString('fr-FR')} MAD
                           </span>
-                        </td>
-                        <td>{s.count}</td>
-                        <td>{s.min?.toLocaleString('fr-FR')} MAD</td>
-                        <td><strong>{s.median?.toLocaleString('fr-FR')} MAD</strong></td>
-                        <td>{s.max?.toLocaleString('fr-FR')} MAD</td>
-                        <td>{s.mean?.toLocaleString('fr-FR')} MAD</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                        <div className="pip-cluster-price-item">
+                          <span className="pip-cprice-label">Moy</span>
+                          <span className="pip-cprice-val">{s.mean?.toLocaleString('fr-FR')} MAD</span>
+                        </div>
+                        <div className="pip-cluster-price-item">
+                          <span className="pip-cprice-label">Min</span>
+                          <span className="pip-cprice-val">{s.min?.toLocaleString('fr-FR')} MAD</span>
+                        </div>
+                        <div className="pip-cluster-price-item">
+                          <span className="pip-cprice-label">Max</span>
+                          <span className="pip-cprice-val">{s.max?.toLocaleString('fr-FR')} MAD</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -207,7 +223,7 @@ export default function ClusteringTab() {
             </div>
           )}
 
-          {/* ── Graphique Radar ── */}
+          {/* ── Radar ── */}
           {data.summary && data.summary.length > 0 && (
             <div className="pip-section">
               <h3 className="pip-section-title">🕸️ Radar — Profil des clusters</h3>
@@ -215,7 +231,7 @@ export default function ClusteringTab() {
             </div>
           )}
 
-          {/* ── PCA Scatter 2D ── */}
+          {/* ── PCA 2D ── */}
           {pcaData && pcaData.length > 0 && (
             <div className="pip-section">
               <h3 className="pip-section-title">🔬 PCA — Clusters projetés en 2D</h3>
