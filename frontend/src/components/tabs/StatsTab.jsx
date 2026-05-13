@@ -207,8 +207,8 @@ export default function StatsTab() {
               <strong>Test Mann-Whitney</strong> — p-value : <code>{gaming.mannwhitney.pvalue}</code>
               <span className="pip-pvalue-verdict">
                 {gaming.mannwhitney.pvalue < 0.05
-                  ? ' ✅ Différence significative'
-                  : ' ⚠️ Différence non significative'}
+                  ? ' Différence significative'
+                  : ' Différence non significative'}
               </span>
             </div>
           )}

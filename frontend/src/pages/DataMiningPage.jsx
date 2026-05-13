@@ -1,329 +1,186 @@
-import { Link } from 'react-router-dom';
-import { 
-  ArrowLeft, Brain, Network, AlertTriangle, Link2, 
-  Target, Radar, GitBranch, Search, Lightbulb,
-  TreePine, MapPin, AlertOctagon, Bell, Trash,
-  FileSearch, Sliders, Coins, TrendingUp 
-} from 'lucide-react';
-import './DetailPages.css';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
+// Hook pour charger la police Inter
+function useFont() {
+  useEffect(() => {
+    if (document.getElementById("pip-font")) return;
+    const link = document.createElement("link");
+    link.id = "pip-font";
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap";
+    document.head.appendChild(link);
+  }, []);
+}
+
+// Composant Tag simplifié
+function Tag({ children }) {
+  return (
+    <span style={{
+      fontSize: 11, fontWeight: 600, padding: "4px 10px",
+      borderRadius: 6, border: "1px solid #2563EB",
+      background: "#FFFFFF", color: "#2563EB",
+    }}>
+      {children}
+    </span>
+  );
+}
+
+// Composant Feature simplifié
+function Feature({ label, desc }) {
+  return (
+    <div style={{
+      display: "flex", gap: "1rem", padding: "1rem 1.5rem",
+      borderBottom: "1px solid #00000020",
+    }}>
+      <div style={{
+        width: 24, height: 24, borderRadius: "50%",
+        background: "#2563EB", color: "#FFFFFF",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 10, fontWeight: 700, flexShrink: 0, marginTop: 2,
+      }}>
+        ✓
+      </div>
+      <div>
+        <div style={{
+          fontSize: 12, fontWeight: 700, color: "#000000", marginBottom: 2,
+        }}>
+          {label}
+        </div>
+        <p style={{ fontSize: 13, color: "#000000", lineHeight: 1.6, margin: 0, opacity: 0.85 }}>
+          {desc}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function DataMiningPage() {
+  useFont();
+
+  const features = [
+    {
+      label: "Clustering (K-Means & DBSCAN)",
+      desc: "Partitionnement et analyse de densité pour regrouper les offres similaires. Visualisation des segments de marché et détection des niches sous-exploitées.",
+    },
+    {
+      label: "Détection d'anomalies",
+      desc: "Isolation Forest et LOF pour identifier automatiquement les prix aberrants, offres suspectes et erreurs de saisie dans les datasets.",
+    },
+    {
+      label: "Règles d'association",
+      desc: "Algorithmes Apriori et FP-Growth pour extraire les corrélations entre caractéristiques produits et fourchettes de prix.",
+    },
+    {
+      label: "Analyse prédictive",
+      desc: "Projections PCA et modèles de tendance pour anticiper les évolutions de prix et optimiser les stratégies de positioning.",
+    },
+  ];
+
+  const methods = ["K-Means", "DBSCAN", "Isolation Forest", "LOF", "Apriori", "FP-Growth"];
+
   return (
-    <div className="detail-container">
-      
-      {/* Navigation */}
-      <nav className="detail-nav" style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '16px 24px',
-        background: 'var(--surface)',
-        borderBottom: '1px solid var(--border)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-        width: '100%'
+    <div style={{
+      minHeight: "100vh", background: "#FFFFFF",
+      fontFamily: "'Inter', sans-serif", color: "#000000",
+    }}>
+      {/* Navbar */}
+      <nav style={{
+        position: "sticky", top: 0, zIndex: 50,
+        background: "#FFFFFF", borderBottom: "1px solid #00000020",
+        padding: "0 1.5rem", height: 56,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
-        <Link 
-          to="/" 
-          className="back-link"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            color: 'var(--text2)',
-            textDecoration: 'none',
-            fontSize: '14px',
-            fontWeight: 500,
-            transition: 'color 0.15s',
-            padding: '8px 12px',
-            borderRadius: 'var(--radius)'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent)'}
-          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text2)'}
-        >
-          <ArrowLeft size={16} />
-          Retour à l'accueil
-        </Link>
-        <div className="nav-title" style={{
-          fontSize: '16px',
-          fontWeight: 600,
-          color: 'var(--text)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8
+        <Link to="/" style={{
+          display: "flex", alignItems: "center", gap: 6,
+          fontSize: 13, fontWeight: 600, color: "#000000",
+          textDecoration: "none",
         }}>
-          <Brain size={18} style={{ color: 'var(--accent)' }} />
-          Data Mining & IA
+          ← Retour
+        </Link>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700 }}>
+          <div style={{
+            width: 24, height: 24, borderRadius: 6, background: "#2563EB",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#FFFFFF", fontSize: 12,
+          }}>
+            DM
+          </div>
+          Data Mining
         </div>
-        <div style={{ width: 120 }} /> {/* Spacer pour centrer le titre */}
+
+        <div style={{ width: 60 }} />
       </nav>
 
-      {/* Hero Section */}
-      <header className="detail-hero" style={{
-        background: 'linear-gradient(135deg, var(--sidebar-bg) 0%, #1e293b 100%)',
-        padding: '48px 24px',
-        textAlign: 'center',
-        color: '#fff',
-        width: '100%'
+      {/* Hero */}
+      <header style={{
+        padding: "3rem 1.5rem 2rem", maxWidth: 800, margin: "0 auto",
+        borderBottom: "1px solid #00000020",
       }}>
         <h1 style={{
-          fontSize: '32px',
-          fontWeight: 700,
-          margin: '0 0 12px',
-          letterSpacing: '-0.5px'
+          fontSize: "2rem", fontWeight: 700, lineHeight: 1.2,
+          color: "#000000", margin: "0 0 1rem",
         }}>
-          Data Mining & IA
+          Data Mining
         </h1>
-        <p style={{
-          fontSize: '16px',
-          color: '#94a3b8',
-          margin: 0,
-          maxWidth: '600px',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          lineHeight: 1.6
-        }}>
-          De la donnée brute à l'intelligence décisionnelle grâce au Machine Learning.
+        <p style={{ fontSize: 14, color: "#000000", lineHeight: 1.7, margin: 0, maxWidth: 500 }}>
+          De la donnée brute à l'intelligence décisionnelle grâce aux algorithmes d'analyse statistique et de segmentation avancée.
         </p>
       </header>
 
-      {/* Content Section */}
-      <section className="detail-content" style={{
-        padding: '32px 24px',
-        maxWidth: '900px',
-        margin: '0 auto',
-        width: '100%'
-      }}>
-        <div className="detail-card single-card" style={{
-          background: 'var(--surface)',
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--border)',
-          boxShadow: 'var(--shadow)',
-          overflow: 'hidden',
-          width: '100%'
+      {/* Main */}
+      <main style={{ padding: "2rem 1.5rem", maxWidth: 800, margin: "0 auto" }}>
+        <div style={{
+          border: "1px solid #00000020", borderRadius: 12,
+          background: "#FFFFFF",
         }}>
-          
-          {/* Section 1: Clustering */}
-          <div className="card-section" style={{
-            padding: '24px',
-            borderBottom: '1px solid var(--border)'
+          {/* Header */}
+          <div style={{
+            padding: "1rem 1.5rem", borderBottom: "1px solid #00000020",
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+            flexWrap: "wrap", gap: 8,
           }}>
-            <div className="card-header" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              marginBottom: '16px'
-            }}>
-              <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
-                display: 'grid',
-                placeItems: 'center',
-                flexShrink: 0
-              }}>
-                {/* ✅ Remplacé Cluster par Network */}
-                <Network size={20} color="#fff" />
-              </div>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: 600,
-                color: 'var(--text)',
-                margin: 0
-              }}>
-                Clustering (K-Means & DBSCAN)
-              </h3>
-            </div>
-            <p style={{
-              fontSize: '14px',
-              color: 'var(--text2)',
-              lineHeight: 1.7,
-              margin: '0 0 16px'
-            }}>
-              Nous appliquons des algorithmes de partitionnement et de densité pour regrouper naturellement les offres similaires. La visualisation radar et les projections PCA permettent d'observer les segments de marché.
+            <p style={{ fontSize: 14, fontWeight: 700, color: "#000000", margin: 0 }}>
+              Algorithmes & Méthodes
             </p>
-            <ul className="feature-list" style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-              display: 'grid',
-              gap: 10
-            }}>
-              {[
-                { icon: Target, text: 'Algorithmes K-Means et DBSCAN' },
-                { icon: Radar, text: 'Visualisation radar des clusters' },
-                { icon: GitBranch, text: 'Projections PCA (Analyse en Composantes Principales)' },
-                { icon: Search, text: 'Identification des segments de marché' },
-                { icon: Lightbulb, text: 'Détection des niches sous-exploitées' }
-              ].map((item, i) => (
-                <li key={i} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  fontSize: '13px',
-                  color: 'var(--text)',
-                  fontWeight: 500
-                }}>
-                  <item.icon size={16} style={{ color: 'var(--purple)', flexShrink: 0 }} />
-                  {item.text}
-                </li>
+            <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+              {methods.map((m) => (
+                <Tag key={m}>{m}</Tag>
               ))}
-            </ul>
+            </div>
           </div>
 
-          {/* Divider */}
-          <div className="divider" style={{
-            height: '1px',
-            background: 'var(--border)',
-            margin: 0
-          }} />
+          {/* Features */}
+          {features.map((f, i) => (
+            <Feature key={i} {...f} />
+          ))}
 
-          {/* Section 2: Détection d'anomalies */}
-          <div className="card-section" style={{
-            padding: '24px',
-            borderBottom: '1px solid var(--border)'
-          }}>
-            <div className="card-header" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              marginBottom: '16px'
-            }}>
-              <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, #ef4444, #f87171)',
-                display: 'grid',
-                placeItems: 'center',
-                flexShrink: 0
-              }}>
-                <AlertTriangle size={20} color="#fff" />
-              </div>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: 600,
-                color: 'var(--text)',
-                margin: 0
-              }}>
-                Détection d'anomalies
-              </h3>
-            </div>
-            <p style={{
-              fontSize: '14px',
-              color: 'var(--text2)',
-              lineHeight: 1.7,
-              margin: '0 0 16px'
-            }}>
-              Les algorithmes Isolation Forest et LOF analysent les distributions multidimensionnelles pour flaguer automatiquement les prix aberrants, les offres suspectes ou les erreurs de saisie.
+          {/* Metrics box */}
+          <div style={{ padding: "1rem 1.5rem", borderTop: "1px solid #00000020" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "#2563EB", marginBottom: 8 }}>
+              Performance des modèles
             </p>
-            <ul className="feature-list" style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-              display: 'grid',
-              gap: 10
-            }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
               {[
-                { icon: TreePine, text: 'Isolation Forest pour détection d\'outliers' },
-                { icon: MapPin, text: 'LOF (Local Outlier Factor)' },
-                { icon: AlertOctagon, text: 'Détection automatique des prix aberrants' },
-                { icon: Bell, text: 'Alertes sur offres suspectes' },
-                { icon: Trash, text: 'Nettoyage automatique des datasets' }
-              ].map((item, i) => (
-                <li key={i} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  fontSize: '13px',
-                  color: 'var(--text)',
-                  fontWeight: 500
+                { label: "Isolation Forest", val: "5.0%" },
+                { label: "IQR", val: "6.9%" },
+                { label: "Z-Score", val: "4.3%" },
+                { label: "LOF", val: "3.3%" },
+              ].map((item) => (
+                <div key={item.label} style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: "8px 10px", borderRadius: 6,
+                  border: "1px solid #2563EB", background: "#FFFFFF",
                 }}>
-                  <item.icon size={16} style={{ color: 'var(--red)', flexShrink: 0 }} />
-                  {item.text}
-                </li>
+                  <span style={{ fontSize: 11, color: "#000000" }}>{item.label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#2563EB" }}>{item.val}</span>
+                </div>
               ))}
-            </ul>
-          </div>
-
-          {/* Divider */}
-          <div className="divider" style={{
-            height: '1px',
-            background: 'var(--border)',
-            margin: 0
-          }} />
-
-          {/* Section 3: Règles d'association */}
-          <div className="card-section" style={{
-            padding: '24px'
-          }}>
-            <div className="card-header" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              marginBottom: '16px'
-            }}>
-              <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, #3b82f6, #60a5fa)',
-                display: 'grid',
-                placeItems: 'center',
-                flexShrink: 0
-              }}>
-                <Link2 size={20} color="#fff" />
-              </div>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: 600,
-                color: 'var(--text)',
-                margin: 0
-              }}>
-                Règles d'association
-              </h3>
             </div>
-            <p style={{
-              fontSize: '14px',
-              color: 'var(--text2)',
-              lineHeight: 1.7,
-              margin: '0 0 16px'
-            }}>
-              Via Apriori et FP-Growth, nous extrayons des corrélations fortes entre caractéristiques produits (marque, RAM, stockage, accessoires) et fourchettes de prix pour révéler des combinaisons gagnantes.
-            </p>
-            <ul className="feature-list" style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-              display: 'grid',
-              gap: 10
-            }}>
-              {[
-                { icon: FileSearch, text: 'Algorithmes Apriori et FP-Growth' },
-                { icon: Network, text: 'Extraction de corrélations fortes' },
-                { icon: Sliders, text: 'Analyse des caractéristiques produits (marque, RAM, stockage)' },
-                { icon: Coins, text: 'Corrélations avec les fourchettes de prix' },
-                { icon: TrendingUp, text: 'Stratégies de pricing optimisées' }
-              ].map((item, i) => (
-                <li key={i} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  fontSize: '13px',
-                  color: 'var(--text)',
-                  fontWeight: 500
-                }}>
-                  <item.icon size={16} style={{ color: 'var(--accent2)', flexShrink: 0 }} />
-                  {item.text}
-                </li>
-              ))}
-            </ul>
           </div>
-
         </div>
-      </section>
+      </main>
     </div>
   );
 }
