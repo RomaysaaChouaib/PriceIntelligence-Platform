@@ -1,12 +1,21 @@
 import { useState, useEffect, useMemo, createContext, useContext } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import "./main.css";
 import {
   Search, Bell, ShoppingBag, TrendingUp, Package, Menu, X, AlertTriangle, Link2,
   RefreshCw, ChevronRight, BarChart2, LogOut, User, Lock, AlertCircle,
   Activity, Clock, Database, Download, Play, Square, Settings,
-  TrendingDown, ArrowRight, ChevronLeft, ChevronRight as ChevRight
+  TrendingDown, ArrowRight, ChevronLeft, ChevronRight as ChevRight,
+  Home
 } from "lucide-react";
+import LandingPage from './pages/LandingPage';
+import SignUpPage from './pages/SignUpPage';
+// 👇 NOUVEAUX IMPORTS AJOUTÉS ICI
+import PricingPage from './pages/PricingPage';
+import ScrapingPage from './pages/ScrapingPage';
+import DataMiningPage from './pages/DataMiningPage';
+// ❌ LIGNE SUPPRIMÉE : AnomaliesTab est DÉJÀ défini dans ce fichier (plus bas)
+// import AnomaliesTab from './pages/AnomaliesPage';
 
 const API = "http://127.0.0.1:8000/api";
 
@@ -72,7 +81,7 @@ export const useAuth = () => {
   return ctx;
 };
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────
 function getAuthHeaders() {
   const token = localStorage.getItem("access_token");
   return token ? { "Authorization": `Bearer ${token}` } : {};
@@ -105,7 +114,7 @@ const PLATFORM_COLORS = {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// 🔐 PAGE LOGIN (inchangée)
+// 🔐 PAGE LOGIN (Corrigée avec redirection)
 // ══════════════════════════════════════════════════════════════════
 function Login() {
   const [username, setUsername] = useState("");
@@ -113,13 +122,20 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const navigate = useNavigate(); // 👈 AJOUTÉ ICI
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     const result = await login(username, password);
-    if (!result.success) setError(result.error || "Erreur de connexion");
+    
+    if (result.success) {
+      // 👇 REDIRECTION VERS LE DASHBOARD APRÈS SUCCÈS
+      navigate('/dashboard');
+    } else {
+      setError(result.error || "Erreur de connexion");
+    }
     setLoading(false);
   };
 
@@ -210,18 +226,24 @@ function TabProducts() {
     setLoading(false);
   };
 
+  // ✅ CORRECTION ICI : fetchDB avec URL complète et headers explicites
   const fetchDB = async (p = 1) => {
     setLoading(true);
     setMode("db");
     setScrapeMsg("");
 
     try {
+      const token = localStorage.getItem("access_token");
+      const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+      
       const res = await fetch(
-        `${API}/search/?query=${query}&page=${p}&limit=20`,
-        {
-          headers: getAuthHeaders(),
-        }
+        `http://127.0.0.1:8000/api/search/?query=${query}&page=${p}&limit=20`,
+        { headers }
       );
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
 
       const data = await res.json();
 
@@ -230,7 +252,7 @@ function TabProducts() {
       setPages(data.pages || 1);
       setPage(p);
     } catch (e) {
-      console.error(e);
+      console.error("Erreur fetchDB:", e);
       setScrapeMsg("❌ Erreur lors du chargement DB");
     }
 
@@ -1014,6 +1036,7 @@ function TabProducts() {
     </div>
   );
 }
+
 // ══════════════════════════════════════════════════════════════════
 // 📊 ONGLET STATISTIQUES — données réelles + Boxplot
 // ══════════════════════════════════════════════════════════════════
@@ -1174,7 +1197,7 @@ function TabStats() {
   };
 
   // ── Boxplot SVG amélioré ─────────────────────────────────────────
-  const BoxplotV2 = ({ data: bdata }) => {
+  const BoxplotV2 = ({  bdata }) => {
     if (!bdata || bdata.length === 0) return null;
     const W = 640, H = 300, PL = 70, PR = 20, PT = 20, PB = 70;
     const CW = W - PL - PR, CH = H - PT - PB;
@@ -1823,110 +1846,110 @@ function TabClustering() {
 
   // ── Graphe plages de prix ────────────────────────────────────────
   const PriceRangeChart = ({ summary, title }) => {
-  if (!summary || summary.length === 0) return null;
-  const sorted  = [...summary].sort((a, b) => (a.median || 0) - (b.median || 0));
-  const maxVal  = Math.max(...sorted.map(c => c.max || 0));
-  const total   = sorted.reduce((s, c) => s + (c.count || 0), 0);
- 
-  return (
-    <div style={{
-      background: "var(--color-background-primary)",
-      border: "0.5px solid var(--color-border-tertiary)",
-      borderRadius: "var(--border-radius-lg)",
-      padding: "1.25rem", marginBottom: "1.5rem"
-    }}>
-      <div style={{ fontSize: 14, fontWeight: 500, color: "var(--color-text-primary)",
-        marginBottom: "1rem" }}>{title}</div>
- 
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-        <thead>
-          <tr>
-            {["Segment","Min","Plage de prix","Max","Produits"].map((h, i) => (
-              <th key={i} style={{
-                textAlign: i === 0 || i === 2 ? "left" : "right",
-                padding: "6px 8px", fontWeight: 500,
-                color: "var(--color-text-secondary)", fontSize: 11,
-                borderBottom: "0.5px solid var(--color-border-tertiary)",
-                width: i === 2 ? "38%" : "auto"
-              }}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((c, i) => {
-            const color   = COLORS[summary.indexOf(c) % COLORS.length];
-            const light   = LIGHT[summary.indexOf(c) % LIGHT.length];
-            const minPct  = ((c.min || 0) / maxVal) * 100;
-            const maxPct  = ((c.max || 0) / maxVal) * 100;
-            const medPct  = ((c.median || 0) / maxVal) * 100;
-            const pct     = total > 0 ? Math.round((c.count / total) * 100) : 0;
-            const fmt     = v => v >= 1000
-              ? Math.round(v / 1000) + "k MAD"
-              : Math.round(v) + " MAD";
- 
-            return (
-              <tr key={i} style={{ borderBottom: "0.5px solid var(--color-border-tertiary)" }}>
-                <td style={{ padding: "10px 8px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ width: 10, height: 10, borderRadius: 2,
-                      background: color, flexShrink: 0 }} />
-                    <span style={{ fontWeight: 500,
-                      color: "var(--color-text-primary)" }}>{c.cluster}</span>
-                  </div>
-                </td>
-                <td style={{ textAlign: "right", padding: "10px 8px",
-                  fontSize: 11, color: "var(--color-text-tertiary)" }}>
-                  {fmt(c.min)}
-                </td>
-                <td style={{ padding: "10px 8px" }}>
-                  <div style={{ position: "relative", height: 22,
-                    background: "var(--color-background-secondary)", borderRadius: 4 }}>
-                    <div style={{
-                      position: "absolute", top: 0, height: "100%",
-                      left: `${minPct}%`, width: `${maxPct - minPct}%`,
-                      background: light,
-                      border: `1.5px solid ${color}`, borderRadius: 4
-                    }} />
-                    <div style={{
-                      position: "absolute", top: 0, height: "100%",
-                      left: `${medPct - 0.5}%`, width: 3,
-                      background: color, borderRadius: 2
-                    }} />
-                    <span style={{
-                      position: "absolute", top: "50%", left: "50%",
-                      transform: "translate(-50%,-50%)",
-                      fontSize: 10, fontWeight: 500, color: color,
-                      whiteSpace: "nowrap"
-                    }}>
-                      Médiane {fmt(c.median)}
+    if (!summary || summary.length === 0) return null;
+    const sorted  = [...summary].sort((a, b) => (a.median || 0) - (b.median || 0));
+    const maxVal  = Math.max(...sorted.map(c => c.max || 0));
+    const total   = sorted.reduce((s, c) => s + (c.count || 0), 0);
+
+    return (
+      <div style={{
+        background: "var(--color-background-primary)",
+        border: "0.5px solid var(--color-border-tertiary)",
+        borderRadius: "var(--border-radius-lg)",
+        padding: "1.25rem", marginBottom: "1.5rem"
+      }}>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--color-text-primary)",
+          marginBottom: "1rem" }}>{title}</div>
+
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <thead>
+            <tr>
+              {["Segment","Min","Plage de prix","Max","Produits"].map((h, i) => (
+                <th key={i} style={{
+                  textAlign: i === 0 || i === 2 ? "left" : "right",
+                  padding: "6px 8px", fontWeight: 500,
+                  color: "var(--color-text-secondary)", fontSize: 11,
+                  borderBottom: "0.5px solid var(--color-border-tertiary)",
+                  width: i === 2 ? "38%" : "auto"
+                }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((c, i) => {
+              const color   = COLORS[summary.indexOf(c) % COLORS.length];
+              const light   = LIGHT[summary.indexOf(c) % LIGHT.length];
+              const minPct  = ((c.min || 0) / maxVal) * 100;
+              const maxPct  = ((c.max || 0) / maxVal) * 100;
+              const medPct  = ((c.median || 0) / maxVal) * 100;
+              const pct     = total > 0 ? Math.round((c.count / total) * 100) : 0;
+              const fmt     = v => v >= 1000
+                ? Math.round(v / 1000) + "k MAD"
+                : Math.round(v) + " MAD";
+
+              return (
+                <tr key={i} style={{ borderBottom: "0.5px solid var(--color-border-tertiary)" }}>
+                  <td style={{ padding: "10px 8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ width: 10, height: 10, borderRadius: 2,
+                        background: color, flexShrink: 0 }} />
+                      <span style={{ fontWeight: 500,
+                        color: "var(--color-text-primary)" }}>{c.cluster}</span>
+                    </div>
+                  </td>
+                  <td style={{ textAlign: "right", padding: "10px 8px",
+                    fontSize: 11, color: "var(--color-text-tertiary)" }}>
+                    {fmt(c.min)}
+                  </td>
+                  <td style={{ padding: "10px 8px" }}>
+                    <div style={{ position: "relative", height: 22,
+                      background: "var(--color-background-secondary)", borderRadius: 4 }}>
+                      <div style={{
+                        position: "absolute", top: 0, height: "100%",
+                        left: `${minPct}%`, width: `${maxPct - minPct}%`,
+                        background: light,
+                        border: `1.5px solid ${color}`, borderRadius: 4
+                      }} />
+                      <div style={{
+                        position: "absolute", top: 0, height: "100%",
+                        left: `${medPct - 0.5}%`, width: 3,
+                        background: color, borderRadius: 2
+                      }} />
+                      <span style={{
+                        position: "absolute", top: "50%", left: "50%",
+                        transform: "translate(-50%,-50%)",
+                        fontSize: 10, fontWeight: 500, color: color,
+                        whiteSpace: "nowrap"
+                      }}>
+                        Médiane {fmt(c.median)}
+                      </span>
+                    </div>
+                  </td>
+                  <td style={{ textAlign: "right", padding: "10px 8px",
+                    fontSize: 11, color: "var(--color-text-tertiary)" }}>
+                    {fmt(c.max)}
+                  </td>
+                  <td style={{ textAlign: "right", padding: "10px 8px" }}>
+                    <span style={{ fontSize: 12, fontWeight: 500,
+                      color: "var(--color-text-primary)" }}>
+                      {fmtNum(c.count)}
                     </span>
-                  </div>
-                </td>
-                <td style={{ textAlign: "right", padding: "10px 8px",
-                  fontSize: 11, color: "var(--color-text-tertiary)" }}>
-                  {fmt(c.max)}
-                </td>
-                <td style={{ textAlign: "right", padding: "10px 8px" }}>
-                  <span style={{ fontSize: 12, fontWeight: 500,
-                    color: "var(--color-text-primary)" }}>
-                    {fmtNum(c.count)}
-                  </span>
-                  <span style={{ fontSize: 10, color: "var(--color-text-tertiary)",
-                    marginLeft: 4 }}>{pct}%</span>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
- 
-      <div style={{ display: "flex", gap: 16, fontSize: 11,
-        color: "var(--color-text-tertiary)", marginTop: 10 }}>
-        <span>▬ Médiane &nbsp; □ Plage min–max</span>
+                    <span style={{ fontSize: 10, color: "var(--color-text-tertiary)",
+                      marginLeft: 4 }}>{pct}%</span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        <div style={{ display: "flex", gap: 16, fontSize: 11,
+          color: "var(--color-text-tertiary)", marginTop: 10 }}>
+          <span>▬ Médiane &nbsp; □ Plage min–max</span>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
   // ── Donut SVG ────────────────────────────────────────────────────
   const DonutChart = ({ summary }) => {
@@ -1992,173 +2015,173 @@ function TabClustering() {
 
   // ── Scatter PCA ──────────────────────────────────────────────────
   const PCAScatter = ({ scatterData, summary }) => {
-  const [active, setActive] = useState(null);
-  const [tooltip, setTooltip] = useState(null);
- 
-  // Utilise les données scatter de l'API (price + cluster)
-  // Si pas de coordonnées PCA, on simule via prix → axe X + bruit → axe Y
-  const points = useMemo(() => {
-    if (!scatterData || scatterData.length === 0) return [];
-    const prices = scatterData.map(d => d.price);
-    const minP   = Math.min(...prices);
-    const maxP   = Math.max(...prices);
-    const rng    = (seed) => {
-      let s = seed;
-      return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
-    };
-    return scatterData.map((d, i) => {
-      const r   = rng(i * 31 + 7);
-      const normX = ((d.price - minP) / (maxP - minP || 1));
-      const noiseX = (r() - 0.5) * 0.15;
-      const noiseY = (r() - 0.5) * 0.8;
-      const clusterIdx = summary
-        ? summary.findIndex(s => s.cluster === d.cluster)
-        : -1;
-      return {
-        x: normX + noiseX,
-        y: 0.5 + noiseY,
-        cluster: d.cluster,
-        color: COLORS[clusterIdx >= 0 ? clusterIdx % COLORS.length : i % COLORS.length],
-        price: d.price,
-        title: d.title,
+    const [active, setActive] = useState(null);
+    const [tooltip, setTooltip] = useState(null);
+
+    // Utilise les données scatter de l'API (price + cluster)
+    // Si pas de coordonnées PCA, on simule via prix → axe X + bruit → axe Y
+    const points = useMemo(() => {
+      if (!scatterData || scatterData.length === 0) return [];
+      const prices = scatterData.map(d => d.price);
+      const minP   = Math.min(...prices);
+      const maxP   = Math.max(...prices);
+      const rng    = (seed) => {
+        let s = seed;
+        return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
       };
-    });
-  }, [scatterData, summary]);
- 
-  if (!points || points.length === 0) return null;
- 
-  const clusters = summary
-    ? summary.map(s => s.cluster)
-    : [...new Set(points.map(d => d.cluster))];
- 
-  const W = 580, H = 320, PAD = 45;
-  const xs = points.map(d => d.x);
-  const ys = points.map(d => d.y);
-  const minX = Math.min(...xs), maxX = Math.max(...xs);
-  const minY = Math.min(...ys), maxY = Math.max(...ys);
-  const toX  = x => PAD + ((x - minX) / (maxX - minX || 1)) * (W - PAD * 2);
-  const toY  = y => PAD + (H - PAD * 2) - ((y - minY) / (maxY - minY || 1)) * (H - PAD * 2);
- 
-  const sample = points.length > 500
-    ? points.filter((_, i) => i % Math.ceil(points.length / 500) === 0)
-    : points;
- 
-  return (
-    <div style={{
-      background: "var(--color-background-primary)",
-      border: "0.5px solid var(--color-border-tertiary)",
-      borderRadius: "var(--border-radius-lg)",
-      padding: "1.25rem", marginBottom: "1.5rem"
-    }}>
-      <div style={{ fontSize: 14, fontWeight: 500, color: "var(--color-text-primary)",
-        marginBottom: 6 }}>PCA — Clusters projetés en 2D</div>
-      <div style={{ fontSize: 12, color: "var(--color-text-tertiary)", marginBottom: 12 }}>
-        Chaque point = un produit. Couleur = gamme de prix. Axe horizontal = prix.
-      </div>
- 
-      {/* Filtres */}
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-        <button onClick={() => setActive(null)} style={{
-          padding: "3px 12px", borderRadius: 999, fontSize: 12, cursor: "pointer",
-          background: !active ? "#0f172a" : "var(--color-background-secondary)",
-          color: !active ? "#fff" : "var(--color-text-secondary)",
-          border: `1px solid ${!active ? "#0f172a" : "var(--color-border-secondary)"}`
-        }}>Tous</button>
-        {clusters.map((c, i) => {
-          const color = COLORS[i % COLORS.length];
-          const isActive = active === c;
-          return (
-            <button key={i} onClick={() => setActive(isActive ? null : c)} style={{
-              padding: "3px 12px", borderRadius: 999, fontSize: 12, cursor: "pointer",
-              background: isActive ? color : "var(--color-background-secondary)",
-              color: isActive ? "#fff" : "var(--color-text-secondary)",
-              border: `1px solid ${isActive ? color : "var(--color-border-secondary)"}`
-            }}>{c}</button>
-          );
-        })}
-      </div>
- 
-      {/* Légende */}
-      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 10 }}>
-        {clusters.map((c, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center",
-            gap: 5, fontSize: 12, color: "var(--color-text-secondary)" }}>
-            <span style={{ width: 10, height: 10, borderRadius: "50%",
-              background: COLORS[i % COLORS.length], display: "inline-block" }} />
-            {c} ({points.filter(d => d.cluster === c).length})
-          </div>
-        ))}
-      </div>
- 
-      {/* SVG scatter */}
-      <div style={{ position: "relative" }}>
-        <svg width="100%" viewBox={`0 0 ${W} ${H}`}
-          style={{ display: "block", background: "var(--color-background-secondary)",
-            borderRadius: 8 }}>
-          {/* Grille */}
-          {[0.25, 0.5, 0.75].map((t, i) => (
-            <line key={i}
-              x1={PAD + t * (W - PAD * 2)} y1={PAD}
-              x2={PAD + t * (W - PAD * 2)} y2={H - PAD}
-              stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4,3" />
-          ))}
-          {/* Axes */}
-          <line x1={PAD} y1={H-PAD} x2={W-PAD} y2={H-PAD}
-            stroke="#cbd5e1" strokeWidth="1" />
-          <line x1={PAD} y1={PAD} x2={PAD} y2={H-PAD}
-            stroke="#cbd5e1" strokeWidth="1" />
-          <text x={W/2} y={H-10} fontSize="11" fill="#94a3b8" textAnchor="middle">
-            Prix (faible → élevé)
-          </text>
-          <text x={14} y={H/2} fontSize="11" fill="#94a3b8"
-            textAnchor="middle" transform={`rotate(-90,14,${H/2})`}>
-            Variance
-          </text>
- 
-          {/* Points */}
-          {sample.map((d, i) => (
-            <circle key={i}
-              cx={Math.max(PAD+5, Math.min(W-PAD-5, toX(d.x)))}
-              cy={Math.max(PAD+5, Math.min(H-PAD-5, toY(d.y)))}
-              r="4.5"
-              fill={d.color}
-              fillOpacity={active && active !== d.cluster ? 0.05 : 0.72}
-              stroke={active === d.cluster ? "#fff" : "none"}
-              strokeWidth="1"
-              style={{ cursor: "pointer" }}
-              onMouseEnter={(e) => setTooltip({ d, x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY })}
-              onMouseLeave={() => setTooltip(null)}
-            />
-          ))}
-        </svg>
- 
-        {/* Tooltip */}
-        {tooltip && (
-          <div style={{
-            position: "absolute",
-            left: tooltip.x + 12, top: tooltip.y - 36,
-            background: "#0f172a", color: "#fff",
-            padding: "6px 10px", borderRadius: 6,
-            fontSize: 11, pointerEvents: "none",
-            maxWidth: 210, zIndex: 10
-          }}>
-            <div style={{ fontWeight: 500, marginBottom: 2 }}>
-              {tooltip.d.cluster}
+      return scatterData.map((d, i) => {
+        const r   = rng(i * 31 + 7);
+        const normX = ((d.price - minP) / (maxP - minP || 1));
+        const noiseX = (r() - 0.5) * 0.15;
+        const noiseY = (r() - 0.5) * 0.8;
+        const clusterIdx = summary
+          ? summary.findIndex(s => s.cluster === d.cluster)
+          : -1;
+        return {
+          x: normX + noiseX,
+          y: 0.5 + noiseY,
+          cluster: d.cluster,
+          color: COLORS[clusterIdx >= 0 ? clusterIdx % COLORS.length : i % COLORS.length],
+          price: d.price,
+          title: d.title,
+        };
+      });
+    }, [scatterData, summary]);
+
+    if (!points || points.length === 0) return null;
+
+    const clusters = summary
+      ? summary.map(s => s.cluster)
+      : [...new Set(points.map(d => d.cluster))];
+
+    const W = 580, H = 320, PAD = 45;
+    const xs = points.map(d => d.x);
+    const ys = points.map(d => d.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const toX  = x => PAD + ((x - minX) / (maxX - minX || 1)) * (W - PAD * 2);
+    const toY  = y => PAD + (H - PAD * 2) - ((y - minY) / (maxY - minY || 1)) * (H - PAD * 2);
+
+    const sample = points.length > 500
+      ? points.filter((_, i) => i % Math.ceil(points.length / 500) === 0)
+      : points;
+
+    return (
+      <div style={{
+        background: "var(--color-background-primary)",
+        border: "0.5px solid var(--color-border-tertiary)",
+        borderRadius: "var(--border-radius-lg)",
+        padding: "1.25rem", marginBottom: "1.5rem"
+      }}>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--color-text-primary)",
+          marginBottom: 6 }}>PCA — Clusters projetés en 2D</div>
+        <div style={{ fontSize: 12, color: "var(--color-text-tertiary)", marginBottom: 12 }}>
+          Chaque point = un produit. Couleur = gamme de prix. Axe horizontal = prix.
+        </div>
+
+        {/* Filtres */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+          <button onClick={() => setActive(null)} style={{
+            padding: "3px 12px", borderRadius: 999, fontSize: 12, cursor: "pointer",
+            background: !active ? "#0f172a" : "var(--color-background-secondary)",
+            color: !active ? "#fff" : "var(--color-text-secondary)",
+            border: `1px solid ${!active ? "#0f172a" : "var(--color-border-secondary)"}`
+          }}>Tous</button>
+          {clusters.map((c, i) => {
+            const color = COLORS[i % COLORS.length];
+            const isActive = active === c;
+            return (
+              <button key={i} onClick={() => setActive(isActive ? null : c)} style={{
+                padding: "3px 12px", borderRadius: 999, fontSize: 12, cursor: "pointer",
+                background: isActive ? color : "var(--color-background-secondary)",
+                color: isActive ? "#fff" : "var(--color-text-secondary)",
+                border: `1px solid ${isActive ? color : "var(--color-border-secondary)"}`
+              }}>{c}</button>
+            );
+          })}
+        </div>
+
+        {/* Légende */}
+        <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 10 }}>
+          {clusters.map((c, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center",
+              gap: 5, fontSize: 12, color: "var(--color-text-secondary)" }}>
+              <span style={{ width: 10, height: 10, borderRadius: "50%",
+                background: COLORS[i % COLORS.length], display: "inline-block" }} />
+              {c} ({points.filter(d => d.cluster === c).length})
             </div>
-            <div style={{ color: "#94a3b8" }}>
-              {tooltip.d.price?.toLocaleString("fr-FR")} MAD
-            </div>
-            {tooltip.d.title && (
-              <div style={{ color: "#94a3b8", fontSize: 10, marginTop: 2 }}>
-                {tooltip.d.title.slice(0, 30)}…
+          ))}
+        </div>
+
+        {/* SVG scatter */}
+        <div style={{ position: "relative" }}>
+          <svg width="100%" viewBox={`0 0 ${W} ${H}`}
+            style={{ display: "block", background: "var(--color-background-secondary)",
+              borderRadius: 8 }}>
+            {/* Grille */}
+            {[0.25, 0.5, 0.75].map((t, i) => (
+              <line key={i}
+                x1={PAD + t * (W - PAD * 2)} y1={PAD}
+                x2={PAD + t * (W - PAD * 2)} y2={H - PAD}
+                stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4,3" />
+            ))}
+            {/* Axes */}
+            <line x1={PAD} y1={H-PAD} x2={W-PAD} y2={H-PAD}
+              stroke="#cbd5e1" strokeWidth="1" />
+            <line x1={PAD} y1={PAD} x2={PAD} y2={H-PAD}
+              stroke="#cbd5e1" strokeWidth="1" />
+            <text x={W/2} y={H-10} fontSize="11" fill="#94a3b8" textAnchor="middle">
+              Prix (faible → élevé)
+            </text>
+            <text x={14} y={H/2} fontSize="11" fill="#94a3b8"
+              textAnchor="middle" transform={`rotate(-90,14,${H/2})`}>
+              Variance
+            </text>
+
+            {/* Points */}
+            {sample.map((d, i) => (
+              <circle key={i}
+                cx={Math.max(PAD+5, Math.min(W-PAD-5, toX(d.x)))}
+                cy={Math.max(PAD+5, Math.min(H-PAD-5, toY(d.y)))}
+                r="4.5"
+                fill={d.color}
+                fillOpacity={active && active !== d.cluster ? 0.05 : 0.72}
+                stroke={active === d.cluster ? "#fff" : "none"}
+                strokeWidth="1"
+                style={{ cursor: "pointer" }}
+                onMouseEnter={(e) => setTooltip({ d, x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY })}
+                onMouseLeave={() => setTooltip(null)}
+              />
+            ))}
+          </svg>
+
+          {/* Tooltip */}
+          {tooltip && (
+            <div style={{
+              position: "absolute",
+              left: tooltip.x + 12, top: tooltip.y - 36,
+              background: "#0f172a", color: "#fff",
+              padding: "6px 10px", borderRadius: 6,
+              fontSize: 11, pointerEvents: "none",
+              maxWidth: 210, zIndex: 10
+            }}>
+              <div style={{ fontWeight: 500, marginBottom: 2 }}>
+                {tooltip.d.cluster}
               </div>
-            )}
-          </div>
-        )}
+              <div style={{ color: "#94a3b8" }}>
+                {tooltip.d.price?.toLocaleString("fr-FR")} MAD
+              </div>
+              {tooltip.d.title && (
+                <div style={{ color: "#94a3b8", fontSize: 10, marginTop: 2 }}>
+                  {tooltip.d.title.slice(0, 30)}…
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
   // ── Render principal ─────────────────────────────────────────────
   return (
@@ -2262,10 +2285,10 @@ function TabClustering() {
   );
 }
 // ══════════════════════════════════════════════════════════════════
-// 🚨 ONGLET ANOMALIES — version améliorée
+// 🚨 ONGLET ANOMALIES — version améliorée (DÉJÀ DÉFINI ICI — PAS BESOIN D'IMPORT)
 // ══════════════════════════════════════════════════════════════════
 
-function TabAnomalies() {
+function AnomaliesTab() {
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
@@ -2997,6 +3020,7 @@ const TABS = [
 ];
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [tab, setTab]             = useState("products");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { user, logout }          = useAuth();
@@ -3077,10 +3101,23 @@ function Dashboard() {
               <span className="pip-breadcrumb-current">{currentTabLabel}</span>
             </div>
           </div>
+          
           <div className="pip-header-right">
+            {/* 👇 BOUTON ACCUEIL (Ajouté ici) */}
+            <button
+              onClick={() => navigate('/')}
+              className="pip-header-icon-btn"
+              title="Retour à l'accueil"
+            >
+              <Home size={17} />
+            </button>
+
+            {/* Bouton Actualiser existant */}
             <button className="pip-header-icon-btn" title="Actualiser" onClick={() => window.location.reload()}>
               <RefreshCw size={17} />
             </button>
+
+            {/* Menu utilisateur existant */}
             {user && (
               <div className="pip-user-menu">
                 <span className="pip-username">👋 {user?.first_name || user?.username}</span>
@@ -3122,7 +3159,7 @@ function Dashboard() {
             {tab === "products"    && <TabProducts    />}
             {tab === "stats"       && <TabStats       />}
             {tab === "clustering"  && <TabClustering  />}
-            {tab === "anomalies"   && <TabAnomalies   />}
+            {tab === "anomalies"   && <AnomaliesTab   />}  {/* ✅ Utilise la fonction DÉJÀ DÉFINIE dans ce fichier */}
             {tab === "association" && <TabAssociation />}
           </div>
         </main>
@@ -3139,21 +3176,44 @@ function PrivateRoute({ children }) {
   return user ? children : <Navigate to="/login" />;
 }
 
+// PublicRoute : redirige vers /dashboard si l'utilisateur EST DÉJÀ connecté
+function PublicRoute({ children }) {
+  const { user } = useAuth();
+  return !user ? children : <Navigate to="/dashboard" replace />;
+}
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<LoginRouteWrapper />} />
-          <Route path="/*" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+
+          {/* 👇 Landing Page - accessible à tous */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* 👇 Signup - accessible à tous (même connecté) - CORRECTION ICI */}
+          <Route path="/signup" element={<SignUpPage />} />
+
+          {/* 👇 Login - accessible à tous (CORRIGÉ pour afficher toujours le formulaire) */}
+          <Route path="/login" element={<Login />} />
+
+          {/* 👇 Dashboard - accessible seulement si connecté */}
+          <Route path="/dashboard" element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          } />
+
+          {/* 👇 NOUVELLES ROUTES AJOUTÉES ICI (dans <Routes>) */}
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/scraping" element={<ScrapingPage />} />
+          <Route path="/datamining" element={<DataMiningPage />} />
+
+          {/* 👇 Redirection par défaut vers l'accueil */}
+          <Route path="/*" element={<Navigate to="/" replace />} />
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>
   );
-}
-
-function LoginRouteWrapper() {
-  const { user } = useAuth();
-  return user ? <Navigate to="/" /> : <Login />;
 }

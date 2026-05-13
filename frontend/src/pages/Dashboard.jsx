@@ -191,4 +191,28 @@ function Dashboard() {
   );
 }
 
+// Dans le header de Dashboard, ajoute :
+<button 
+  onClick={() => {
+    localStorage.removeItem('pip_user');
+    localStorage.removeItem('access_token');
+    window.location.href = '/';
+  }}
+  style={{
+    position: 'fixed',
+    top: '10px',
+    right: '10px',
+    zIndex: 9999,
+    padding: '10px 20px',
+    background: '#ef4444',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontWeight: 'bold'
+  }}
+>
+  🚪 Déconnexion & Voir Landing
+</button>
+
 export default Dashboard;
