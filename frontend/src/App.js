@@ -587,16 +587,16 @@ function TabProducts() {
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
             {scrapeCategory === "laptop" ? <>
-              <ScrapeBtn label="Jumia" target="jumia" emoji="🟠" />
-              <ScrapeBtn label="Amazon" target="amazon" emoji="🔵" />
-              <ScrapeBtn label="AliExpress" target="aliexpress" emoji="🔴" />
-              <ScrapeBtn label="Tout scraper" target="all" emoji="🔥" />
+              <ScrapeBtn label="Jumia" target="jumia"/>
+              <ScrapeBtn label="Amazon" target="amazon"/>
+              <ScrapeBtn label="AliExpress" target="aliexpress"/>
+              <ScrapeBtn label="Tout scraper" target="all"/>
             </> : <>
-              <ScrapeBtn label="Souris" target="souris" emoji="🖱️" />
-              <ScrapeBtn label="Support PC" target="laptop_stand" emoji="🏗️" />
-              <ScrapeBtn label="Refroidisseur" target="cooling_pad" emoji="❄️" />
-              <ScrapeBtn label="Sac PC" target="sac_laptop" emoji="🎒" />
-              <ScrapeBtn label="Clé USB" target="usb" emoji="💾" />
+              <ScrapeBtn label="Souris" target="souris"/>
+              <ScrapeBtn label="Support PC" target="laptop_stand"/>
+              <ScrapeBtn label="Refroidisseur" target="cooling_pad"/>
+              <ScrapeBtn label="Sac PC" target="sac_laptop"/>
+              <ScrapeBtn label="Clé USB" target="usb"/>
             </>}
           </div>
           <div style={{ borderTop: `1px solid ${DS.border}`, paddingTop: 12 }}>
