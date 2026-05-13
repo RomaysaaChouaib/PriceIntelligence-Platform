@@ -256,7 +256,7 @@ class PriceAlertViewSet(viewsets.ModelViewSet):
 @permission_classes([permissions.AllowAny])
 def signup(request):
     """Inscription d'un nouvel utilisateur"""
-    print("📥 Requête signup reçue:", request.data)  # 🔍 DEBUG
+    print("📥 Requête signup reçue:", request.data)  #  DEBUG
     username = request.data.get('username', '').strip()
     email = request.data.get('email', '').strip()
     password = request.data.get('password', '')
@@ -287,7 +287,7 @@ def signup(request):
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
-                'first_name': user.first_name or user.username  # ✅ AJOUTÉ pour le dashboard
+                'first_name': user.first_name or user.username  # AJOUTÉ pour le dashboard
             },
             'tokens': {
                 'access': str(refresh.access_token),
@@ -301,7 +301,7 @@ def signup(request):
 @permission_classes([permissions.AllowAny])
 def login(request):
     """Connexion d'un utilisateur"""
-    print("📥 Requête login reçue:", request.data)  # 🔍 DEBUG
+    print("📥 Requête login reçue:", request.data)  # DEBUG
     username = request.data.get('username', '').strip()
     password = request.data.get('password', '')
     
@@ -318,7 +318,7 @@ def login(request):
             'id': user.id,
             'username': user.username,
             'email': user.email,
-            'first_name': user.first_name or user.username  # ✅ AJOUTÉ
+            'first_name': user.first_name or user.username 
         },
         'tokens': {
             'access': str(refresh.access_token),

@@ -1,85 +1,63 @@
-:root {
-  --orange-primary: #FF6A00;
-  --orange-dark: #CC5500;
-  --black-primary: #0A0A0A;
-  --black-soft: #1A1A1A;
-  --white: #FFFFFF;
-  --gray-light: #F4F4F5;
-  --gray-text: #6B7280;
-  --radius: 12px;
-  --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --shadow-hover: 0 8px 30px rgba(255, 106, 0, 0.15);
+/* ══════════════════════════════════════════════════════════════════
+   LandingPage.css — Styles complémentaires
+   Palette : Fond Blanc + Texte Noir/Bleu
+   ══════════════════════════════════════════════════════════════════ */
+
+html { scroll-behavior: smooth; }
+
+a:focus-visible, button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-.landing-container { font-family: 'Inter', system-ui, sans-serif; color: var(--black-primary); background: var(--white); line-height: 1.6; }
-
-.landing-nav { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 5%; background: var(--black-primary); position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--orange-primary); }
-
-.logo { 
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.6rem; 
-  font-weight: 800; 
-  color: var(--white); 
-  letter-spacing: -0.5px; 
+/* ═══════════════════════════════════════════════════════════════
+   🎨 OVERRIDES POUR THÈME BLANC
+   ═══════════════════════════════════════════════════════════════ */
+body {
+  background: #ffffff !important;
+  color: #0f172a !important;
 }
 
-.logo svg {
-  transition: transform 0.3s ease;
+/* Liens bleus */
+a {
+  color: 2563eb;
+  transition: color 0.2s;
 }
-.landing-nav:hover .logo svg {
-  transform: rotate(180deg);
-}
-
-.btn-signup-nav { padding: 0.7rem 1.6rem; background: var(--orange-primary); color: var(--white); text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s; }
-.btn-signup-nav:hover { background: var(--orange-dark); transform: translateY(-2px); }
-
-.hero { position: relative; text-align: center; padding: 6rem 2rem; background: linear-gradient(135deg, var(--black-primary) 0%, var(--black-soft) 100%); overflow: hidden; }
-.hero-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 30% 20%, rgba(255, 106, 0, 0.15) 0%, transparent 50%); pointer-events: none; }
-.hero-content { position: relative; z-index: 2; max-width: 800px; margin: 0 auto; }
-.hero-badge { display: inline-block; padding: 0.4rem 1rem; background: rgba(255, 106, 0, 0.15); color: var(--orange-primary); border: 1px solid var(--orange-primary); border-radius: 50px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
-.hero h1 { font-size: 3.2rem; margin-bottom: 1.2rem; color: var(--white); line-height: 1.1; font-weight: 800; }
-.hero-subtitle { font-size: 1.25rem; color: #D1D5DB; max-width: 650px; margin: 0 auto 2.5rem; line-height: 1.7; }
-.btn-primary { display: inline-block; padding: 1rem 2.2rem; background: var(--orange-primary); color: var(--white); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 1.05rem; transition: all 0.3s; box-shadow: 0 4px 15px rgba(255, 106, 0, 0.3); }
-.btn-primary:hover { background: var(--orange-dark); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 106, 0, 0.4); }
-
-.pillars-section { padding: 5rem 5%; background: var(--gray-light); }
-/* Optionnel : Ajouter un peu de marge en haut pour aérer */
-.pillars-section .cards-grid {
-  margin-top: 2rem;
+a:hover {
+  color: #2563eb;
 }
 
-.cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem; max-width: 1200px; margin: 0 auto; }
-
-.pillar-card-link { text-decoration: none; color: inherit; display: block; transition: transform 0.3s ease; }
-.pillar-card-link:hover { transform: translateY(-8px); }
-.pillar-card-link:hover .pillar-card { box-shadow: var(--shadow-hover); border-top-color: var(--orange-primary); }
-
-.pillar-card { background: var(--white); padding: 2.5rem 2rem; border-radius: var(--radius); box-shadow: var(--shadow); border-top: 4px solid transparent; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; text-align: center; height: 100%; }
-.pillar-card.highlight { border-top-color: var(--orange-primary); background: linear-gradient(180deg, var(--white) 0%, #FFF8F0 100%); }
-
-.card-icon { font-size: 3rem; margin-bottom: 1rem; background: var(--gray-light); width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-.pillar-card h3 { font-size: 1.6rem; margin: 1rem 0 0.8rem; color: var(--black-primary); font-weight: 700; }
-.card-summary { color: var(--gray-text); font-size: 1rem; line-height: 1.6; margin-bottom: 1.5rem; flex-grow: 1; }
-.read-more { color: var(--orange-primary); font-weight: 600; font-size: 0.95rem; }
-
-.landing-footer { background: var(--black-primary); color: var(--white); padding: 4rem 5% 2rem; }
-.footer-content { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; margin-bottom: 3rem; text-align: center; }
-
-.footer-logo { 
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.8rem; 
-  font-weight: 800; 
-  color: var(--orange-primary); 
+/* Badges bleus */
+[style*="background: rgba(0, 102, 204"] {
+  border-color: rgba(0, 102, 204, 0.2) !important;
 }
 
-.footer-bottom { border-top: 1px solid #2D2D2D; padding-top: 1.5rem; text-align: center; color: #6B7280; font-size: 0.9rem; }
+/* Cartes avec hover */
+[style*="transition: all 0.3s"] {
+  will-change: transform, box-shadow;
+}
 
+/* ═══════════════════════════════════════════════════════════════
+   📱 RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .hero h1 { font-size: 2.2rem; }
-  .cards-grid { grid-template-columns: 1fr; }
+  header[style*="padding"] { padding: 4rem 1.5rem 3rem !important; }
+  [style*="display: flex"][style*="gap: 12px"] {
+    flex-direction: column; align-items: center;
+  }
+  [style*="padding: 1.5rem"] { padding: 1.25rem !important; }
+  
+  /* Cartes équipe mobile */
+  [style*="gridTemplateColumns: repeat(auto-fit"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media print {
+  .fade-in, .glow, .pulse { animation: none !important; }
+  [style*="box-shadow"] { box-shadow: none !important; }
+}
+
+@media (prefers-color-scheme: light) {
+  body { background: #ffffff; color: #0f172a; }
 }

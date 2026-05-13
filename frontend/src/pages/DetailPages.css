@@ -1,84 +1,71 @@
-.detail-container { min-height: 100vh; background: var(--gray-light); font-family: 'Inter', system-ui, sans-serif; }
-.detail-nav { display: flex; align-items: center; gap: 1.5rem; padding: 1.2rem 5%; background: var(--black-primary); border-bottom: 3px solid var(--orange-primary); }
-.back-link { color: var(--white); text-decoration: none; font-weight: 600; transition: color 0.3s; }
-.back-link:hover { color: var(--orange-primary); }
-.nav-title { color: var(--orange-primary); font-weight: 700; font-size: 1.2rem; }
+/* ══════════════════════════════════════════════════════════════════
+   DetailPages.css — Styles complémentaires uniquement
+   Le design principal est géré via inline styles avec DS tokens
+   ══════════════════════════════════════════════════════════════════ */
 
-.detail-hero { text-align: center; padding: 4rem 2rem; background: linear-gradient(135deg, var(--black-primary) 0%, var(--black-soft) 100%); color: var(--white); }
-.detail-hero h1 { font-size: 2.8rem; margin-bottom: 1rem; font-weight: 800; }
-.detail-hero p { font-size: 1.2rem; color: #D1D5DB; max-width: 600px; margin: 0 auto; }
-
-.detail-content { max-width: 900px; margin: -3rem auto 4rem; padding: 0 2rem; display: flex; flex-direction: column; gap: 2rem; }
-
-/* ✅ NOUVEAU : Style pour la carte unique combinée */
-.single-card {
-  padding: 3rem;
+/* Smooth transitions pour les interactions */
+a, button, [style*="transition"] {
+  will-change: transform, box-shadow, border-color;
 }
 
-.card-section {
-  margin-bottom: 2rem;
+/* Focus visible pour l'accessibilité */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-.card-section:last-child {
-  margin-bottom: 0;
-}
-
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--orange-primary), transparent);
-  margin: 2.5rem 0;
-  opacity: 0.3;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.card-icon {
-  font-size: 2rem;
-  background: var(--gray-light);
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-}
-
-.detail-card { background: var(--white); padding: 2.5rem; border-radius: var(--radius); box-shadow: var(--shadow); border-left: 5px solid var(--orange-primary); transition: transform 0.3s; }
-.detail-card:hover { transform: translateX(5px); }
-.detail-card h3 { font-size: 1.4rem; color: var(--black-primary); margin: 0; font-weight: 700; }
-.detail-card p { color: var(--gray-text); line-height: 1.8; font-size: 1.05rem; margin-bottom: 1.5rem; }
-
-.feature-list {
-  list-style: none;
-  padding: 0;
-  margin: 1.5rem 0 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.feature-list li {
-  padding: 0.5rem 0;
-  color: var(--gray-text);
-  font-size: 0.95rem;
-  border-bottom: 1px solid var(--gray-light);
-}
-
-.feature-list li:last-child {
-  border-bottom: none;
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-  .detail-hero h1 { font-size: 2rem; }
-  .detail-content { padding: 0 1rem; margin-top: -2rem; }
-  .detail-card { padding: 1.5rem; }
-  .single-card { padding: 1.5rem; }
-  .card-header { flex-direction: column; text-align: center; }
-  .card-icon { width: 60px; height: 60px; font-size: 2.5rem; }
-  .divider { margin: 2rem 0; }
+  /* Reduce padding on mobile */
+  header[style*="padding"],
+  section[style*="padding"] {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+  
+  /* Stack flex items on small screens */
+  [style*="display: flex"][style*="gap"] {
+    flex-wrap: wrap;
+  }
+  
+  /* Adjust hero text */
+  h1[style*="font-size"] {
+    font-size: 1.8rem !important;
+  }
+  
+  /* Two-column grids become single column */
+  [style*="gridTemplateColumns: '1fr 1fr'"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Print styles — disable animations */
+@media print {
+  .fade-in, .glow, .pulse {
+    animation: none !important;
+  }
+  [style*="box-shadow"] {
+    box-shadow: none !important;
+  }
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Utility: hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

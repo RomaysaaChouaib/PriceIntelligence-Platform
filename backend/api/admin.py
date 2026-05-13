@@ -20,7 +20,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(PriceRecord)
 class PriceRecordAdmin(admin.ModelAdmin):
-    # ✅ Remplacement de 'platform' par une méthode custom
+    # Remplacement de 'platform' par une méthode custom
     list_display = ['product', 'price', 'currency', 'get_platform', 'scraped_at']
     list_filter = ['currency', 'scraped_at']
     search_fields = ['product__title']
