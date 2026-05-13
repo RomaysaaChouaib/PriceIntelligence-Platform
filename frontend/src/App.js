@@ -438,7 +438,6 @@ function TabProducts() {
     setLoading(true); setMode("db"); setScrapeMsg("");
     try {
       const res = await fetch(`${API}/search/?query=${query}&page=${p}&limit=20`, { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setProducts(data.products || []); setTotal(data.total || 0); setPages(data.pages || 1); setPage(p);
     } catch { setScrapeMsg("❌ Erreur lors du chargement DB"); }
@@ -474,14 +473,13 @@ function TabProducts() {
         if (status.status === "SUCCESS") {
           clearInterval(interval); setProgress(100); setPolling(false);
           setScrapeMsg(`✅ Scraping ${target} terminé — ${status.result?.inserted || 0} produits`);
-          fetch(`${API}/history/`, { method: "POST", headers: { "Content-Type": "application/json", ...getAuthHeaders() }, body: JSON.stringify({ query, source: target, count: status.result?.inserted || 0 }) }).catch(() => {});
           if (!["jumia", "amazon", "aliexpress", "all"].includes(target)) fetchAccessories(1);
           else fetchDB(1);
           setTimeout(() => { setProgress(0); setScrapeMsg(""); }, 3000);
         } else if (status.status === "FAILURE") {
-          clearInterval(interval); setPolling(false); setScrapeMsg("❌ Échec du scraping"); setProgress(0);
+          clearInterval(interval); setPolling(false); setScrapeMsg("❌ Échec"); setProgress(0);
         } else { setProgress(p => Math.min(p + 8, 90)); }
-      } catch { clearInterval(interval); setPolling(false); setProgress(0); }
+      } catch { clearInterval(interval); setPolling(false); }
     }, 2000);
   };
 
@@ -489,7 +487,7 @@ function TabProducts() {
     setLoading(true); setScrapeTarget(target);
     const defaultQuery = { souris: "souris", laptop_stand: "laptop_stand", cooling_pad: "cooling_pad", sac_laptop: "sac_laptop", usb: "usb_flash_drive" }[target] || "laptop";
     const finalQuery = query.trim() !== "" ? query.trim() : defaultQuery;
-    setScrapeMsg(`⏳ Scraping ${target} en cours pour "${finalQuery}"...`); setProgress(10);
+    setScrapeMsg(`⏳ Scraping ${target}...`); setProgress(10);
     try {
       const endpoints = { jumia: "scrape/jumia/", amazon: "scrape/amazon/", aliexpress: "scrape/aliexpress/", all: "scrape/All/", souris: "scrape/souris/", laptop_stand: "scrape/laptop_stand/", cooling_pad: "scrape/cooling_pad/", sac_laptop: "scrape/sac_laptop/", usb: "scrape/usb/" };
       const url = `${API}/${endpoints[target] || "search/"}?query=${encodeURIComponent(finalQuery)}`;
@@ -497,181 +495,91 @@ function TabProducts() {
       const data = await res.json();
       if (data.task_id) { setCurrentTaskId(data.task_id); pollTaskStatus(data.task_id, target); }
       else if (data.success) {
-        setProgress(100); setScrapeMsg(`✅ ${data.message}`);
-        if (!["jumia", "amazon", "aliexpress", "all"].includes(target)) { setMode("db_accessoire"); fetchAccessories(1); } else { setMode("db"); fetchDB(1); }
-        setTimeout(() => { setProgress(0); setScrapeMsg(""); }, 3000);
-      } else { setScrapeMsg(`❌ ${data.message || data.error || "Problème lors du scraping"}`); setProgress(0); }
-    } catch { setScrapeMsg(`❌ Erreur réseau sur ${target}`); setProgress(0); }
-    setLoading(false); setScrapeTarget("");
+        setScrapeMsg(`✅ ${data.message}`); setProgress(100);
+        if (!["jumia", "amazon", "aliexpress", "all"].includes(target)) fetchAccessories(1); else fetchDB(1);
+        setTimeout(() => setProgress(0), 3000);
+      }
+    } catch { setScrapeMsg("❌ Erreur"); setProgress(0); }
+    setLoading(false);
   };
 
   const handleStop = async () => {
-    if (!currentTaskId) { setScrapeMsg("❌ Aucune tâche en cours."); return; }
-    setScrapeMsg("⏳ Arrêt en cours...");
+    if (!currentTaskId) return;
     try {
       const res = await fetch(`${API}/scrape/stop/?task_id=${currentTaskId}`, { headers: getAuthHeaders() });
       const data = await res.json();
-      if (data.success) { setScrapeMsg(`🛑 ${data.message || "Scraping arrêté."}`); setCurrentTaskId(null); setProgress(0); setPolling(false); }
-      else setScrapeMsg(`❌ ${data.message || "Impossible d'arrêter"}`);
-    } catch { setScrapeMsg("❌ Erreur lors de l'arrêt."); }
-  };
-
-  const MODE_LABELS = { db: "Base de données", db_accessoire: "Accessoires", scrape: "Scraping", alerts: "🔥 Alertes" };
-
-  const ScrapeBtn = ({ label, target: t, color, emoji }) => {
-    const platformColor = PLATFORM_COLORS[t] || PLATFORM_COLORS.default;
-    return (
-      <button onClick={() => runScrape(t)} disabled={loading || polling} style={{
-        padding: "10px 18px", borderRadius: 8,
-        background: platformColor.fill,
-        border: `1px solid ${platformColor.stroke}`,
-        color: platformColor.text,
-        fontWeight: 600, fontSize: 12, cursor: "pointer",
-        fontFamily: DS.mono, transition: "all 0.2s",
-        opacity: loading || polling ? 0.7 : 1,
-        display: "flex", alignItems: "center", gap: 6,
-      }}>
-        {loading && scrapeTarget === t ? <><RefreshCw size={12} className="spin" /> ...</> : <>{emoji} {label}</>}
-      </button>
-    );
+      if (data.success) { setScrapeMsg("🛑 Arrêté"); setCurrentTaskId(null); setProgress(0); setPolling(false); }
+    } catch { setScrapeMsg("❌ Erreur arrêt"); }
   };
 
   return (
-    <div className="fade-in" style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      {/* BARRE DE RECHERCHE */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 20, alignItems: "center" }}>
-        <div style={{ flex: 1, position: "relative" }}>
-          <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: DS.textMuted }} />
-          <input type="text" value={query} onChange={e => setQuery(e.target.value)} 
-            onKeyDown={e => { if (e.key === "Enter") { if (mode === "db_accessoire") fetchAccessories(1); else if (mode === "alerts") fetchNotifications(); else fetchDB(1); } }} 
-            placeholder='Rechercher… ex: "laptop", "redmi 14"' 
-            style={{ width: "100%", padding: "10px 10px 10px 38px", borderRadius: "8px", border: `1px solid ${DS.border}`, outline: "none" }} 
-          />
-        </div>
-        <button onClick={() => { if (mode === "db_accessoire") fetchAccessories(1); else if (mode === "alerts") fetchNotifications(); else fetchDB(1); }} 
-          disabled={loading || mode === "scrape"} 
-          style={{ padding: "10px 20px", borderRadius: 8, background: DS.platformBlue, border: "none", color: "white", fontWeight: 700, cursor: "pointer", opacity: loading ? 0.6 : 1 }}>
-          {loading ? "..." : "RECHERCHER"}
-        </button>
+    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto", fontFamily: "sans-serif" }}>
+      {/* SEARCH BAR */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+        <input type="text" value={query} onChange={e => setQuery(e.target.value)} placeholder="Rechercher..." style={{ flex: 1, padding: "10px", borderRadius: "8px", border: `1px solid ${DS.border}` }} />
+        <button onClick={() => mode === "alerts" ? fetchNotifications() : mode === "db_accessoire" ? fetchAccessories(1) : fetchDB(1)} style={{ padding: "10px 20px", background: DS.platformBlue, color: "white", border: "none", borderRadius: "8px", cursor: "pointer" }}>Rechercher</button>
       </div>
 
-      {/* TABS DE NAVIGATION */}
-      <div style={{ display: "flex", gap: 4, marginBottom: 20, background: "#f1f5f9", padding: 4, borderRadius: 8, border: `1px solid ${DS.border}` }}>
-        {[["db", "🗄️ Produits"], ["db_accessoire", "🎧 Accessoires"], ["scrape", "🕷️ Scraper"], ["alerts", "🔔 Alertes"]].map(([m, label]) => (
-          <button key={m} onClick={() => { setMode(m); if (m === "db") fetchDB(1); else if (m === "db_accessoire") fetchAccessories(1); else if (m === "alerts") fetchNotifications(); }} 
-          style={{ flex: 1, padding: "8px", borderRadius: 6, border: "none", background: mode === m ? "white" : "transparent", color: mode === m ? DS.platformBlue : DS.textSecondary, fontWeight: 600, fontSize: 12, cursor: "pointer", boxShadow: mode === m ? "0 2px 4px rgba(0,0,0,0.05)" : "none" }}>
-            {label}
+      {/* TABS */}
+      <div style={{ display: "flex", gap: 5, marginBottom: 20, background: "#f1f5f9", padding: 5, borderRadius: 10 }}>
+        {["db", "db_accessoire", "scrape", "alerts"].map(m => (
+          <button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "10px", border: "none", borderRadius: "8px", background: mode === m ? "white" : "transparent", fontWeight: "bold", cursor: "pointer", color: mode === m ? DS.platformBlue : DS.textSecondary }}>
+            {m === "db" ? "Produits" : m === "db_accessoire" ? "Accessoires" : m === "scrape" ? "Scraper" : "Alertes"}
           </button>
         ))}
       </div>
 
-      {/* MOTEUR DE SCRAPING */}
+      {/* SCRAPE PANEL */}
       {mode === "scrape" && (
         <Card accent={DS.amber} style={{ marginBottom: 20 }}>
-          <SectionTitle icon={Zap} accent={DS.amber}>Scraping Engine</SectionTitle>
-          <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-            {[["laptop", "💻 Laptops"], ["accessoire", "🎧 Accessoires"]].map(([cat, label]) => (
-              <button key={cat} onClick={() => setScrapeCategory(cat)} style={{ flex: 1, padding: "10px", borderRadius: 8, background: scrapeCategory === cat ? `${DS.amber}22` : "#f8fafc", border: `1px solid ${scrapeCategory === cat ? DS.amber : DS.border}`, color: scrapeCategory === cat ? DS.amber : DS.textSecondary, fontWeight: 600, cursor: "pointer" }}>{label}</button>
-            ))}
+          <div style={{ display: "flex", gap: 10, marginBottom: 15 }}>
+             <button onClick={() => setScrapeCategory("laptop")} style={{ flex: 1, padding: 10, borderRadius: 8, background: scrapeCategory === "laptop" ? DS.amber : "#eee", border: "none", color: scrapeCategory === "laptop" ? "white" : "black", fontWeight: "bold" }}>Laptops</button>
+             <button onClick={() => setScrapeCategory("accessoire")} style={{ flex: 1, padding: 10, borderRadius: 8, background: scrapeCategory === "accessoire" ? DS.amber : "#eee", border: "none", color: scrapeCategory === "accessoire" ? "white" : "black", fontWeight: "bold" }}>Accessoires</button>
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
-            {scrapeCategory === "laptop" ? <>
-              <ScrapeBtn label="Jumia" target="jumia" emoji="🟠" />
-              <ScrapeBtn label="Amazon" target="amazon" emoji="🔵" />
-              <ScrapeBtn label="AliExpress" target="aliexpress" emoji="🔴" />
-              <ScrapeBtn label="Tout scraper" target="all" emoji="🔥" />
-            </> : <>
-              <ScrapeBtn label="Souris" target="souris" emoji="🖱️" />
-              <ScrapeBtn label="Support PC" target="laptop_stand" emoji="🏗️" />
-              <ScrapeBtn label="Refroidisseur" target="cooling_pad" emoji="❄️" />
-              <ScrapeBtn label="Sac PC" target="sac_laptop" emoji="🎒" />
-              <ScrapeBtn label="Clé USB" target="usb" emoji="💾" />
-            </>}
-          </div>
-          <div style={{ borderTop: `1px solid ${DS.border}`, paddingTop: 12 }}>
-            <button onClick={handleStop} style={{ padding: "9px 18px", borderRadius: 8, background: `${DS.red}18`, border: `1px solid ${DS.red}40`, color: DS.red, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
-              <Square size={12} /> STOP
-            </button>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            {scrapeCategory === "laptop" ? (
+              <>
+                <button onClick={() => runScrape("jumia")} style={{ padding: "10px", background: "#f97316", color: "white", border: "none", borderRadius: 8 }}>Jumia</button>
+                <button onClick={() => runScrape("amazon")} style={{ padding: "10px", background: "#232f3e", color: "white", border: "none", borderRadius: 8 }}>Amazon</button>
+                <button onClick={() => runScrape("all")} style={{ padding: "10px", background: "#1e293b", color: "white", border: "none", borderRadius: 8 }}>Tout Scraper</button>
+              </>
+            ) : (
+              <button onClick={() => runScrape("souris")} style={{ padding: "10px", background: DS.platformBlue, color: "white", border: "none", borderRadius: 8 }}>Souris</button>
+            )}
+            <button onClick={handleStop} style={{ padding: "10px", background: DS.red, color: "white", border: "none", borderRadius: 8 }}>STOP</button>
           </div>
         </Card>
       )}
 
-      {/* PROGRESSION & MESSAGES */}
-      {(polling || progress > 0) && (
-        <div style={{ marginBottom: 16 }}>
-          <ProgressBar value={progress} color={DS.platformBlue} height={4} />
-          <p style={{ fontSize: 11, color: DS.textMuted, marginTop: 6, fontFamily: DS.mono }}>{scrapeMsg}</p>
-        </div>
-      )}
-
-      {scrapeMsg && !polling && progress === 0 && (
-        <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 14, fontSize: 12, color: scrapeMsg.startsWith("✅") ? DS.green : DS.red, background: scrapeMsg.startsWith("✅") ? "#dcfce7" : "#fee2e2", border: `1px solid ${scrapeMsg.startsWith("✅") ? "#bbf7d0" : "#fecaca"}` }}>{scrapeMsg}</div>
-      )}
-
-      {/* STATUS BAR */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-        <span style={{ fontSize: 13, color: DS.textSecondary }}>
-          <strong>{total.toLocaleString("fr-FR")}</strong> {mode === "alerts" ? "alertes trouvées" : "produits trouvés"}
-        </span>
-        <Tag color={mode === "alerts" ? DS.red : DS.platformBlue}>{MODE_LABELS[mode]}</Tag>
-      </div>
-
-      {/* GRILLE DE RÉSULTATS (PRODUITS OU ALERTES) */}
-      {loading && mode !== "scrape" ? <Spinner /> : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-          {mode === "alerts" ? (
-            alerts.map((item, i) => (
-              <Card key={i} accent={DS.red} style={{ border: "2px solid #fecaca" }}>
-                <span style={{ position: "absolute", top: 10, left: 10, background: DS.red, color: "white", padding: "4px 8px", borderRadius: "4px", fontWeight: "bold", fontSize: "0.8rem", zIndex: 1 }}>-{item.percentage}%</span>
-                <div style={{ padding: "10px", marginTop: 20 }}>
-                  <h3 style={{ fontSize: "0.9rem", fontWeight: 600, height: "40px", overflow: "hidden" }}>{item.title}</h3>
-                  <p style={{ fontSize: "1.2rem", fontWeight: 700, color: DS.red, margin: "10px 0" }}>
-                    <span style={{ textDecoration: "line-through", color: DS.textMuted, fontSize: "0.8rem", marginRight: 8 }}>{item.old_price}</span>
-                    {item.new_price} {item.currency}
-                  </p>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${DS.border}`, paddingTop: 10 }}>
-                    <small style={{ fontWeight: 600, color: DS.textSecondary }}>{item.source}</small>
-                    <a href={item.link} target="_blank" rel="noreferrer" style={{ color: DS.platformBlue, textDecoration: "none", fontWeight: 700, fontSize: "0.8rem" }}>ACHETER →</a>
-                  </div>
-                </div>
-              </Card>
-            ))
-          ) : (
-            products.map((item, i) => (
-              <div key={i} style={{ background: "white", border: `1px solid ${DS.border}`, borderRadius: 10, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                {item.image && (
-                  <div style={{ height: 160, background: "#f8fafc", padding: 10 }}>
-                    <img src={item.image} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                  </div>
-                )}
-                <div style={{ padding: 15, flex: 1, display: "flex", flexDirection: "column" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                    <span style={{ fontSize: 10, color: DS.textMuted, fontWeight: 700 }}>{item.brand_detected || "—"}</span>
-                    {item.is_gaming && <Tag color={DS.purple} size="sm">GAMING</Tag>}
-                  </div>
-                  <h3 style={{ fontSize: 12, fontWeight: 600, height: 34, overflow: "hidden", marginBottom: 10 }}>{item.title}</h3>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: DS.platformBlue, marginBottom: 15 }}>
-                    {item.price?.toLocaleString("fr-FR")} {item.currency || "MAD"}
-                  </div>
-                  <div style={{ marginTop: "auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <small style={{ fontSize: 10, color: DS.textMuted }}>{item.source}</small>
-                    <a href={item.link} target="_blank" rel="noreferrer" style={{ padding: "5px 10px", background: DS.platformBlack, color: "white", borderRadius: 5, fontSize: 10, textDecoration: "none", fontWeight: 700 }}>VOIR →</a>
-                  </div>
+      {/* LISTING */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
+        {mode === "alerts" ? (
+          alerts.map((item, i) => (
+            <div key={i} style={{ border: `2px solid ${DS.red}`, borderRadius: 12, padding: 15, position: "relative" }}>
+              <span style={{ background: DS.red, color: "white", padding: "2px 6px", borderRadius: 4, fontWeight: "bold" }}>-{item.percentage}%</span>
+              <h3>{item.title}</h3>
+              <p style={{ color: DS.red, fontWeight: "bold" }}>{item.new_price} {item.currency}</p>
+              {/* LIEN ICI */}
+              <a href={item.link} target="_blank" rel="noreferrer" style={{ display: "block", marginTop: 10, color: DS.platformBlue, fontWeight: "bold", textDecoration: "none" }}>ACHETER →</a>
+            </div>
+          ))
+        ) : (
+          products.map((item, i) => (
+            <div key={i} style={{ border: `1px solid ${DS.border}`, borderRadius: 12, overflow: "hidden", display: "flex", flexDirection: "column", background: "white" }}>
+              {item.image && <img src={item.image} alt="" style={{ height: 150, objectFit: "contain", padding: 10 }} />}
+              <div style={{ padding: 15 }}>
+                <h4 style={{ fontSize: 13, height: 35, overflow: "hidden" }}>{item.title}</h4>
+                <p style={{ fontWeight: "bold", color: DS.platformBlue }}>{item.price} {item.currency}</p>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, alignItems: "center" }}>
+                  <small>{item.source}</small>
+                  {/* LIEN ICI */}
+                  <a href={item.link} target="_blank" rel="noreferrer" style={{ padding: "5px 10px", background: "#1e293b", color: "white", borderRadius: 5, fontSize: 11, textDecoration: "none" }}>VOIR →</a>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-      )}
-
-      {/* PAGINATION */}
-      {mode !== "scrape" && mode !== "alerts" && pages > 1 && (
-        <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 25 }}>
-          <button onClick={() => mode === "db_accessoire" ? fetchAccessories(page - 1) : fetchDB(page - 1)} disabled={page <= 1} style={{ padding: "8px 15px", borderRadius: 6, border: `1px solid ${DS.border}`, cursor: "pointer" }}>←</button>
-          <span style={{ alignSelf: "center", fontSize: 12, fontWeight: 600 }}>{page} / {pages}</span>
-          <button onClick={() => mode === "db_accessoire" ? fetchAccessories(page + 1) : fetchDB(page + 1)} disabled={page >= pages} style={{ padding: "8px 15px", borderRadius: 6, border: `1px solid ${DS.border}`, cursor: "pointer" }}>→</button>
-        </div>
-      )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
