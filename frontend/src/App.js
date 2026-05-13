@@ -424,28 +424,20 @@ function TabProducts() {
   const [currentTaskId, setCurrentTaskId] = useState(null);
   const [progress, setProgress] = useState(0);
   const [polling, setPolling] = useState(false);
-
-  // 🔥 État pour gérer les deux sous-menus de scraping
   const [scrapeCategory, setScrapeCategory] = useState("laptop");
-
-  const API = "http://127.0.0.1:8000/api";
-
-  // ── Notifications ──
-  const [alerts, setAlerts] = useState([]); 
+  const [alerts, setAlerts] = useState([]);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("access_token");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  useEffect(() => { fetchDB(1, ""); }, []);
+  useEffect(() => { fetchDB(1); }, []);
 
   const fetchDB = async (p = 1) => {
     setLoading(true); setMode("db"); setScrapeMsg("");
     try {
-      const token = localStorage.getItem("access_token");
-      const headers = token ? { "Authorization": `Bearer ${token}` } : {};
-      const res = await fetch(`http://127.0.0.1:8000/api/search/?query=${query}&page=${p}&limit=20`, { headers });
+      const res = await fetch(`${API}/search/?query=${query}&page=${p}&limit=20`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setProducts(data.products || []); setTotal(data.total || 0); setPages(data.pages || 1); setPage(p);
@@ -454,41 +446,22 @@ function TabProducts() {
   };
 
   const fetchAccessories = async (p = 1) => {
-    setLoading(true);
-    setMode("db_accessoire");
-    setScrapeMsg("");
+    setLoading(true); setMode("db_accessoire"); setScrapeMsg("");
     try {
-      const res = await fetch(`${API}/search/Accessoire/?query=${query}&page=${p}&limit=20`, {
-        headers: getAuthHeaders(),
-      });
+      const res = await fetch(`${API}/search/Accessoire/?query=${query}&page=${p}&limit=20`, { headers: getAuthHeaders() });
       const data = await res.json();
-      setProducts(data.accessories || []);
-      setTotal(data.total || 0);
-      setPages(data.pages || 1);
-      setPage(p);
-    } catch (e) {
-      console.error(e);
-      setScrapeMsg("❌ Erreur lors du chargement des accessoires");
-    }
+      setProducts(data.accessories || []); setTotal(data.total || 0); setPages(data.pages || 1); setPage(p);
+    } catch { setScrapeMsg("❌ Erreur lors du chargement des accessoires"); }
     setLoading(false);
   };
 
   const fetchNotifications = async () => {
-    setLoading(true);
-    setMode("alerts");
-    setScrapeMsg("");
+    setLoading(true); setMode("alerts"); setScrapeMsg("");
     try {
-      const res = await fetch(`${API}/notifications/`, {
-        headers: getAuthHeaders(),
-      });
+      const res = await fetch(`${API}/notifications/`, { headers: getAuthHeaders() });
       const data = await res.json();
-      setAlerts(data.alerts || []);
-      setTotal(data.alerts?.length || 0);
-      setPages(1);
-    } catch (e) {
-      console.error(e);
-      setScrapeMsg("❌ Erreur lors de la récupération des alertes");
-    }
+      setAlerts(data.alerts || []); setTotal(data.alerts?.length || 0); setPages(1);
+    } catch { setScrapeMsg("❌ Erreur lors de la récupération des alertes"); }
     setLoading(false);
   };
 
@@ -500,7 +473,7 @@ function TabProducts() {
         const status = await res.json();
         if (status.status === "SUCCESS") {
           clearInterval(interval); setProgress(100); setPolling(false);
-          setScrapeMsg(`Scraping ${target} terminé — ${status.result?.inserted || 0} produits`);
+          setScrapeMsg(`✅ Scraping ${target} terminé — ${status.result?.inserted || 0} produits`);
           fetch(`${API}/history/`, { method: "POST", headers: { "Content-Type": "application/json", ...getAuthHeaders() }, body: JSON.stringify({ query, source: target, count: status.result?.inserted || 0 }) }).catch(() => {});
           if (!["jumia", "amazon", "aliexpress", "all"].includes(target)) fetchAccessories(1);
           else fetchDB(1);
@@ -513,222 +486,190 @@ function TabProducts() {
   };
 
   const runScrape = async (target) => {
-    setLoading(true);
-    setScrapeTarget(target);
-    let defaultQuery = "laptop";
-    if (target === "souris") defaultQuery = "souris";
-    if (target === "laptop_stand") defaultQuery = "laptop_stand";
-    if (target === "cooling_pad") defaultQuery = "cooling_pad";
-    if (target === "sac_laptop") defaultQuery = "sac_laptop";
-    if (target === "usb") defaultQuery = "usb_flash_drive";
-
+    setLoading(true); setScrapeTarget(target);
+    const defaultQuery = { souris: "souris", laptop_stand: "laptop_stand", cooling_pad: "cooling_pad", sac_laptop: "sac_laptop", usb: "usb_flash_drive" }[target] || "laptop";
     const finalQuery = query.trim() !== "" ? query.trim() : defaultQuery;
-    const searchParam = `?query=${encodeURIComponent(finalQuery)}`;
-    setScrapeMsg(`⏳ Scraping ${target} en cours pour "${finalQuery}"...`);
-    setProgress(10);
-
+    setScrapeMsg(`⏳ Scraping ${target} en cours pour "${finalQuery}"...`); setProgress(10);
     try {
-      let endpoint = "";
-      switch (target) {
-        case "jumia": endpoint = "scrape/jumia/"; break;
-        case "amazon": endpoint = "scrape/amazon/"; break;
-        case "aliexpress": endpoint = "scrape/aliexpress/"; break;
-        case "all": endpoint = "scrape/All/"; break;
-        case "souris": endpoint = "scrape/souris/"; break;
-        case "laptop_stand": endpoint = "scrape/laptop_stand/"; break;
-        case "cooling_pad": endpoint = "scrape/cooling_pad/"; break;
-        case "sac_laptop": endpoint = "scrape/sac_laptop/"; break;
-        case "usb": endpoint = "scrape/usb/"; break;
-        default: endpoint = "search/";
-      }
-
-      const res = await fetch(`${API}/${endpoint}${searchParam}`, { headers: getAuthHeaders() });
+      const endpoints = { jumia: "scrape/jumia/", amazon: "scrape/amazon/", aliexpress: "scrape/aliexpress/", all: "scrape/All/", souris: "scrape/souris/", laptop_stand: "scrape/laptop_stand/", cooling_pad: "scrape/cooling_pad/", sac_laptop: "scrape/sac_laptop/", usb: "scrape/usb/" };
+      const url = `${API}/${endpoints[target] || "search/"}?query=${encodeURIComponent(finalQuery)}`;
+      const res = await fetch(url, { headers: getAuthHeaders() });
       const data = await res.json();
-
-      if (data.task_id) {
-        setCurrentTaskId(data.task_id);
-        pollTaskStatus(data.task_id, target);
-      } else if (data.success) {
-        setProgress(100);
-        setScrapeMsg(`✅ ${data.message}`);
-        if (!["jumia", "amazon", "aliexpress", "all"].includes(target)) {
-          setMode("db_accessoire"); fetchAccessories(1);
-        } else {
-          setMode("db"); fetchDB(1);
-        }
+      if (data.task_id) { setCurrentTaskId(data.task_id); pollTaskStatus(data.task_id, target); }
+      else if (data.success) {
+        setProgress(100); setScrapeMsg(`✅ ${data.message}`);
+        if (!["jumia", "amazon", "aliexpress", "all"].includes(target)) { setMode("db_accessoire"); fetchAccessories(1); } else { setMode("db"); fetchDB(1); }
         setTimeout(() => { setProgress(0); setScrapeMsg(""); }, 3000);
-      } else {
-        setScrapeMsg(`❌ ${data.message || data.error || "Problème lors du scraping"}`);
-        setProgress(0);
-      }
-    } catch (e) {
-      setScrapeMsg(`❌ Erreur réseau sur ${target}`);
-      setProgress(0);
-    }
-    setLoading(false);
-    setScrapeTarget("");
+      } else { setScrapeMsg(`❌ ${data.message || data.error || "Problème lors du scraping"}`); setProgress(0); }
+    } catch { setScrapeMsg(`❌ Erreur réseau sur ${target}`); setProgress(0); }
+    setLoading(false); setScrapeTarget("");
   };
 
   const handleStop = async () => {
-    if (!currentTaskId) {
-      setScrapeMsg("❌ Impossible d'arrêter : aucune tâche en cours.");
-      return;
-    }
-    setScrapeMsg("⏳ Demande d'arrêt envoyée...");
+    if (!currentTaskId) { setScrapeMsg("❌ Aucune tâche en cours."); return; }
+    setScrapeMsg("⏳ Arrêt en cours...");
     try {
       const res = await fetch(`${API}/scrape/stop/?task_id=${currentTaskId}`, { headers: getAuthHeaders() });
       const data = await res.json();
-      if (data.success) {
-        setScrapeMsg(`🛑 ${data.message || "Scraping arrêté."}`);
-        setCurrentTaskId(null); setProgress(0); setPolling(false);
-      }
-    } catch (e) {
-      setScrapeMsg("❌ Erreur lors de l'envoi de l'arrêt.");
-    }
+      if (data.success) { setScrapeMsg(`🛑 ${data.message || "Scraping arrêté."}`); setCurrentTaskId(null); setProgress(0); setPolling(false); }
+      else setScrapeMsg(`❌ ${data.message || "Impossible d'arrêter"}`);
+    } catch { setScrapeMsg("❌ Erreur lors de l'arrêt."); }
   };
 
-  const scrapeBtnStyle = (bg) => ({
-    padding: "10px 16px", border: "none", borderRadius: "8px", color: "white",
-    fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center",
-    justifyContent: "center", transition: "opacity 0.2s", minWidth: "140px",
-    background: bg, opacity: loading || polling ? 0.7 : 1,
-  });
+  const MODE_LABELS = { db: "Base de données", db_accessoire: "Accessoires", scrape: "Scraping", alerts: "🔥 Alertes" };
 
-  const categoryBtnStyle = (isActive) => ({
-    padding: "10px 20px", border: "none", borderRadius: "8px", fontWeight: "bold",
-    cursor: "pointer", backgroundColor: isActive ? "#1e293b" : "#e2e8f0",
-    color: isActive ? "white" : "#475569", transition: "background-color 0.2s", flex: 1,
-  });
+  const ScrapeBtn = ({ label, target: t, color, emoji }) => {
+    const platformColor = PLATFORM_COLORS[t] || PLATFORM_COLORS.default;
+    return (
+      <button onClick={() => runScrape(t)} disabled={loading || polling} style={{
+        padding: "10px 18px", borderRadius: 8,
+        background: platformColor.fill,
+        border: `1px solid ${platformColor.stroke}`,
+        color: platformColor.text,
+        fontWeight: 600, fontSize: 12, cursor: "pointer",
+        fontFamily: DS.mono, transition: "all 0.2s",
+        opacity: loading || polling ? 0.7 : 1,
+        display: "flex", alignItems: "center", gap: 6,
+      }}>
+        {loading && scrapeTarget === t ? <><RefreshCw size={12} className="spin" /> ...</> : <>{emoji} {label}</>}
+      </button>
+    );
+  };
 
   return (
-    <div>
-      <div className="pip-search-box">
-        <input
-          type="text" className="pip-search-input"
-          placeholder='Rechercher un produit… (ex: "laptop", "redmi 14")'
-          value={query} onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              if (mode === "csv") fetchCSV(1);
-              else if (mode === "db_accessoire") fetchAccessories(1);
-              else fetchDB(1);
-            }
-          }}
-        />
-
-        <div className="pip-mode-toggle">
-          <button className={`pip-mode-btn ${mode === "csv" ? "active" : ""}`} onClick={() => fetchCSV(1)}>📂 CSV</button>
-          <button className={`pip-mode-btn ${mode === "db" ? "active" : ""}`} onClick={() => fetchDB(1)}>🗄️ Produits (DB)</button>
-          <button className={`pip-mode-btn ${mode === "db_accessoire" ? "active" : ""}`} onClick={() => fetchAccessories(1)}>🎧 Accessoires</button>
-          <button className={`pip-mode-btn ${mode === "scrape" ? "active" : ""}`} onClick={() => setMode("scrape")}>🕷️ Scraper</button>
-          <button className={`pip-mode-btn ${mode === "alerts" ? "active" : ""}`} onClick={fetchNotifications} style={{backgroundColor: mode === "alerts" ? "#ef4444" : "#fee2e2", color: mode === "alerts" ? "white" : "#ef4444"}}>🔔 Alertes</button>
+    <div className="fade-in" style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
+      {/* BARRE DE RECHERCHE */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 20, alignItems: "center" }}>
+        <div style={{ flex: 1, position: "relative" }}>
+          <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: DS.textMuted }} />
+          <input type="text" value={query} onChange={e => setQuery(e.target.value)} 
+            onKeyDown={e => { if (e.key === "Enter") { if (mode === "db_accessoire") fetchAccessories(1); else if (mode === "alerts") fetchNotifications(); else fetchDB(1); } }} 
+            placeholder='Rechercher… ex: "laptop", "redmi 14"' 
+            style={{ width: "100%", padding: "10px 10px 10px 38px", borderRadius: "8px", border: `1px solid ${DS.border}`, outline: "none" }} 
+          />
         </div>
+        <button onClick={() => { if (mode === "db_accessoire") fetchAccessories(1); else if (mode === "alerts") fetchNotifications(); else fetchDB(1); }} 
+          disabled={loading || mode === "scrape"} 
+          style={{ padding: "10px 20px", borderRadius: 8, background: DS.platformBlue, border: "none", color: "white", fontWeight: 700, cursor: "pointer", opacity: loading ? 0.6 : 1 }}>
+          {loading ? "..." : "RECHERCHER"}
+        </button>
+      </div>
 
-        {mode !== "scrape" && mode !== "alerts" && (
-          <button onClick={() => { if (mode === "csv") fetchCSV(1); else if (mode === "db_accessoire") fetchAccessories(1); else fetchDB(1); }} disabled={loading} className="pip-search-btn">
-            {loading ? "..." : "🔍 Rechercher"}
+      {/* TABS DE NAVIGATION */}
+      <div style={{ display: "flex", gap: 4, marginBottom: 20, background: "#f1f5f9", padding: 4, borderRadius: 8, border: `1px solid ${DS.border}` }}>
+        {[["db", "🗄️ Produits"], ["db_accessoire", "🎧 Accessoires"], ["scrape", "🕷️ Scraper"], ["alerts", "🔔 Alertes"]].map(([m, label]) => (
+          <button key={m} onClick={() => { setMode(m); if (m === "db") fetchDB(1); else if (m === "db_accessoire") fetchAccessories(1); else if (m === "alerts") fetchNotifications(); }} 
+          style={{ flex: 1, padding: "8px", borderRadius: 6, border: "none", background: mode === m ? "white" : "transparent", color: mode === m ? DS.platformBlue : DS.textSecondary, fontWeight: 600, fontSize: 12, cursor: "pointer", boxShadow: mode === m ? "0 2px 4px rgba(0,0,0,0.05)" : "none" }}>
+            {label}
           </button>
         ))}
       </div>
+
+      {/* MOTEUR DE SCRAPING */}
       {mode === "scrape" && (
         <Card accent={DS.amber} style={{ marginBottom: 20 }}>
           <SectionTitle icon={Zap} accent={DS.amber}>Scraping Engine</SectionTitle>
           <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-            {[["laptop","Laptops"], ["accessoire","Accessoires"]].map(([cat, icon, label]) => (
-              <button key={cat} onClick={() => setScrapeCategory(cat)} style={{
-                flex: 1, padding: "10px", borderRadius: 8,
-                background: scrapeCategory === cat ? `${DS.amber}22` : DS.bg0,
-                border: `1px solid ${scrapeCategory === cat ? DS.amber : DS.border}`,
-                color: scrapeCategory === cat ? DS.amber : DS.textSecondary,
-                fontWeight: 600, fontSize: 12, cursor: "pointer", fontFamily: DS.mono,
-              }}>{icon} {label}</button>
+            {[["laptop", "💻 Laptops"], ["accessoire", "🎧 Accessoires"]].map(([cat, label]) => (
+              <button key={cat} onClick={() => setScrapeCategory(cat)} style={{ flex: 1, padding: "10px", borderRadius: 8, background: scrapeCategory === cat ? `${DS.amber}22` : "#f8fafc", border: `1px solid ${scrapeCategory === cat ? DS.amber : DS.border}`, color: scrapeCategory === cat ? DS.amber : DS.textSecondary, fontWeight: 600, cursor: "pointer" }}>{label}</button>
             ))}
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
             {scrapeCategory === "laptop" ? <>
-              <ScrapeBtn label="Jumia" target="jumia" color={DS.amber} />
-              <ScrapeBtn label="Amazon" target="amazon" color={DS.cyan} />
-              <ScrapeBtn label="AliExpress" target="aliexpress" color={DS.green} />
-              <ScrapeBtn label="Tout scraper" target="all" color={DS.red} />
+              <ScrapeBtn label="Jumia" target="jumia" emoji="🟠" />
+              <ScrapeBtn label="Amazon" target="amazon" emoji="🔵" />
+              <ScrapeBtn label="AliExpress" target="aliexpress" emoji="🔴" />
+              <ScrapeBtn label="Tout scraper" target="all" emoji="🔥" />
             </> : <>
-              <ScrapeBtn label="Souris" target="souris" color={DS.cyan} />
-              <ScrapeBtn label="Support PC" target="laptop_stand" color={DS.cyan} />
-              <ScrapeBtn label="Refroidisseur" target="cooling_pad" color={DS.cyan} />
-              <ScrapeBtn label="Sac PC" target="sac_laptop" color={DS.cyan} />
-              <ScrapeBtn label="Clé USB" target="usb" color={DS.cyan} />
+              <ScrapeBtn label="Souris" target="souris" emoji="🖱️" />
+              <ScrapeBtn label="Support PC" target="laptop_stand" emoji="🏗️" />
+              <ScrapeBtn label="Refroidisseur" target="cooling_pad" emoji="❄️" />
+              <ScrapeBtn label="Sac PC" target="sac_laptop" emoji="🎒" />
+              <ScrapeBtn label="Clé USB" target="usb" emoji="💾" />
             </>}
           </div>
           <div style={{ borderTop: `1px solid ${DS.border}`, paddingTop: 12 }}>
-            <button onClick={handleStop} style={{
-              padding: "9px 18px", borderRadius: 8,
-              background: `${DS.red}18`, border: `1px solid ${DS.red}40`,
-              color: DS.red, fontWeight: 700, fontSize: 12, cursor: "pointer",
-              fontFamily: DS.mono, display: "flex", alignItems: "center", gap: 6,
-            }}>
+            <button onClick={handleStop} style={{ padding: "9px 18px", borderRadius: 8, background: `${DS.red}18`, border: `1px solid ${DS.red}40`, color: DS.red, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
               <Square size={12} /> STOP
             </button>
           </div>
         </Card>
       )}
+
+      {/* PROGRESSION & MESSAGES */}
       {(polling || progress > 0) && (
         <div style={{ marginBottom: 16 }}>
-          <ProgressBar value={progress} color={DS.cyan} height={3} />
+          <ProgressBar value={progress} color={DS.platformBlue} height={4} />
           <p style={{ fontSize: 11, color: DS.textMuted, marginTop: 6, fontFamily: DS.mono }}>{scrapeMsg}</p>
         </div>
       )}
+
       {scrapeMsg && !polling && progress === 0 && (
-        <div style={{
-          padding: "10px 14px", borderRadius: 8, marginBottom: 14, fontSize: 12, fontFamily: DS.mono,
-          color: scrapeMsg.startsWith("✅") ? DS.green : scrapeMsg.startsWith("🛑") ? DS.amber : DS.red,
-          background: scrapeMsg.startsWith("✅") ? `${DS.green}12` : scrapeMsg.startsWith("🛑") ? `${DS.amber}12` : `${DS.red}12`,
-          border: `1px solid ${scrapeMsg.startsWith("✅") ? DS.green : scrapeMsg.startsWith("🛑") ? DS.amber : DS.red}30`,
-        }}>{scrapeMsg}</div>
+        <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 14, fontSize: 12, color: scrapeMsg.startsWith("✅") ? DS.green : DS.red, background: scrapeMsg.startsWith("✅") ? "#dcfce7" : "#fee2e2", border: `1px solid ${scrapeMsg.startsWith("✅") ? "#bbf7d0" : "#fecaca"}` }}>{scrapeMsg}</div>
       )}
+
+      {/* STATUS BAR */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
         <span style={{ fontSize: 13, color: DS.textSecondary }}>
-          <span style={{ color: DS.cyan, fontFamily: DS.mono, fontWeight: 600 }}>{total.toLocaleString("fr-FR")}</span> produits trouvés
+          <strong>{total.toLocaleString("fr-FR")}</strong> {mode === "alerts" ? "alertes trouvées" : "produits trouvés"}
         </span>
-        <Tag color={mode === "scrape" ? DS.amber : DS.cyan}>{MODE_LABELS[mode]}</Tag>
+        <Tag color={mode === "alerts" ? DS.red : DS.platformBlue}>{MODE_LABELS[mode]}</Tag>
       </div>
 
-      {loading && mode !== "scrape" ? (
-        <div className="spinner-placeholder">Chargement...</div>
-      ) : (
-        <div className="pip-product-list">
+      {/* GRILLE DE RÉSULTATS (PRODUITS OU ALERTES) */}
+      {loading && mode !== "scrape" ? <Spinner /> : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
           {mode === "alerts" ? (
             alerts.map((item, i) => (
-              <div className="pip-card" key={i} style={{border: "2px solid #fecaca"}}>
-                <span className="pip-gaming-tag" style={{background: "#ef4444"}}>-{item.percentage}%</span>
-                <div className="pip-card-content">
-                  <h3 className="pip-card-title">{item.title}</h3>
-                  <p className="pip-price">
-                    <span style={{textDecoration: "line-through", color: "#94a3b8", fontSize: "0.8em", marginRight: 8}}>{item.old_price}</span>
+              <Card key={i} accent={DS.red} style={{ border: "2px solid #fecaca" }}>
+                <span style={{ position: "absolute", top: 10, left: 10, background: DS.red, color: "white", padding: "4px 8px", borderRadius: "4px", fontWeight: "bold", fontSize: "0.8rem", zIndex: 1 }}>-{item.percentage}%</span>
+                <div style={{ padding: "10px", marginTop: 20 }}>
+                  <h3 style={{ fontSize: "0.9rem", fontWeight: 600, height: "40px", overflow: "hidden" }}>{item.title}</h3>
+                  <p style={{ fontSize: "1.2rem", fontWeight: 700, color: DS.red, margin: "10px 0" }}>
+                    <span style={{ textDecoration: "line-through", color: DS.textMuted, fontSize: "0.8rem", marginRight: 8 }}>{item.old_price}</span>
                     {item.new_price} {item.currency}
                   </p>
-                  <div className="pip-card-footer">
-                    <small style={{ color: "#64748b" }}>{item.source}</small>
-                    <a href={item.link} target="_blank" rel="noreferrer" className="pip-view-btn">Acheter →</a>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${DS.border}`, paddingTop: 10 }}>
+                    <small style={{ fontWeight: 600, color: DS.textSecondary }}>{item.source}</small>
+                    <a href={item.link} target="_blank" rel="noreferrer" style={{ color: DS.platformBlue, textDecoration: "none", fontWeight: 700, fontSize: "0.8rem" }}>ACHETER →</a>
                   </div>
                 </div>
-              </div>
+              </Card>
             ))
           ) : (
             products.map((item, i) => (
-              <div className="pip-card" key={i}>
-                {item.is_gaming && <span className="pip-gaming-tag">🎮 Gaming</span>}
-                {item.image && <img src={item.image} alt={item.title} className="pip-product-img" />}
-                <div className="pip-card-content">
-                  <span className="pip-brand-label">{item.brand_detected || item.brand || "Inconnu"}</span>
-                  <h3 className="pip-card-title">{item.title}</h3>
-                  <p className="pip-price">{item.price?.toLocaleString("fr-FR")} {item.currency || "MAD"}</p>
-                  <div className="pip-card-footer">
-                    <small style={{ color: "#64748b" }}>{item.source}</small>
-                    <a href={item.link} target="_blank" rel="noreferrer" className="pip-view-btn">Voir →</a>
+              <div key={i} style={{ background: "white", border: `1px solid ${DS.border}`, borderRadius: 10, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                {item.image && (
+                  <div style={{ height: 160, background: "#f8fafc", padding: 10 }}>
+                    <img src={item.image} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                  </div>
+                )}
+                <div style={{ padding: 15, flex: 1, display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                    <span style={{ fontSize: 10, color: DS.textMuted, fontWeight: 700 }}>{item.brand_detected || "—"}</span>
+                    {item.is_gaming && <Tag color={DS.purple} size="sm">GAMING</Tag>}
+                  </div>
+                  <h3 style={{ fontSize: 12, fontWeight: 600, height: 34, overflow: "hidden", marginBottom: 10 }}>{item.title}</h3>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: DS.platformBlue, marginBottom: 15 }}>
+                    {item.price?.toLocaleString("fr-FR")} {item.currency || "MAD"}
+                  </div>
+                  <div style={{ marginTop: "auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <small style={{ fontSize: 10, color: DS.textMuted }}>{item.source}</small>
+                    <a href={item.link} target="_blank" rel="noreferrer" style={{ padding: "5px 10px", background: DS.platformBlack, color: "white", borderRadius: 5, fontSize: 10, textDecoration: "none", fontWeight: 700 }}>VOIR →</a>
                   </div>
                 </div>
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {/* PAGINATION */}
+      {mode !== "scrape" && mode !== "alerts" && pages > 1 && (
+        <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 25 }}>
+          <button onClick={() => mode === "db_accessoire" ? fetchAccessories(page - 1) : fetchDB(page - 1)} disabled={page <= 1} style={{ padding: "8px 15px", borderRadius: 6, border: `1px solid ${DS.border}`, cursor: "pointer" }}>←</button>
+          <span style={{ alignSelf: "center", fontSize: 12, fontWeight: 600 }}>{page} / {pages}</span>
+          <button onClick={() => mode === "db_accessoire" ? fetchAccessories(page + 1) : fetchDB(page + 1)} disabled={page >= pages} style={{ padding: "8px 15px", borderRadius: 6, border: `1px solid ${DS.border}`, cursor: "pointer" }}>→</button>
         </div>
       )}
     </div>
