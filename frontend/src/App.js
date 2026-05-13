@@ -425,6 +425,7 @@ function TabProducts() {
   const [progress, setProgress] = useState(0);
   const [polling, setPolling] = useState(false);
   const [scrapeCategory, setScrapeCategory] = useState("laptop");
+  // --- Ajout pour les notifications ---
   const [alerts, setAlerts] = useState([]);
 
   const getAuthHeaders = () => {
@@ -432,12 +433,14 @@ function TabProducts() {
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  useEffect(() => { fetchDB(1); }, []);
+  useEffect(() => { fetchDB(1, ""); }, []);
 
   const fetchDB = async (p = 1) => {
     setLoading(true); setMode("db"); setScrapeMsg("");
     try {
-      const res = await fetch(`${API}/search/?query=${query}&page=${p}&limit=20`, { headers: getAuthHeaders() });
+      const token = localStorage.getItem("access_token");
+      const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+      const res = await fetch(`http://127.0.0.1:8000/api/search/?query=${query}&page=${p}&limit=20`, { headers });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setProducts(data.products || []); setTotal(data.total || 0); setPages(data.pages || 1); setPage(p);
@@ -455,6 +458,7 @@ function TabProducts() {
     setLoading(false);
   };
 
+  // --- Fonction pour charger les notifications ---
   const fetchNotifications = async () => {
     setLoading(true); setMode("alerts"); setScrapeMsg("");
     try {
@@ -473,7 +477,7 @@ function TabProducts() {
         const status = await res.json();
         if (status.status === "SUCCESS") {
           clearInterval(interval); setProgress(100); setPolling(false);
-          setScrapeMsg(`✅ Scraping ${target} terminé — ${status.result?.inserted || 0} produits`);
+          setScrapeMsg(`Scraping ${target} terminé — ${status.result?.inserted || 0} produits`);
           fetch(`${API}/history/`, { method: "POST", headers: { "Content-Type": "application/json", ...getAuthHeaders() }, body: JSON.stringify({ query, source: target, count: status.result?.inserted || 0 }) }).catch(() => {});
           if (!["jumia", "amazon", "aliexpress", "all"].includes(target)) fetchAccessories(1);
           else fetchDB(1);
@@ -497,7 +501,7 @@ function TabProducts() {
       const data = await res.json();
       if (data.task_id) { setCurrentTaskId(data.task_id); pollTaskStatus(data.task_id, target); }
       else if (data.success) {
-        setProgress(100); setScrapeMsg(`✅ ${data.message}`);
+        setProgress(100); setScrapeMsg(`${data.message}`);
         if (!["jumia", "amazon", "aliexpress", "all"].includes(target)) { setMode("db_accessoire"); fetchAccessories(1); } else { setMode("db"); fetchDB(1); }
         setTimeout(() => { setProgress(0); setScrapeMsg(""); }, 3000);
       } else { setScrapeMsg(`❌ ${data.message || data.error || "Problème lors du scraping"}`); setProgress(0); }
@@ -509,6 +513,7 @@ function TabProducts() {
     if (!currentTaskId) { setScrapeMsg("❌ Aucune tâche en cours."); return; }
     setScrapeMsg("⏳ Arrêt en cours...");
     try {
+      // --- Correction : "stop" en minuscules ---
       const res = await fetch(`${API}/scrape/stop/?task_id=${currentTaskId}`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (data.success) { setScrapeMsg(`🛑 ${data.message || "Scraping arrêté."}`); setCurrentTaskId(null); setProgress(0); setPolling(false); }
@@ -516,166 +521,237 @@ function TabProducts() {
     } catch { setScrapeMsg("❌ Erreur lors de l'arrêt."); }
   };
 
-  const MODE_LABELS = { db: "Base de données", db_accessoire: "Accessoires", scrape: "Scraping", alerts: "🔥 Alertes" };
+  const MODE_LABELS = { db: "DB Produits", db_accessoire: "Accessoires", scrape: "Scraping", alerts: "Alertes" };
 
   const ScrapeBtn = ({ label, target: t, color, emoji }) => {
     const platformColor = PLATFORM_COLORS[t] || PLATFORM_COLORS.default;
     return (
       <button onClick={() => runScrape(t)} disabled={loading || polling} style={{
         padding: "10px 18px", borderRadius: 8,
-        background: platformColor.fill,
+        background: (loading || polling) && scrapeTarget === t ? `${platformColor.fill}` : platformColor.fill,
         border: `1px solid ${platformColor.stroke}`,
-        color: platformColor.text,
+        color: loading && scrapeTarget === t ? DS.textMuted : platformColor.text,
         fontWeight: 600, fontSize: 12, cursor: "pointer",
-        fontFamily: DS.mono, transition: "all 0.2s",
+        fontFamily: DS.mono, letterSpacing: 0.5, transition: "all 0.2s",
         opacity: loading || polling ? 0.7 : 1,
         display: "flex", alignItems: "center", gap: 6,
       }}>
-        {loading && scrapeTarget === t ? <><RefreshCw size={12} className="spin" /> ...</> : <>{emoji} {label}</>}
+        {(loading || polling) && scrapeTarget === t ? <><RefreshCw size={12} style={{ animation: "spin 1s linear infinite" }} /> En cours…</> : <>{emoji} {label}</>}
       </button>
     );
   };
 
   return (
-    <div className="fade-in" style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      {/* BARRE DE RECHERCHE */}
+    <div className="fade-in">
       <div style={{ display: "flex", gap: 10, marginBottom: 20, alignItems: "center" }}>
         <div style={{ flex: 1, position: "relative" }}>
           <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: DS.textMuted }} />
-          <input type="text" value={query} onChange={e => setQuery(e.target.value)} 
-            onKeyDown={e => { if (e.key === "Enter") { if (mode === "db_accessoire") fetchAccessories(1); else if (mode === "alerts") fetchNotifications(); else fetchDB(1); } }} 
-            placeholder='Rechercher… ex: "laptop", "redmi 14"' 
-            style={{ width: "100%", padding: "10px 10px 10px 38px", borderRadius: "8px", border: `1px solid ${DS.border}`, outline: "none" }} 
-          />
+          <input type="text" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { if (mode === "db_accessoire") fetchAccessories(1); else if (mode === "alerts") fetchNotifications(); else fetchDB(1); } }} placeholder='Rechercher… ex: "laptop", "redmi 14"' style={{ width: "100%", paddingLeft: 38, background: DS.bg0, border: `1px solid ${DS.border}` }} />
         </div>
-        <button onClick={() => { if (mode === "db_accessoire") fetchAccessories(1); else if (mode === "alerts") fetchNotifications(); else fetchDB(1); }} 
-          disabled={loading || mode === "scrape"} 
-          style={{ padding: "10px 20px", borderRadius: 8, background: DS.platformBlue, border: "none", color: "white", fontWeight: 700, cursor: "pointer", opacity: loading ? 0.6 : 1 }}>
-          {loading ? "..." : "RECHERCHER"}
+        <button onClick={() => { if (mode === "db_accessoire") fetchAccessories(1); else if (mode === "alerts") fetchNotifications(); else fetchDB(1); }} disabled={loading || mode === "scrape"} style={{
+          padding: "9px 18px", borderRadius: 8,
+          background: `linear-gradient(135deg, ${DS.cyan}cc, ${DS.cyanDim}cc)`,
+          border: "none", color: DS.bg0, fontWeight: 700, fontSize: 12,
+          cursor: "pointer", fontFamily: DS.mono, letterSpacing: 1, opacity: loading ? 0.6 : 1,
+        }}>
+          {loading ? "…" : "RECHERCHER"}
         </button>
       </div>
-
-      {/* TABS DE NAVIGATION */}
-      <div style={{ display: "flex", gap: 4, marginBottom: 20, background: "#f1f5f9", padding: 4, borderRadius: 8, border: `1px solid ${DS.border}` }}>
-        {[["db", "🗄️ Produits"], ["db_accessoire", "🎧 Accessoires"], ["scrape", "🕷️ Scraper"], ["alerts", "🔔 Alertes"]].map(([m, label]) => (
-          <button key={m} onClick={() => { setMode(m); if (m === "db") fetchDB(1); else if (m === "db_accessoire") fetchAccessories(1); else if (m === "alerts") fetchNotifications(); }} 
-          style={{ flex: 1, padding: "8px", borderRadius: 6, border: "none", background: mode === m ? "white" : "transparent", color: mode === m ? DS.platformBlue : DS.textSecondary, fontWeight: 600, fontSize: 12, cursor: "pointer", boxShadow: mode === m ? "0 2px 4px rgba(0,0,0,0.05)" : "none" }}>
+      <div style={{ display: "flex", gap: 4, marginBottom: 20, background: DS.bg3, padding: 4, borderRadius: 8, border: `1px solid ${DS.border}` }}>
+        {[["db","Produits"], ["db_accessoire","Accessoires"], ["scrape","Scraper"], ["alerts","Alertes"]].map(([m, label]) => (
+          <button key={m} onClick={() => { setMode(m); if (m === "db") fetchDB(1); else if (m === "db_accessoire") fetchAccessories(1); else if (m === "alerts") fetchNotifications(); }} style={{
+            flex: 1, padding: "8px 12px", borderRadius: 6,
+            background: mode === m ? DS.bg0 : "transparent",
+            border: mode === m ? `1px solid ${DS.borderGlow}` : "1px solid transparent",
+            color: mode === m ? DS.cyan : DS.textSecondary,
+            fontWeight: 600, fontSize: 12, cursor: "pointer", transition: "all 0.2s",
+            fontFamily: DS.mono,
+          }}>
             {label}
           </button>
         ))}
       </div>
-
-      {/* MOTEUR DE SCRAPING */}
       {mode === "scrape" && (
         <Card accent={DS.amber} style={{ marginBottom: 20 }}>
           <SectionTitle icon={Zap} accent={DS.amber}>Scraping Engine</SectionTitle>
           <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-            {[["laptop", "💻 Laptops"], ["accessoire", "🎧 Accessoires"]].map(([cat, label]) => (
-              <button key={cat} onClick={() => setScrapeCategory(cat)} style={{ flex: 1, padding: "10px", borderRadius: 8, background: scrapeCategory === cat ? `${DS.amber}22` : "#f8fafc", border: `1px solid ${scrapeCategory === cat ? DS.amber : DS.border}`, color: scrapeCategory === cat ? DS.amber : DS.textSecondary, fontWeight: 600, cursor: "pointer" }}>{label}</button>
+            {[["laptop","Laptops"], ["accessoire","Accessoires"]].map(([cat, label]) => (
+              <button key={cat} onClick={() => setScrapeCategory(cat)} style={{
+                flex: 1, padding: "10px", borderRadius: 8,
+                background: scrapeCategory === cat ? `${DS.amber}22` : DS.bg0,
+                border: `1px solid ${scrapeCategory === cat ? DS.amber : DS.border}`,
+                color: scrapeCategory === cat ? DS.amber : DS.textSecondary,
+                fontWeight: 600, fontSize: 12, cursor: "pointer", fontFamily: DS.mono,
+              }}>{label}</button>
             ))}
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
             {scrapeCategory === "laptop" ? <>
-              <ScrapeBtn label="Jumia" target="jumia" emoji="🟠" />
-              <ScrapeBtn label="Amazon" target="amazon" emoji="🔵" />
-              <ScrapeBtn label="AliExpress" target="aliexpress" emoji="🔴" />
-              <ScrapeBtn label="Tout scraper" target="all" emoji="🔥" />
+              <ScrapeBtn label="Jumia" target="jumia"/>
+              <ScrapeBtn label="Amazon" target="amazon"/>
+              <ScrapeBtn label="AliExpress" target="aliexpress"/>
+              <ScrapeBtn label="Tout scraper" target="all"/>
             </> : <>
-              <ScrapeBtn label="Souris" target="souris" emoji="🖱️" />
-              <ScrapeBtn label="Support PC" target="laptop_stand" emoji="🏗️" />
-              <ScrapeBtn label="Refroidisseur" target="cooling_pad" emoji="❄️" />
-              <ScrapeBtn label="Sac PC" target="sac_laptop" emoji="🎒" />
-              <ScrapeBtn label="Clé USB" target="usb" emoji="💾" />
+              <ScrapeBtn label="Souris" target="souris"/>
+              <ScrapeBtn label="Support PC" target="laptop_stand"/>
+              <ScrapeBtn label="Refroidisseur" target="cooling_pad"/>
+              <ScrapeBtn label="Sac PC" target="sac_laptop"/>
+              <ScrapeBtn label="Clé USB" target="usb"/>
             </>}
           </div>
           <div style={{ borderTop: `1px solid ${DS.border}`, paddingTop: 12 }}>
-            <button onClick={handleStop} style={{ padding: "9px 18px", borderRadius: 8, background: `${DS.red}18`, border: `1px solid ${DS.red}40`, color: DS.red, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+            <button onClick={handleStop} style={{
+              padding: "9px 18px", borderRadius: 8,
+              background: `${DS.red}18`, border: `1px solid ${DS.red}40`,
+              color: DS.red, fontWeight: 700, fontSize: 12, cursor: "pointer",
+              fontFamily: DS.mono, display: "flex", alignItems: "center", gap: 6,
+            }}>
               <Square size={12} /> STOP
             </button>
           </div>
         </Card>
       )}
-
-      {/* PROGRESSION & MESSAGES */}
       {(polling || progress > 0) && (
         <div style={{ marginBottom: 16 }}>
-          <ProgressBar value={progress} color={DS.platformBlue} height={4} />
+          <ProgressBar value={progress} color={DS.cyan} height={3} />
           <p style={{ fontSize: 11, color: DS.textMuted, marginTop: 6, fontFamily: DS.mono }}>{scrapeMsg}</p>
         </div>
       )}
-
       {scrapeMsg && !polling && progress === 0 && (
-        <div style={{ padding: "10px 14px", borderRadius: 8, marginBottom: 14, fontSize: 12, color: scrapeMsg.startsWith("✅") ? DS.green : DS.red, background: scrapeMsg.startsWith("✅") ? "#dcfce7" : "#fee2e2", border: `1px solid ${scrapeMsg.startsWith("✅") ? "#bbf7d0" : "#fecaca"}` }}>{scrapeMsg}</div>
+        <div style={{
+          padding: "10px 14px", borderRadius: 8, marginBottom: 14, fontSize: 12, fontFamily: DS.mono,
+          color: scrapeMsg.startsWith("✅") ? DS.green : scrapeMsg.startsWith("🛑") ? DS.amber : DS.red,
+          background: scrapeMsg.startsWith("✅") ? `${DS.green}12` : scrapeMsg.startsWith("🛑") ? `${DS.amber}12` : `${DS.red}12`,
+          border: `1px solid ${scrapeMsg.startsWith("✅") ? DS.green : scrapeMsg.startsWith("🛑") ? DS.amber : DS.red}30`,
+        }}>{scrapeMsg}</div>
       )}
-
-      {/* STATUS BAR */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
         <span style={{ fontSize: 13, color: DS.textSecondary }}>
-          <strong>{total.toLocaleString("fr-FR")}</strong> {mode === "alerts" ? "alertes trouvées" : "produits trouvés"}
+          <span style={{ color: DS.cyan, fontFamily: DS.mono, fontWeight: 600 }}>{total.toLocaleString("fr-FR")}</span> {mode === "alerts" ? "alertes trouvées" : "produits trouvés"}
         </span>
-        <Tag color={mode === "alerts" ? DS.red : DS.platformBlue}>{MODE_LABELS[mode]}</Tag>
+        <Tag color={mode === "scrape" ? DS.amber : mode === "alerts" ? DS.red : DS.cyan}>{MODE_LABELS[mode]}</Tag>
       </div>
-
-      {/* GRILLE DE RÉSULTATS (PRODUITS OU ALERTES) */}
       {loading && mode !== "scrape" ? <Spinner /> : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-          {mode === "alerts" ? (
-            alerts.map((item, i) => (
-              <Card key={i} accent={DS.red} style={{ border: "2px solid #fecaca" }}>
-                <span style={{ position: "absolute", top: 10, left: 10, background: DS.red, color: "white", padding: "4px 8px", borderRadius: "4px", fontWeight: "bold", fontSize: "0.8rem", zIndex: 1 }}>-{item.percentage}%</span>
-                <div style={{ padding: "10px", marginTop: 20 }}>
-                  <h3 style={{ fontSize: "0.9rem", fontWeight: 600, height: "40px", overflow: "hidden" }}>{item.title}</h3>
-                  <p style={{ fontSize: "1.2rem", fontWeight: 700, color: DS.red, margin: "10px 0" }}>
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+            {mode === "alerts" ? (
+              alerts.map((item, i) => (
+                <div key={i} className="fade-in" style={{
+                  background: DS.bg0, border: `2px solid ${DS.red}40`, borderRadius: 10, padding: "14px", position: "relative",
+                  boxShadow: "0 2px 8px rgba(239, 68, 68, 0.1)"
+                }}>
+                  <span style={{ position: "absolute", top: 10, right: 10, background: DS.red, color: "white", padding: "2px 8px", borderRadius: "4px", fontWeight: "bold", fontSize: "0.75rem" }}>-{item.percentage}%</span>
+                  <h3 style={{ fontSize: 13, fontWeight: 600, color: DS.textPrimary, marginBottom: 10, marginTop: 20 }}>{item.title}</h3>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: DS.red, fontFamily: DS.mono, marginBottom: 10 }}>
                     <span style={{ textDecoration: "line-through", color: DS.textMuted, fontSize: "0.8rem", marginRight: 8 }}>{item.old_price}</span>
                     {item.new_price} {item.currency}
-                  </p>
+                  </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${DS.border}`, paddingTop: 10 }}>
-                    <small style={{ fontWeight: 600, color: DS.textSecondary }}>{item.source}</small>
-                    <a href={item.link} target="_blank" rel="noreferrer" style={{ color: DS.platformBlue, textDecoration: "none", fontWeight: 700, fontSize: "0.8rem" }}>ACHETER →</a>
+                    <span style={{ fontSize: 11, color: DS.textMuted }}>{item.source}</span>
+                    <a href={item.link} target="_blank" rel="noreferrer" style={{ color: DS.cyan, fontWeight: 700, fontSize: 11, textDecoration: "none" }}>VOIR →</a>
                   </div>
                 </div>
-              </Card>
-            ))
-          ) : (
-            products.map((item, i) => (
-              <div key={i} style={{ background: "white", border: `1px solid ${DS.border}`, borderRadius: 10, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                {item.image && (
-                  <div style={{ height: 160, background: "#f8fafc", padding: 10 }}>
-                    <img src={item.image} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              ))
+            ) : (
+              products.map((item, i) => {
+                const sourceKey = item.source?.toLowerCase() || "default";
+                const platformColor = PLATFORM_COLORS[sourceKey] || PLATFORM_COLORS.default;
+                
+                return (
+                  <div key={i} className="fade-in" style={{
+                    background: DS.bg0, 
+                    border: `2px solid ${DS.platformBlack}`,
+                    borderRadius: 10, 
+                    overflow: "hidden", 
+                    transition: "border-color 0.2s, transform 0.2s",
+                    boxShadow: `0 1px 3px ${platformColor.fill}`,
+                    animationDelay: `${Math.min(i * 0.03, 0.3)}s`,
+                  }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = DS.borderGlow; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = DS.platformBlack; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 1px 3px ${platformColor.fill}`; }}
+                  >
+                    {item.source && (
+                      <div style={{
+                        position: "absolute", top: 8, right: 8,
+                        padding: "3px 10px", borderRadius: 12,
+                        background: platformColor.bg,
+                        color: platformColor.text,
+                        fontSize: 10, fontWeight: 700, fontFamily: DS.mono,
+                        textTransform: "uppercase", letterSpacing: 0.5,
+                        border: `1px solid ${platformColor.stroke}40`,
+                      }}>
+                        {item.source}
+                      </div>
+                    )}
+                    
+                    {item.image && (
+                      <div style={{ height: 140, overflow: "hidden", background: DS.bg3 }}>
+                        <img src={item.image} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 10 }} />
+                      </div>
+                    )}
+                    <div style={{ padding: "14px", paddingTop: 24 }}>
+                      {item.is_gaming && <Tag color={DS.purple} size="sm">🎮 GAMING</Tag>}
+                      <div style={{ fontSize: 11, color: DS.textMuted, fontFamily: DS.mono, marginTop: item.is_gaming ? 6 : 0, marginBottom: 4 }}>
+                        {item.brand_detected || item.brand || "—"}
+                      </div>
+                      <h3 style={{ fontSize: 13, fontWeight: 600, color: DS.textPrimary, lineHeight: 1.4, marginBottom: 10, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                        {item.title}
+                      </h3>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: DS.platformBlue, fontFamily: DS.mono, marginBottom: 10 }}>
+                        {item.price?.toLocaleString("fr-FR")} {item.currency && item.currency !== "N/A" ? item.currency : item.source?.toLowerCase().includes("amazon") ? "€" : "MAD"}
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 11, color: DS.textMuted }}>{item.source}</span>
+                        <a href={item.link} target="_blank" rel="noreferrer" style={{
+                          padding: "5px 12px", borderRadius: 6, fontSize: 11,
+                          background: DS.platformBlack,
+                          border: `1px solid ${DS.platformBlack}`,
+                          color: DS.platformWhite,
+                          textDecoration: "none", 
+                          fontWeight: 600, 
+                          fontFamily: DS.mono,
+                          transition: "all 0.2s",
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background = "#000000";
+                          e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background = DS.platformBlack;
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
+                        >VOIR →</a>
+                      </div>
+                    </div>
                   </div>
-                )}
-                <div style={{ padding: 15, flex: 1, display: "flex", flexDirection: "column" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                    <span style={{ fontSize: 10, color: DS.textMuted, fontWeight: 700 }}>{item.brand_detected || "—"}</span>
-                    {item.is_gaming && <Tag color={DS.purple} size="sm">GAMING</Tag>}
-                  </div>
-                  <h3 style={{ fontSize: 12, fontWeight: 600, height: 34, overflow: "hidden", marginBottom: 10 }}>{item.title}</h3>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: DS.platformBlue, marginBottom: 15 }}>
-                    {item.price?.toLocaleString("fr-FR")} {item.currency || "MAD"}
-                  </div>
-                  <div style={{ marginTop: "auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <small style={{ fontSize: 10, color: DS.textMuted }}>{item.source}</small>
-                    <a href={item.link} target="_blank" rel="noreferrer" style={{ padding: "5px 10px", background: DS.platformBlack, color: "white", borderRadius: 5, fontSize: 10, textDecoration: "none", fontWeight: 700 }}>VOIR →</a>
-                  </div>
-                </div>
+                );
+              })
+            )}
+            {products.length === 0 && alerts.length === 0 && !loading && (
+              <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: 60, color: DS.textMuted, fontSize: 13 }}>
+                <Database size={32} style={{ marginBottom: 12, opacity: 0.3, display: "block", margin: "0 auto 12px" }} />
+                Aucun résultat. Lancez un scraping ou cherchez un terme différent.
               </div>
-            ))
+            )}
+          </div>
+          {pages > 1 && mode !== "alerts" && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginTop: 24 }}>
+              <button onClick={() => { if (mode === "db_accessoire") fetchAccessories(page - 1); else fetchDB(page - 1); }} disabled={page <= 1} style={{
+                padding: "8px 16px", borderRadius: 6, background: DS.bg0, border: `1px solid ${DS.border}`,
+                color: page <= 1 ? DS.textMuted : DS.textPrimary, cursor: page <= 1 ? "not-allowed" : "pointer", fontFamily: DS.mono,
+              }}>←</button>
+              <span style={{ color: DS.textSecondary, fontFamily: DS.mono, fontSize: 12 }}>{page} / {pages}</span>
+              <button onClick={() => { if (mode === "db_accessoire") fetchAccessories(page + 1); else fetchDB(page + 1); }} disabled={page >= pages} style={{
+                padding: "8px 16px", borderRadius: 6, background: DS.bg0, border: `1px solid ${DS.border}`,
+                color: page >= pages ? DS.textMuted : DS.textPrimary, cursor: page >= pages ? "not-allowed" : "pointer", fontFamily: DS.mono,
+              }}>→</button>
+            </div>
           )}
-        </div>
-      )}
-
-      {/* PAGINATION */}
-      {mode !== "scrape" && mode !== "alerts" && pages > 1 && (
-        <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 25 }}>
-          <button onClick={() => mode === "db_accessoire" ? fetchAccessories(page - 1) : fetchDB(page - 1)} disabled={page <= 1} style={{ padding: "8px 15px", borderRadius: 6, border: `1px solid ${DS.border}`, cursor: "pointer" }}>←</button>
-          <span style={{ alignSelf: "center", fontSize: 12, fontWeight: 600 }}>{page} / {pages}</span>
-          <button onClick={() => mode === "db_accessoire" ? fetchAccessories(page + 1) : fetchDB(page + 1)} disabled={page >= pages} style={{ padding: "8px 15px", borderRadius: 6, border: `1px solid ${DS.border}`, cursor: "pointer" }}>→</button>
-        </div>
+        </>
       )}
     </div>
   );
 }
-
 
 // ══════════════════════════════════════════════════════════════════
 // TAB STATS
