@@ -20,6 +20,8 @@ urlpatterns = [
     path('api/scrape/sac_laptop/',   views.scrape_all_sac,          name='scrape_sac'),
     path('api/scrape/usb/',          views.scrape_all_usb,          name='scrape_usb'),
 
+    # notification si prix basse :
+    path('api/notifications/', views.get_notifications, name='notifications'),
     # ── Produits & Recherche ──────────────────────────────────────────────
     path('api/products/',           views.products_view,           name='products'),
     path('api/search/',             views.search_view,             name='search'),

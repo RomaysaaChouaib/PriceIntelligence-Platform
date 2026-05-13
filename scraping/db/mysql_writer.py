@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import mysql.connector
-
+from scraping.services.notification import check_price_drop 
 # On définit le chemin vers le dossier backend
 env_path = Path(__file__).resolve().parent.parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -33,38 +33,46 @@ class MySQLWriter:
     # 1. INSERT FROM SCRAPING
     # =========================
     def insert_products(self, products):
-        # Ajout de 'currency' et de la gestion des doublons (ON DUPLICATE KEY UPDATE)
-        sql = """
+        sql_insert = """
         INSERT INTO products
         (title, price, currency, brand, source, link, image, search_query, page, is_gaming, date_scraped)
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         ON DUPLICATE KEY UPDATE 
-           price = VALUES(price),
+            price = VALUES(price),
             date_scraped = VALUES(date_scraped);
         """
 
         count = 0
-
         for p in products:
             try:
-                # --- NETTOYAGE DU PRIX ---
+                # --- 1. NETTOYAGE DU PRIX ---
                 raw_price = str(p.get("price", "0"))
                 if raw_price in ("N/A", "None", ""):
-                    final_price = 0.0
+                    new_price = 0.0
                 else:
-                    # Enlever les espaces (classiques et insécables) et remplacer la virgule par un point
                     clean_price = raw_price.replace(" ", "").replace("\u202f", "").replace("\xa0", "")
                     clean_price = clean_price.replace(",", ".")
                     try:
-                        final_price = float(clean_price)
+                        new_price = float(clean_price)
                     except ValueError:
-                        final_price = 0.0
-                # -------------------------
+                        new_price = 0.0
 
+                # --- 2. VÉRIFICATION DE BAISSE DE PRIX (AVANT UPDATE) ---
+                # On cherche si le produit existe déjà pour comparer le prix
+                sql_check = "SELECT price FROM products WHERE link = %s"
+                self.cursor.execute(sql_check, (p.get("link"),))
+                result = self.cursor.fetchone()
+
+                if result and result[0] is not None:
+                    old_price = float(result[0])
+                    # On appelle la notification si le prix a baissé
+                    check_price_drop(p.get("title"), new_price, old_price)
+
+                # --- 3. INSERTION / UPDATE ---
                 values = (
                     p.get("title"),
-                    final_price,       # Prix nettoyé au format float
-                    p.get("currency"), # <--- NOUVEAU CHAMP ICI
+                    new_price,
+                    p.get("currency"),
                     str(p.get("brand", ""))[:50],
                     p.get("source"),
                     p.get("link"),
@@ -75,15 +83,14 @@ class MySQLWriter:
                     p.get("date_scraped")
                 )
 
-                self.cursor.execute(sql, values)
+                self.cursor.execute(sql_insert, values)
                 count += 1
 
             except Exception as e:
                 print("Insert error:", e)
 
         self.conn.commit()
-        print(f"✔ {count} products inserted into MySQL")
-
+        print(f"✔ {count} products processed in MySQL")
     # =========================
     # 2. GET PRODUCTS BY QUERY
     # =========================
