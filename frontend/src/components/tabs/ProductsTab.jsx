@@ -3,28 +3,32 @@ import {
   getProducts, startScraping, checkScrapingStatus, addHistory
 } from '../../services/api';
 import ProductCard from '../dashboard/ProductCard';
-import { Search, Play, Square, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Play, ChevronLeft, ChevronRight, Database } from 'lucide-react';
 
 const SOURCES = ['jumia', 'amazon', 'aliexpress'];
 
+const SOURCE_COLORS = {
+  jumia:      { bg: '#fff7ed', color: '#c2410c', border: '#fed7aa' },
+  amazon:     { bg: '#fff8f0', color: '#d97706', border: '#fde68a' },
+  aliexpress: { bg: '#fef2f2', color: '#dc2626', border: '#fecaca' },
+};
+
 export default function ProductsTab() {
-  const [products, setProducts]     = useState([]);
-  const [total, setTotal]           = useState(0);
-  const [page, setPage]             = useState(1);
-  const [pages, setPages]           = useState(1);
-  const [query, setQuery]           = useState('');
-  const [inputVal, setInputVal]     = useState('');
-  const [loading, setLoading]       = useState(false);
-  const [error, setError]           = useState(null);
+  const [products, setProducts]       = useState([]);
+  const [total, setTotal]             = useState(0);
+  const [page, setPage]               = useState(1);
+  const [pages, setPages]             = useState(1);
+  const [query, setQuery]             = useState('');
+  const [inputVal, setInputVal]       = useState('');
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState(null);
 
   // Scraping state
-  const [source, setSource]         = useState('jumia');
-  const [scraping, setScraping]     = useState(false);
-  const [taskId, setTaskId]         = useState(null);
+  const [source, setSource]           = useState('jumia');
+  const [scraping, setScraping]       = useState(false);
   const [scrapStatus, setScrapStatus] = useState('');
-  const [progress, setProgress]     = useState(0);
+  const [progress, setProgress]       = useState(0);
 
-  // Charger les produits
   const loadProducts = useCallback((q = query, p = page) => {
     setLoading(true);
     setError(null);
@@ -40,7 +44,6 @@ export default function ProductsTab() {
 
   useEffect(() => { loadProducts(); }, [page]);
 
-  // Lancer le scraping
   const handleSearch = async () => {
     if (!inputVal.trim()) return;
     const q = inputVal.trim().toLowerCase();
@@ -53,7 +56,6 @@ export default function ProductsTab() {
     try {
       const res = await startScraping(q, source);
       if (!res.task_id) {
-        // Pas de tâche Celery (ex: Amazon synchrone)
         setScrapStatus(`✅ ${res.inserted || 0} produits récupérés`);
         setProgress(100);
         setQuery(q);
@@ -64,11 +66,9 @@ export default function ProductsTab() {
         return;
       }
 
-      setTaskId(res.task_id);
       setScrapStatus('Scraping en cours…');
       setProgress(30);
 
-      // Polling du statut Celery
       const poll = setInterval(async () => {
         try {
           const status = await checkScrapingStatus(res.task_id);
@@ -87,7 +87,6 @@ export default function ProductsTab() {
             setScraping(false);
             setProgress(0);
           } else {
-            // PENDING ou PROGRESS
             setProgress(p => Math.min(p + 10, 90));
           }
         } catch {
@@ -103,27 +102,35 @@ export default function ProductsTab() {
     }
   };
 
-  // Filtrage local (sans nouveau scraping)
   const handleFilter = () => {
-    setQuery(inputVal.trim().toLowerCase());
+    const q = inputVal.trim().toLowerCase();
+    setQuery(q);
     setPage(1);
-    loadProducts(inputVal.trim().toLowerCase(), 1);
+    loadProducts(q, 1);
   };
+
+  const srcStyle = SOURCE_COLORS[source] || {};
 
   return (
     <div className="pip-tab-inner">
 
+      {/* ── En-tête ── */}
       <div className="pip-tab-header">
         <div>
           <h2 className="pip-tab-title">Recherche de produits</h2>
-          <p className="pip-tab-subtitle">{total.toLocaleString('fr-FR')} produits en base</p>
+          <p className="pip-tab-subtitle">
+            <span className="pip-count-badge">{total.toLocaleString('fr-FR')}</span> produits en base
+          </p>
+        </div>
+        <div className="pip-header-icon pip-header-icon--green">
+          <Database size={20} />
         </div>
       </div>
 
-      {/* ── Barre de recherche / scraping ── */}
+      {/* ── Barre de recherche ── */}
       <div className="pip-search-zone">
         <div className="pip-search-row">
-          <div className="pip-search-input-wrap">
+          <div className="pip-search-input-wrap" style={{ flex: 1 }}>
             <Search size={16} className="pip-search-icon" />
             <input
               type="text"
@@ -136,16 +143,19 @@ export default function ProductsTab() {
             />
           </div>
 
-          <select
-            className="pip-select"
-            value={source}
-            onChange={e => setSource(e.target.value)}
-            disabled={scraping}
-          >
+          <div className="pip-source-selector">
             {SOURCES.map(s => (
-              <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+              <button
+                key={s}
+                className={`pip-source-btn ${source === s ? 'active' : ''}`}
+                style={source === s ? { background: SOURCE_COLORS[s]?.bg, color: SOURCE_COLORS[s]?.color, borderColor: SOURCE_COLORS[s]?.border } : {}}
+                onClick={() => setSource(s)}
+                disabled={scraping}
+              >
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </button>
             ))}
-          </select>
+          </div>
 
           <button
             className="pip-btn pip-btn-primary"
@@ -160,7 +170,7 @@ export default function ProductsTab() {
             onClick={handleFilter}
             disabled={scraping}
           >
-            <Search size={14} /> Filtrer base
+            <Search size={14} /> Filtrer
           </button>
         </div>
 
@@ -170,7 +180,7 @@ export default function ProductsTab() {
             <div className="pip-progress-bar-bg">
               <div
                 className="pip-progress-bar-fill"
-                style={{ width: `${progress}%`, transition: 'width 0.5s ease' }}
+                style={{ width: `${progress}%` }}
               />
             </div>
             <p className="pip-progress-label">{scrapStatus}</p>
@@ -178,14 +188,14 @@ export default function ProductsTab() {
         )}
       </div>
 
-      {error   && <div className="pip-error">Erreur : {error}</div>}
-      {loading && <div className="pip-loading">Chargement des produits…</div>}
+      {error   && <div className="pip-error">{error}</div>}
+      {loading && <div className="pip-loading"><span className="pip-spinner" />Chargement des produits…</div>}
 
       {/* ── Grille produits ── */}
       {!loading && products.length === 0 && (
-        <div className="pip-empty">
-          Aucun produit trouvé.
-          {query && ` Essayez de scraper "${query}" via l'un des scrapers.`}
+        <div className="pip-empty-state">
+          <span className="pip-empty-icon">📦</span>
+          <p>Aucun produit trouvé.{query && ` Essayez de scraper "${query}".`}</p>
         </div>
       )}
 
@@ -205,7 +215,21 @@ export default function ProductsTab() {
           >
             <ChevronLeft size={16} />
           </button>
-          <span className="pip-page-info">Page {page} / {pages}</span>
+          <div className="pip-page-pills">
+            {Array.from({ length: Math.min(pages, 7) }, (_, i) => {
+              const p = i + 1;
+              return (
+                <button
+                  key={p}
+                  className={`pip-page-pill ${page === p ? 'active' : ''}`}
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </button>
+              );
+            })}
+            {pages > 7 && <span className="pip-page-dots">…</span>}
+          </div>
           <button
             className="pip-page-btn"
             onClick={() => setPage(p => Math.min(pages, p + 1))}

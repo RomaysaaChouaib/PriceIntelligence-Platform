@@ -1,0 +1,71 @@
+/* ══════════════════════════════════════════════════════════════════
+   DetailPages.css — Styles complémentaires uniquement
+   Le design principal est géré via inline styles avec DS tokens
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Smooth transitions pour les interactions */
+a, button, [style*="transition"] {
+  will-change: transform, box-shadow, border-color;
+}
+
+/* Focus visible pour l'accessibilité */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  /* Reduce padding on mobile */
+  header[style*="padding"],
+  section[style*="padding"] {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+  
+  /* Stack flex items on small screens */
+  [style*="display: flex"][style*="gap"] {
+    flex-wrap: wrap;
+  }
+  
+  /* Adjust hero text */
+  h1[style*="font-size"] {
+    font-size: 1.8rem !important;
+  }
+  
+  /* Two-column grids become single column */
+  [style*="gridTemplateColumns: '1fr 1fr'"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Print styles — disable animations */
+@media print {
+  .fade-in, .glow, .pulse {
+    animation: none !important;
+  }
+  [style*="box-shadow"] {
+    box-shadow: none !important;
+  }
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Utility: hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

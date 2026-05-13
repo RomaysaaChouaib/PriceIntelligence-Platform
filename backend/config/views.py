@@ -967,3 +967,94 @@ def search_history_view(request):
         return JsonResponse({'success': True})
 
     return JsonResponse({'error': 'Méthode non autorisée'}, status=405)
+    
+# ==========================================================
+# AJOUTEZ CE BLOC TOUT EN BAS DE backend/config/views.py
+# ==========================================================
+
+from django.http import JsonResponse, HttpResponse
+from django.contrib.auth.decorators import login_required
+from api.models import SearchHistory
+from celery.result import AsyncResult
+import csv
+from io import StringIO
+
+@login_required
+def get_user_history(request):
+    """GET /api/history/ - Retourne l'historique des recherches"""
+    try:
+        # Récupère les 10 dernières recherches de l'utilisateur
+        history = SearchHistory.objects.filter(user=request.user).order_by('-created_at')[:10]
+        data = [
+            {
+                "id": h.id,
+                "query": h.query,
+                "category": h.category,
+                "status": h.status,
+                "created_at": h.created_at
+            } for h in history
+        ]
+        return JsonResponse({"count": len(data), "results": data})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@login_required
+def get_scrape_status(request, task_id):
+    """GET /api/scrape/status/<task_id>/ - Pour la barre de progression"""
+    try:
+        result = AsyncResult(task_id)
+        response_data = {
+            "task_id": task_id,
+            "state": result.state,
+            "status": "En attente..." if result.state == 'PENDING' else "En cours..."
+        }
+        
+        if result.state == 'SUCCESS':
+            response_data["status"] = "Terminé"
+            response_data["result"] = result.result
+        elif result.state == 'FAILURE':
+            response_data["status"] = "Erreur"
+            response_data["error"] = str(result.result)
+            
+        return JsonResponse(response_data)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@login_required
+def manage_alerts(request):
+    """GET /api/alerts/ - Liste les alertes"""
+    # Pour l'instant retourne une structure vide pour éviter l'erreur
+    return JsonResponse({"alerts": [], "message": "Module d'alertes prêt"})
+
+@login_required
+def export_csv(request):
+    """GET /api/export/csv/ - Exporte les données en CSV"""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="results.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(['Produit', 'Prix', 'Plateforme', 'Date'])
+    # Données d'exemple
+    writer.writerow(['HP Laptop', '5500 MAD', 'Jumia', '2026-05-08'])
+    writer.writerow(['MacBook Air', '12000 MAD', 'Amazon', '2026-05-08'])
+    
+    return response
+
+@login_required
+def export_pdf(request):
+    """GET /api/export/pdf/ - Placeholder pour l'export PDF"""
+    # La génération de PDF nécessite une librairie comme WeasyPrint ou ReportLab
+    # Ici on retourne un JSON d'info pour ne pas faire crasher le serveur
+    return JsonResponse({
+        "message": "Export PDF en cours de développement", 
+        "status": "endpoint_ready"
+    })
+
+@login_required
+def get_product_detail(request, product_id):
+    """GET /api/products/<id>/ - Détails d'un produit"""
+    return JsonResponse({
+        "id": product_id,
+        "title": "Produit Exemple",
+        "description": "Description du produit..."
+    }) 

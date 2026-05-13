@@ -1,0 +1,63 @@
+/* ══════════════════════════════════════════════════════════════════
+   LandingPage.css — Styles complémentaires
+   Palette : Fond Blanc + Texte Noir/Bleu
+   ══════════════════════════════════════════════════════════════════ */
+
+html { scroll-behavior: smooth; }
+
+a:focus-visible, button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   🎨 OVERRIDES POUR THÈME BLANC
+   ═══════════════════════════════════════════════════════════════ */
+body {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Liens bleus */
+a {
+  color: 2563eb;
+  transition: color 0.2s;
+}
+a:hover {
+  color: #2563eb;
+}
+
+/* Badges bleus */
+[style*="background: rgba(0, 102, 204"] {
+  border-color: rgba(0, 102, 204, 0.2) !important;
+}
+
+/* Cartes avec hover */
+[style*="transition: all 0.3s"] {
+  will-change: transform, box-shadow;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   📱 RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  header[style*="padding"] { padding: 4rem 1.5rem 3rem !important; }
+  [style*="display: flex"][style*="gap: 12px"] {
+    flex-direction: column; align-items: center;
+  }
+  [style*="padding: 1.5rem"] { padding: 1.25rem !important; }
+  
+  /* Cartes équipe mobile */
+  [style*="gridTemplateColumns: repeat(auto-fit"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media print {
+  .fade-in, .glow, .pulse { animation: none !important; }
+  [style*="box-shadow"] { box-shadow: none !important; }
+}
+
+@media (prefers-color-scheme: light) {
+  body { background: #ffffff; color: #0f172a; }
+}

@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'api.CustomUser'
 
 # Application definition
 
@@ -40,6 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',# ajouter ca pour le framework rest
     'corsheaders', # la meme pour le corsheaders
     'rest_framework_simplejwt',
+    'api',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [

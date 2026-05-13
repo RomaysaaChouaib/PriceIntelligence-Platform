@@ -1,0 +1,44 @@
+/* ══════════════════════════════════════════════════════════════════
+   AuthPage.css — Styles complémentaires uniquement
+   Le design principal est géré via inline styles avec DS tokens
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Focus visible pour l'accessibilité */
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Responsive mobile */
+@media (max-width: 640px) {
+  .auth-container, 
+  [style*="minHeight: 100vh"][style*="padding: 2rem"] {
+    padding: 1rem !important;
+  }
+  
+  [style*="maxWidth: 480"][style*="padding: 2.5rem"] {
+    padding: 2rem 1.5rem !important;
+  }
+  
+  [style*="fontSize: 1.8rem"] {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .fade-in, .glow, .shake {
+    animation: none !important;
+  }
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
