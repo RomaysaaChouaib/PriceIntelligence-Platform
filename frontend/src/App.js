@@ -424,7 +424,14 @@ function TabProducts() {
   const [currentTaskId, setCurrentTaskId] = useState(null);
   const [progress, setProgress] = useState(0);
   const [polling, setPolling] = useState(false);
+
+  // 🔥 État pour gérer les deux sous-menus de scraping
   const [scrapeCategory, setScrapeCategory] = useState("laptop");
+
+  const API = "http://127.0.0.1:8000/api";
+
+  // ── Notifications ──
+  const [alerts, setAlerts] = useState([]); 
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("access_token");
@@ -447,12 +454,41 @@ function TabProducts() {
   };
 
   const fetchAccessories = async (p = 1) => {
-    setLoading(true); setMode("db_accessoire"); setScrapeMsg("");
+    setLoading(true);
+    setMode("db_accessoire");
+    setScrapeMsg("");
     try {
-      const res = await fetch(`${API}/search/Accessoire/?query=${query}&page=${p}&limit=20`, { headers: getAuthHeaders() });
+      const res = await fetch(`${API}/search/Accessoire/?query=${query}&page=${p}&limit=20`, {
+        headers: getAuthHeaders(),
+      });
       const data = await res.json();
-      setProducts(data.accessories || []); setTotal(data.total || 0); setPages(data.pages || 1); setPage(p);
-    } catch { setScrapeMsg("❌ Erreur lors du chargement des accessoires"); }
+      setProducts(data.accessories || []);
+      setTotal(data.total || 0);
+      setPages(data.pages || 1);
+      setPage(p);
+    } catch (e) {
+      console.error(e);
+      setScrapeMsg("❌ Erreur lors du chargement des accessoires");
+    }
+    setLoading(false);
+  };
+
+  const fetchNotifications = async () => {
+    setLoading(true);
+    setMode("alerts");
+    setScrapeMsg("");
+    try {
+      const res = await fetch(`${API}/notifications/`, {
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      setAlerts(data.alerts || []);
+      setTotal(data.alerts?.length || 0);
+      setPages(1);
+    } catch (e) {
+      console.error(e);
+      setScrapeMsg("❌ Erreur lors de la récupération des alertes");
+    }
     setLoading(false);
   };
 
@@ -477,83 +513,120 @@ function TabProducts() {
   };
 
   const runScrape = async (target) => {
-    setLoading(true); setScrapeTarget(target);
-    const defaultQuery = { souris: "souris", laptop_stand: "laptop_stand", cooling_pad: "cooling_pad", sac_laptop: "sac_laptop", usb: "usb_flash_drive" }[target] || "laptop";
+    setLoading(true);
+    setScrapeTarget(target);
+    let defaultQuery = "laptop";
+    if (target === "souris") defaultQuery = "souris";
+    if (target === "laptop_stand") defaultQuery = "laptop_stand";
+    if (target === "cooling_pad") defaultQuery = "cooling_pad";
+    if (target === "sac_laptop") defaultQuery = "sac_laptop";
+    if (target === "usb") defaultQuery = "usb_flash_drive";
+
     const finalQuery = query.trim() !== "" ? query.trim() : defaultQuery;
-    setScrapeMsg(`⏳ Scraping ${target} en cours pour "${finalQuery}"...`); setProgress(10);
+    const searchParam = `?query=${encodeURIComponent(finalQuery)}`;
+    setScrapeMsg(`⏳ Scraping ${target} en cours pour "${finalQuery}"...`);
+    setProgress(10);
+
     try {
-      const endpoints = { jumia: "scrape/jumia/", amazon: "scrape/amazon/", aliexpress: "scrape/aliexpress/", all: "scrape/All/", souris: "scrape/souris/", laptop_stand: "scrape/laptop_stand/", cooling_pad: "scrape/cooling_pad/", sac_laptop: "scrape/sac_laptop/", usb: "scrape/usb/" };
-      const url = `${API}/${endpoints[target] || "search/"}?query=${encodeURIComponent(finalQuery)}`;
-      const res = await fetch(url, { headers: getAuthHeaders() });
+      let endpoint = "";
+      switch (target) {
+        case "jumia": endpoint = "scrape/jumia/"; break;
+        case "amazon": endpoint = "scrape/amazon/"; break;
+        case "aliexpress": endpoint = "scrape/aliexpress/"; break;
+        case "all": endpoint = "scrape/All/"; break;
+        case "souris": endpoint = "scrape/souris/"; break;
+        case "laptop_stand": endpoint = "scrape/laptop_stand/"; break;
+        case "cooling_pad": endpoint = "scrape/cooling_pad/"; break;
+        case "sac_laptop": endpoint = "scrape/sac_laptop/"; break;
+        case "usb": endpoint = "scrape/usb/"; break;
+        default: endpoint = "search/";
+      }
+
+      const res = await fetch(`${API}/${endpoint}${searchParam}`, { headers: getAuthHeaders() });
       const data = await res.json();
-      if (data.task_id) { setCurrentTaskId(data.task_id); pollTaskStatus(data.task_id, target); }
-      else if (data.success) {
-        setProgress(100); setScrapeMsg(`${data.message}`);
-        if (!["jumia", "amazon", "aliexpress", "all"].includes(target)) { setMode("db_accessoire"); fetchAccessories(1); } else { setMode("db"); fetchDB(1); }
+
+      if (data.task_id) {
+        setCurrentTaskId(data.task_id);
+        pollTaskStatus(data.task_id, target);
+      } else if (data.success) {
+        setProgress(100);
+        setScrapeMsg(`✅ ${data.message}`);
+        if (!["jumia", "amazon", "aliexpress", "all"].includes(target)) {
+          setMode("db_accessoire"); fetchAccessories(1);
+        } else {
+          setMode("db"); fetchDB(1);
+        }
         setTimeout(() => { setProgress(0); setScrapeMsg(""); }, 3000);
-      } else { setScrapeMsg(`❌ ${data.message || data.error || "Problème lors du scraping"}`); setProgress(0); }
-    } catch { setScrapeMsg(`❌ Erreur réseau sur ${target}`); setProgress(0); }
-    setLoading(false); setScrapeTarget("");
+      } else {
+        setScrapeMsg(`❌ ${data.message || data.error || "Problème lors du scraping"}`);
+        setProgress(0);
+      }
+    } catch (e) {
+      setScrapeMsg(`❌ Erreur réseau sur ${target}`);
+      setProgress(0);
+    }
+    setLoading(false);
+    setScrapeTarget("");
   };
 
   const handleStop = async () => {
-    if (!currentTaskId) { setScrapeMsg("❌ Aucune tâche en cours."); return; }
-    setScrapeMsg("⏳ Arrêt en cours...");
+    if (!currentTaskId) {
+      setScrapeMsg("❌ Impossible d'arrêter : aucune tâche en cours.");
+      return;
+    }
+    setScrapeMsg("⏳ Demande d'arrêt envoyée...");
     try {
-      const res = await fetch(`${API}/scrape/Stop/?task_id=${currentTaskId}`, { headers: getAuthHeaders() });
+      const res = await fetch(`${API}/scrape/stop/?task_id=${currentTaskId}`, { headers: getAuthHeaders() });
       const data = await res.json();
-      if (data.success) { setScrapeMsg(`🛑 ${data.message || "Scraping arrêté."}`); setCurrentTaskId(null); setProgress(0); setPolling(false); }
-      else setScrapeMsg(`❌ ${data.message || "Impossible d'arrêter"}`);
-    } catch { setScrapeMsg("❌ Erreur lors de l'arrêt."); }
+      if (data.success) {
+        setScrapeMsg(`🛑 ${data.message || "Scraping arrêté."}`);
+        setCurrentTaskId(null); setProgress(0); setPolling(false);
+      }
+    } catch (e) {
+      setScrapeMsg("❌ Erreur lors de l'envoi de l'arrêt.");
+    }
   };
 
-  const MODE_LABELS = { db: "DB Produits", db_accessoire: "Accessoires", scrape: "Scraping" };
+  const scrapeBtnStyle = (bg) => ({
+    padding: "10px 16px", border: "none", borderRadius: "8px", color: "white",
+    fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center",
+    justifyContent: "center", transition: "opacity 0.2s", minWidth: "140px",
+    background: bg, opacity: loading || polling ? 0.7 : 1,
+  });
 
-  const ScrapeBtn = ({ label, target: t, color, emoji }) => {
-    const platformColor = PLATFORM_COLORS[t] || PLATFORM_COLORS.default;
-    return (
-      <button onClick={() => runScrape(t)} disabled={loading || polling} style={{
-        padding: "10px 18px", borderRadius: 8,
-        background: (loading || polling) && scrapeTarget === t ? `${platformColor.fill}` : platformColor.fill,
-        border: `1px solid ${platformColor.stroke}`,
-        color: loading && scrapeTarget === t ? DS.textMuted : platformColor.text,
-        fontWeight: 600, fontSize: 12, cursor: "pointer",
-        fontFamily: DS.mono, letterSpacing: 0.5, transition: "all 0.2s",
-        opacity: loading || polling ? 0.7 : 1,
-        display: "flex", alignItems: "center", gap: 6,
-      }}>
-        {(loading || polling) && scrapeTarget === t ? <><RefreshCw size={12} style={{ animation: "spin 1s linear infinite" }} /> En cours…</> : <>{emoji} {label}</>}
-      </button>
-    );
-  };
+  const categoryBtnStyle = (isActive) => ({
+    padding: "10px 20px", border: "none", borderRadius: "8px", fontWeight: "bold",
+    cursor: "pointer", backgroundColor: isActive ? "#1e293b" : "#e2e8f0",
+    color: isActive ? "white" : "#475569", transition: "background-color 0.2s", flex: 1,
+  });
 
   return (
-    <div className="fade-in">
-      <div style={{ display: "flex", gap: 10, marginBottom: 20, alignItems: "center" }}>
-        <div style={{ flex: 1, position: "relative" }}>
-          <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: DS.textMuted }} />
-          <input type="text" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { if (mode === "db_accessoire") fetchAccessories(1); else fetchDB(1); } }} placeholder='Rechercher… ex: "laptop", "redmi 14"' style={{ width: "100%", paddingLeft: 38, background: DS.bg0, border: `1px solid ${DS.border}` }} />
+    <div>
+      <div className="pip-search-box">
+        <input
+          type="text" className="pip-search-input"
+          placeholder='Rechercher un produit… (ex: "laptop", "redmi 14")'
+          value={query} onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              if (mode === "csv") fetchCSV(1);
+              else if (mode === "db_accessoire") fetchAccessories(1);
+              else fetchDB(1);
+            }
+          }}
+        />
+
+        <div className="pip-mode-toggle">
+          <button className={`pip-mode-btn ${mode === "csv" ? "active" : ""}`} onClick={() => fetchCSV(1)}>📂 CSV</button>
+          <button className={`pip-mode-btn ${mode === "db" ? "active" : ""}`} onClick={() => fetchDB(1)}>🗄️ Produits (DB)</button>
+          <button className={`pip-mode-btn ${mode === "db_accessoire" ? "active" : ""}`} onClick={() => fetchAccessories(1)}>🎧 Accessoires</button>
+          <button className={`pip-mode-btn ${mode === "scrape" ? "active" : ""}`} onClick={() => setMode("scrape")}>🕷️ Scraper</button>
+          <button className={`pip-mode-btn ${mode === "alerts" ? "active" : ""}`} onClick={fetchNotifications} style={{backgroundColor: mode === "alerts" ? "#ef4444" : "#fee2e2", color: mode === "alerts" ? "white" : "#ef4444"}}>🔔 Alertes</button>
         </div>
-        <button onClick={() => { if (mode === "db_accessoire") fetchAccessories(1); else fetchDB(1); }} disabled={loading || mode === "scrape"} style={{
-          padding: "9px 18px", borderRadius: 8,
-          background: `linear-gradient(135deg, ${DS.cyan}cc, ${DS.cyanDim}cc)`,
-          border: "none", color: DS.bg0, fontWeight: 700, fontSize: 12,
-          cursor: "pointer", fontFamily: DS.mono, letterSpacing: 1, opacity: loading ? 0.6 : 1,
-        }}>
-          {loading ? "…" : "RECHERCHER"}
-        </button>
-      </div>
-      <div style={{ display: "flex", gap: 4, marginBottom: 20, background: DS.bg3, padding: 4, borderRadius: 8, border: `1px solid ${DS.border}` }}>
-        {[["db","Produits"], ["db_accessoire","Accessoires"], ["scrape","Scraper"]].map(([m, icon, label]) => (
-          <button key={m} onClick={() => { setMode(m); if (m === "db") fetchDB(1); else if (m === "db_accessoire") fetchAccessories(1); }} style={{
-            flex: 1, padding: "8px 12px", borderRadius: 6,
-            background: mode === m ? DS.bg0 : "transparent",
-            border: mode === m ? `1px solid ${DS.borderGlow}` : "1px solid transparent",
-            color: mode === m ? DS.cyan : DS.textSecondary,
-            fontWeight: 600, fontSize: 12, cursor: "pointer", transition: "all 0.2s",
-            fontFamily: DS.mono,
-          }}>
-            {icon} {label}
+
+        {mode !== "scrape" && mode !== "alerts" && (
+          <button onClick={() => { if (mode === "csv") fetchCSV(1); else if (mode === "db_accessoire") fetchAccessories(1); else fetchDB(1); }} disabled={loading} className="pip-search-btn">
+            {loading ? "..." : "🔍 Rechercher"}
           </button>
         ))}
       </div>
@@ -617,103 +690,46 @@ function TabProducts() {
         </span>
         <Tag color={mode === "scrape" ? DS.amber : DS.cyan}>{MODE_LABELS[mode]}</Tag>
       </div>
-      {loading && mode !== "scrape" ? <Spinner /> : (
-        <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
-            {products.map((item, i) => {
-              const sourceKey = item.source?.toLowerCase() || "default";
-              const platformColor = PLATFORM_COLORS[sourceKey] || PLATFORM_COLORS.default;
-              
-              return (
-                <div key={i} className="fade-in" style={{
-                  background: DS.bg0, 
-                  border: `2px solid ${DS.platformBlack}`,
-                  borderRadius: 10, 
-                  overflow: "hidden", 
-                  transition: "border-color 0.2s, transform 0.2s",
-                  boxShadow: `0 1px 3px ${platformColor.fill}`,
-                  animationDelay: `${Math.min(i * 0.03, 0.3)}s`,
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = DS.borderGlow; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = DS.platformBlack; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 1px 3px ${platformColor.fill}`; }}
-                >
-                  {item.source && (
-                    <div style={{
-                      position: "absolute", top: 8, right: 8,
-                      padding: "3px 10px", borderRadius: 12,
-                      background: platformColor.bg,
-                      color: platformColor.text,
-                      fontSize: 10, fontWeight: 700, fontFamily: DS.mono,
-                      textTransform: "uppercase", letterSpacing: 0.5,
-                      border: `1px solid ${platformColor.stroke}40`,
-                    }}>
-                      {item.source}
-                    </div>
-                  )}
-                  
-                  {item.image && (
-                    <div style={{ height: 140, overflow: "hidden", background: DS.bg3 }}>
-                      <img src={item.image} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 10 }} />
-                    </div>
-                  )}
-                  <div style={{ padding: "14px", paddingTop: 24 }}>
-                    {item.is_gaming && <Tag color={DS.purple} size="sm">🎮 GAMING</Tag>}
-                    <div style={{ fontSize: 11, color: DS.textMuted, fontFamily: DS.mono, marginTop: item.is_gaming ? 6 : 0, marginBottom: 4 }}>
-                      {item.brand_detected || item.brand || "—"}
-                    </div>
-                    <h3 style={{ fontSize: 13, fontWeight: 600, color: DS.textPrimary, lineHeight: 1.4, marginBottom: 10, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                      {item.title}
-                    </h3>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: DS.platformBlue, fontFamily: DS.mono, marginBottom: 10 }}>
-                      {item.price?.toLocaleString("fr-FR")} {item.currency && item.currency !== "N/A" ? item.currency : item.source?.toLowerCase().includes("amazon") ? "€" : "MAD"}
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 11, color: DS.textMuted }}>{item.source}</span>
-                      <a href={item.link} target="_blank" rel="noreferrer" style={{
-                        padding: "5px 12px", borderRadius: 6, fontSize: 11,
-                        background: DS.platformBlack,
-                        border: `1px solid ${DS.platformBlack}`,
-                        color: DS.platformWhite,
-                        textDecoration: "none", 
-                        fontWeight: 600, 
-                        fontFamily: DS.mono,
-                        transition: "all 0.2s",
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.background = "#000000";
-                        e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.background = DS.platformBlack;
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
-                      >VOIR →</a>
-                    </div>
+
+      {loading && mode !== "scrape" ? (
+        <div className="spinner-placeholder">Chargement...</div>
+      ) : (
+        <div className="pip-product-list">
+          {mode === "alerts" ? (
+            alerts.map((item, i) => (
+              <div className="pip-card" key={i} style={{border: "2px solid #fecaca"}}>
+                <span className="pip-gaming-tag" style={{background: "#ef4444"}}>-{item.percentage}%</span>
+                <div className="pip-card-content">
+                  <h3 className="pip-card-title">{item.title}</h3>
+                  <p className="pip-price">
+                    <span style={{textDecoration: "line-through", color: "#94a3b8", fontSize: "0.8em", marginRight: 8}}>{item.old_price}</span>
+                    {item.new_price} {item.currency}
+                  </p>
+                  <div className="pip-card-footer">
+                    <small style={{ color: "#64748b" }}>{item.source}</small>
+                    <a href={item.link} target="_blank" rel="noreferrer" className="pip-view-btn">Acheter →</a>
                   </div>
                 </div>
-              );
-            })}
-            {products.length === 0 && !loading && (
-              <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: 60, color: DS.textMuted, fontSize: 13 }}>
-                <Database size={32} style={{ marginBottom: 12, opacity: 0.3, display: "block", margin: "0 auto 12px" }} />
-                Aucun produit. Lancez un scraping ou cherchez un terme différent.
               </div>
-            )}
-          </div>
-          {pages > 1 && (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginTop: 24 }}>
-              <button onClick={() => { if (mode === "db_accessoire") fetchAccessories(page - 1); else fetchDB(page - 1); }} disabled={page <= 1} style={{
-                padding: "8px 16px", borderRadius: 6, background: DS.bg0, border: `1px solid ${DS.border}`,
-                color: page <= 1 ? DS.textMuted : DS.textPrimary, cursor: page <= 1 ? "not-allowed" : "pointer", fontFamily: DS.mono,
-              }}>←</button>
-              <span style={{ color: DS.textSecondary, fontFamily: DS.mono, fontSize: 12 }}>{page} / {pages}</span>
-              <button onClick={() => { if (mode === "db_accessoire") fetchAccessories(page + 1); else fetchDB(page + 1); }} disabled={page >= pages} style={{
-                padding: "8px 16px", borderRadius: 6, background: DS.bg0, border: `1px solid ${DS.border}`,
-                color: page >= pages ? DS.textMuted : DS.textPrimary, cursor: page >= pages ? "not-allowed" : "pointer", fontFamily: DS.mono,
-              }}>→</button>
-            </div>
+            ))
+          ) : (
+            products.map((item, i) => (
+              <div className="pip-card" key={i}>
+                {item.is_gaming && <span className="pip-gaming-tag">🎮 Gaming</span>}
+                {item.image && <img src={item.image} alt={item.title} className="pip-product-img" />}
+                <div className="pip-card-content">
+                  <span className="pip-brand-label">{item.brand_detected || item.brand || "Inconnu"}</span>
+                  <h3 className="pip-card-title">{item.title}</h3>
+                  <p className="pip-price">{item.price?.toLocaleString("fr-FR")} {item.currency || "MAD"}</p>
+                  <div className="pip-card-footer">
+                    <small style={{ color: "#64748b" }}>{item.source}</small>
+                    <a href={item.link} target="_blank" rel="noreferrer" className="pip-view-btn">Voir →</a>
+                  </div>
+                </div>
+              </div>
+            ))
           )}
-        </>
+        </div>
       )}
     </div>
   );

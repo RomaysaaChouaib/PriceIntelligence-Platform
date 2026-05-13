@@ -156,9 +156,19 @@ CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1", # L'adresse de ton serveur Redis
+        "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
+}
+# planification de la tache de scraping automatique hebdomadaire
+from celery.schedules import crontab
+from datetime import timedelta
+CELERY_BEAT_SCHEDULE = {
+    'scraping-automatique-hebdomadaire': {
+        'task': 'config.tasks.scrape_all_task', 
+        'schedule': crontab(minute=0, hour=3, day_of_week='mon'),  # Tous les lundis à 03:00 du matin
+        'args': ('laptop',),  # argument par défaut car il n'y a plus de "request"
+    },
 }

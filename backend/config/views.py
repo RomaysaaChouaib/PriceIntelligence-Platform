@@ -270,44 +270,88 @@ def scrape_all(request):
 from celery.result import AsyncResult
 
 def check_status(request, task_id):
-    res = AsyncResult(task_id)
-    return JsonResponse({
-        "task_id": task_id,
-        "status": res.status,
-        "result": res.result if res.ready() else None
-    })
+    try:
+        res = AsyncResult(task_id)
 
+        return JsonResponse({
+            "success": True,
+            "task_id": task_id,
+            "status": res.status,
+            "result": res.result if res.ready() else None
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "message": "Impossible de récupérer le statut.",
+            "error": str(e)
+        }, status=500)
 
 # ════════════════════════════════════════════════════════════════════════════
 # PRODUITS & RECHERCHE
 # ════════════════════════════════════════════════════════════════════════════
 
 def search_view(request):
-    query  = request.GET.get("query", "").strip().lower()
-    page   = int(request.GET.get("page", 1))
-    limit  = int(request.GET.get("limit", 20))
-    offset = (page - 1) * limit
-    db = MySQLWriter()
-    if query:
-        all_products = db.get_products_by_query(query)
-        total    = len(all_products)
-        products = all_products[offset: offset + limit]
-    else:
-        total    = db.count_all_products()
-        products = db.get_all_products_paginated(limit, offset)
-    db.close()
-    return JsonResponse({"source": "mysql", "query": query, "total": total,
-        "page": page, "pages": (total // limit) + (1 if total % limit else 0),
-        "products": products})
+    db = None
 
-    return JsonResponse({
-        "source": "mysql only",
-        "query": query,
-        "total": total,
-        "page": page,
-        "pages": (total // limit) + (1 if total % limit else 0),
-        "products": products
-    })
+    try:
+        query = request.GET.get("query", "").strip().lower()
+
+        page = int(request.GET.get("page", 1))
+        limit = int(request.GET.get("limit", 20))
+
+        if page <= 0 or limit <= 0:
+            return JsonResponse({
+                "success": False,
+                "message": "Page ou limite invalide."
+            }, status=400)
+
+        offset = (page - 1) * limit
+
+        db = MySQLWriter()
+
+        if query:
+            all_products = db.get_products_by_query(query)
+
+            if not all_products:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Produit introuvable."
+                }, status=404)
+
+            total = len(all_products)
+            products = all_products[offset: offset + limit]
+
+        else:
+            total = db.count_all_products()
+            products = db.get_all_products_paginated(limit, offset)
+
+        return JsonResponse({
+            "success": True,
+            "source": "mysql",
+            "query": query,
+            "total": total,
+            "page": page,
+            "pages": (total // limit) + (1 if total % limit else 0),
+            "products": products
+        })
+
+    except ValueError:
+        return JsonResponse({
+            "success": False,
+            "message": "Paramètres page/limit invalides."
+        }, status=400)
+
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "message": "Erreur lors de la recherche.",
+            "error": str(e)
+        }, status=500)
+
+    finally:
+        if db:
+            db.close()
 
 # Accessoire de Laptop:
 # 1-souris
@@ -377,6 +421,60 @@ def scrape_all_cooling_pad(request):
     })
 
 
+
+from scraping.services.notification import check_price_drop
+
+def get_notifications(request):
+    writer = None
+
+    try:
+        writer = MySQLWriter()
+
+        query = """
+            SELECT title, price, currency, link, source
+            FROM products
+            WHERE price > 0
+            ORDER BY RAND()
+            LIMIT 20
+        """
+
+        writer.cursor.execute(query)
+        rows = writer.cursor.fetchall()
+
+        alerts = []
+
+        for row in rows:
+            title, db_price, currency, link, source = row
+
+            simulated_price = float(db_price) * 0.75
+
+            alert = check_price_drop(
+                title,
+                simulated_price,
+                db_price,
+                currency,
+                link,
+                source
+            )
+
+            if alert:
+                alerts.append(alert)
+
+        return JsonResponse({
+            "success": True,
+            "alerts": alerts
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "message": "Erreur notifications.",
+            "error": str(e)
+        }, status=500)
+
+    finally:
+        if writer:
+            writer.close()
 
 # affichage des produits accessoires depuis MySQL uniquement
 def search_accessoire_view(request):
